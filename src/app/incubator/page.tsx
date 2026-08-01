@@ -1,0 +1,56 @@
+import { getIncubatorSkills, activateSkill, createIncubatorSkill } from "@/app/actions";
+import { Lightbulb, Rocket, Play } from "lucide-react";
+import { revalidatePath } from "next/cache";
+import { IncubatorList } from "@/components/incubator-list";
+
+export const dynamic = "force-dynamic";
+
+export default async function IncubatorPage() {
+  const incubatorSkills = await getIncubatorSkills();
+
+  async function handleAdd(formData: FormData) {
+    "use server";
+    const title = formData.get("title") as string;
+    await createIncubatorSkill(title);
+  }
+
+  async function handleActivate(id: number) {
+    "use server";
+    await activateSkill(id);
+  }
+
+  return (
+    <main className="min-h-full px-4 py-8 lg:px-12 max-w-4xl mx-auto flex flex-col gap-6">
+      <header className="flex items-center gap-3">
+        <div className="p-3 bg-yellow-500/10 rounded-xl">
+          <Lightbulb className="w-6 h-6 text-yellow-500" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">Inkubator</h1>
+          <p className="text-zinc-500 text-sm font-medium mt-0.5">Twoja poczekalnia na potężne projekty. Zapisuj tu grube wizje.</p>
+        </div>
+      </header>
+
+      <section className="bg-zinc-950 rounded-2xl p-1">
+        {/* Szybkie dodawanie pomysłu */}
+        <form action={handleAdd} className="flex gap-2 w-full mb-6 relative">
+          <input
+            name="title"
+            placeholder="Opisz swój kolejny wielki projekt..."
+            className="flex-1 bg-zinc-900/50 border border-zinc-800 text-zinc-100 placeholder:text-zinc-500 rounded-xl h-12 pl-4 pr-12 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+            required
+          />
+          <button
+            type="submit"
+            className="absolute right-1 top-1 h-10 w-10 flex items-center justify-center rounded-lg bg-yellow-600 hover:bg-yellow-500 text-white transition-colors"
+          >
+            <Lightbulb className="w-5 h-5" />
+          </button>
+        </form>
+
+        {/* Lista pomysłów w Inkubatorze */}
+        <IncubatorList skills={incubatorSkills} />
+      </section>
+    </main>
+  );
+}

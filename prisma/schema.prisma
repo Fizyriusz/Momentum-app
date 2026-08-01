@@ -1,0 +1,108 @@
+// Quest Log – Prisma Schema (SQLite) – Prisma 6
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Codzienne mikrozadania ("Nawyki w tle")
+/// lastCompletedDate pozwala na leniwy reset statusu o północy
+model Habit {
+  id                Int      @id @default(autoincrement())
+  title             String
+  completedDates    String   @default("[]") // JSON Array: ["YYYY-MM-DD", ...]
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+}
+
+/// Projekty (dawniej Skille) / Główne Inicjatywy Hustlerskie
+model Skill {
+  id                   Int      @id @default(autoincrement())
+  title                String
+  status               String   @default("ACTIVE") // INBOX (Inkubator) lub ACTIVE
+  targetMinutes        Int      @default(240) // Cel czasowy
+  period               String   @default("WEEK") // WEEK, MONTH, QUARTER, YEAR
+  loggedMinutes        Int      @default(0)   // Całkowity zalogowany czas w danym okresie
+  loggedMinutesToday   Int      @default(0)   // Czas zalogowany tylko dzisiaj
+  lastLoggedDate       String   @default("")  // Data ostatniego logowania do leniwego resetu licznika dziennego
+  icon                 String   @default("Briefcase") // Nazwa ikony lucide (profesjonalna)
+  
+  description          String?  // Opis projektu w Markdown
+  goal                 String?  // Cel nadrzędny projektu
+  
+  createdAt            DateTime @default(now())
+  
+  projects             Project[] // Listy zadań przypisane do tego projektu
+  timeLogs             TimeLog[] // Historia przepracowanych sesji
+  notes                Note[]    // Notatki powiązane z projektem
+}
+
+/// Notatki
+model Note {
+  id        String   @id @default(uuid())
+  title     String
+  content   String   // Markdown
+  
+  // Opcjonalne przypisanie do projektu (Skill)
+  skillId   Int?
+  skill     Skill?   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Historia sesji czasu (Timery)
+model TimeLog {
+  id        String   @id @default(uuid())
+  minutes   Int
+  
+  skillId   Int
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+}
+
+/// Listy Zadań (dawniej Projekty/Zbrojownia) - Grupowanie Zadań
+model Project {
+  id        String   @id @default(uuid())
+  name      String
+  color     String   @default("purple-500")
+  
+  skillId   Int?     // Opcjonalne przypisanie do głównego Projektu(Skill)
+  skill     Skill?   @relation(fields: [skillId], references: [id], onDelete: SetNull)
+  
+  tasks     Task[]
+  createdAt DateTime @default(now())
+}
+
+/// Tagi do zadań
+model Tag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  color     String   @default("purple-500")
+  tasks     Task[]   // Relacja m:n (Implicit)
+  createdAt DateTime @default(now())
+}
+
+/// Zadania
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?   // Szczegółowy opis w Markdown
+  imageUrl    String?   // Link do obrazka (opcjonalny)
+  isCompleted Boolean   @default(false)
+  dueDate     DateTime? // Opcjonalna data
+  
+  projectId   String?  // Jeśli null, ląduje w głównym Inboxie zadań
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  
+  tags        Tag[]     // Relacja m:n (Implicit)
+  
+  column      String    @default("todo")
+  createdAt   DateTime  @default(now())
+}
+
