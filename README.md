@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Momentum
 
-## Getting Started
+Momentum to nowoczesny system egzekucji i zarządzania czasem (Personal Dashboard) zbudowany w architekturze PWA (Mobile-First). Został zaprojektowany jako narzędzie dla "hustlerów, twórców i przyszłych milionerów", którzy potrzebują płaskiego, błyskawicznego i w pełni skupionego na celu interfejsu (Flat UI).
 
-First, run the development server:
+## Tech Stack
+* **Framework:** Next.js 16 (App Router)
+* **Styling:** Tailwind CSS, shadcn/ui, wbudowany Dark Mode (`bg-zinc-950`)
+* **Ikony:** lucide-react
+* *(Planowane)* **Baza Danych:** Migracja na Firebase (Firestore Offline)
+* *(Planowane)* **Mobile:** Capacitor (iOS/Android)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Główne Funkcje
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Flat UI & Główne Projekty (Skills):**
+   - Projekty wyświetlane w głównym oknie (bez zagnieżdżonych modali).
+   - Definiowanie celów nadrzędnych i budżetów czasowych na tydzień/miesiąc.
+   - Wbudowane notatki projektowe z obsługą Markdown.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. **System Egzekucji i Stoper (Pomodoro):**
+   - Wbudowany timer skupienia na każdym projekcie.
+   - Możliwość zadeklarowania, ile czasu chcesz przeznaczyć, a stoper sam loguje historię (TimeLogs).
+   - Pełna historia sesji z wizualnym podsumowaniem pod przyciskiem "Historia".
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. **Inkubator Pomysłów:**
+   - Dedykowane miejsce na luźne, niezdefiniowane projekty.
+   - Proces "Przygotowania" pomysłu (cel, budżet, opis) przed przeniesieniem go do aktywnych projektów.
 
-## Learn More
+4. **Nawyki i Rutyny w tle:**
+   - Lista powtarzalnych czynności z możliwością odhaczania na dany dzień.
+   - Automatyczny reset statusów o północy.
 
-To learn more about Next.js, take a look at the following resources:
+5. **Notatki Globalne:**
+   - Podręczny notatnik wspierający Markdown do zapisywania szybkich myśli, linków i inspiracji.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Zrzuty ekranu / Wygląd
+Aplikacja została zaprojektowana w mrocznym, agresywnym i profesjonalnym klimacie. Dominuje ciemnoszary kolor (`zinc-950`), przeplatany fioletem dla głównych akcji, oraz złotym i niebieskim dla inkubatora/drobnych detali. Brak zaokrąglonych, "miękkich" przycisków na rzecz ostrych, biznesowych kart.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*(Repozytorium utworzone w fazie przejścia z lokalnej bazy SQLite na Firebase w architekturze PWA/Capacitor)*
