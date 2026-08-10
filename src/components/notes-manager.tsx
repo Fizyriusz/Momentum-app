@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { createNote, updateNote, deleteNote } from "@/app/actions";
+import { createNote, updateNote, deleteNote } from "@/lib/services/notes";
 import { FileText, Plus, Save, Trash, Edit2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,12 @@ type Note = {
   id: string;
   title: string;
   content: string;
-  skillId?: number | null;
+  skillId?: string | null;
   skill?: { title: string } | null;
-  updatedAt: Date;
+  updatedAt: number;
 };
 
-export function NotesManager({ initialNotes, projectId }: { initialNotes: Note[], projectId?: number }) {
+export function NotesManager({ initialNotes, projectId, groupByProject = false }: { initialNotes: Note[], projectId?: string, groupByProject?: boolean }) {
   const [isPending, startTransition] = useTransition();
   const [notes, setNotes] = useState<Note[]>(initialNotes);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -107,7 +107,7 @@ export function NotesManager({ initialNotes, projectId }: { initialNotes: Note[]
         </div>
       )}
 
-      {!editingId && initialNotes.length > 0 && (
+      {!editingId && initialNotes.length > 0 && !groupByProject && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {initialNotes.map(note => (
             <div key={note.id} className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/50 group relative">
@@ -135,6 +135,51 @@ export function NotesManager({ initialNotes, projectId }: { initialNotes: Note[]
           ))}
         </div>
       )}
+
+      {!editingId && initialNotes.length > 0 && groupByProject && (
+        <div className="space-y-8">
+          {Object.entries(
+            initialNotes.reduce((acc, note) => {
+              // Notatki bez przypisanego skilla wpadają do 'Skrzynka Odbiorcza'
+              const groupName = note.skillId ? (initialNotes.find(n => n.skillId === note.skillId && n.skill)?.skill?.title || 'Projekt') : "Skrzynka Odbiorcza";
+              if (!acc[groupName]) acc[groupName] = [];
+              acc[groupName].push(note);
+              return acc;
+            }, {} as Record<string, Note[]>)
+          ).map(([groupName, groupNotes]) => (
+            <div key={groupName} className="space-y-4">
+              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500/50"></span>
+                {groupName}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {groupNotes.map(note => (
+                  <div key={note.id} className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/50 group relative">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-bold text-zinc-200">{note.title}</h4>
+                      <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(note)} className="h-6 w-6 text-zinc-400 hover:text-white">
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(note.id)} className="h-6 w-6 text-red-500/70 hover:text-red-400">
+                          <Trash className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="prose prose-invert prose-sm max-w-none text-zinc-400 line-clamp-4">
+                      <ReactMarkdown>{note.content}</ReactMarkdown>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-zinc-800/50 text-[10px] text-zinc-600 flex justify-between items-center uppercase tracking-wider font-bold">
+                      <span>{new Date(note.updatedAt).toLocaleDateString('pl-PL')}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
+

@@ -1,11 +1,19 @@
-import { getNotes } from "@/app/actions";
+"use client";
+
+import { useNotes } from "@/lib/services/notes";
+import { useSkills } from "@/lib/services/skills";
 import { NotesManager } from "@/components/notes-manager";
 import { FileText } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export default function NotesPage() {
+  const { notes, loading: notesLoading } = useNotes(undefined);
+  const { skills, loading: skillsLoading } = useSkills();
 
-export default async function NotesPage() {
-  const notes = await getNotes();
+  // Dodajemy nazwy projektów do notatek dla lepszego grupowania
+  const notesWithSkills = notes.map(note => ({
+    ...note,
+    skill: note.skillId ? { title: skills.find(s => s.id === note.skillId)?.title || "Projekt" } : null
+  }));
 
   return (
     <main className="min-h-full px-4 py-8 lg:px-12 max-w-4xl mx-auto flex flex-col gap-6">
@@ -20,7 +28,11 @@ export default async function NotesPage() {
       </header>
 
       <section>
-        <NotesManager initialNotes={notes} />
+        {notesLoading || skillsLoading ? (
+          <div className="text-zinc-500 text-sm">Ładowanie...</div>
+        ) : (
+          <NotesManager initialNotes={notesWithSkills} groupByProject={true} />
+        )}
       </section>
     </main>
   );

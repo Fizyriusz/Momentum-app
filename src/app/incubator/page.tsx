@@ -1,22 +1,20 @@
-import { getIncubatorSkills, activateSkill, createIncubatorSkill } from "@/app/actions";
-import { Lightbulb, Rocket, Play } from "lucide-react";
-import { revalidatePath } from "next/cache";
+"use client";
+
+import { useSkills, createSkill } from "@/lib/services/skills";
+import { Lightbulb } from "lucide-react";
 import { IncubatorList } from "@/components/incubator-list";
 
-export const dynamic = "force-dynamic";
+export default function IncubatorPage() {
+  const { skills: incubatorSkills, loading } = useSkills("INBOX");
 
-export default async function IncubatorPage() {
-  const incubatorSkills = await getIncubatorSkills();
-
-  async function handleAdd(formData: FormData) {
-    "use server";
+  async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
     const title = formData.get("title") as string;
-    await createIncubatorSkill(title);
-  }
-
-  async function handleActivate(id: number) {
-    "use server";
-    await activateSkill(id);
+    if (title.trim()) {
+      await createSkill(title, "INBOX");
+      e.currentTarget.reset();
+    }
   }
 
   return (
@@ -33,7 +31,7 @@ export default async function IncubatorPage() {
 
       <section className="bg-zinc-950 rounded-2xl p-1">
         {/* Szybkie dodawanie pomysłu */}
-        <form action={handleAdd} className="flex gap-2 w-full mb-6 relative">
+        <form onSubmit={handleAdd} className="flex gap-2 w-full mb-6 relative">
           <input
             name="title"
             placeholder="Opisz swój kolejny wielki projekt..."
@@ -49,7 +47,11 @@ export default async function IncubatorPage() {
         </form>
 
         {/* Lista pomysłów w Inkubatorze */}
-        <IncubatorList skills={incubatorSkills} />
+        {loading ? (
+          <div className="text-zinc-500 text-sm p-4">Ładowanie...</div>
+        ) : (
+          <IncubatorList skills={incubatorSkills} />
+        )}
       </section>
     </main>
   );

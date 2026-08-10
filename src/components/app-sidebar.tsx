@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Inbox, LayoutDashboard, Lightbulb, ListTodo, Rocket, Droplet, Hash, ChevronDown, ChevronRight, Sun, Sunset, CalendarDays, Briefcase, FileText } from "lucide-react";
+import { Inbox, LayoutDashboard, Lightbulb, ListTodo, Rocket, Droplet, Hash, ChevronDown, ChevronRight, Sun, Sunset, CalendarDays, Briefcase, FileText, MapPin, Network } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type Tag = {
@@ -13,7 +13,7 @@ type Tag = {
 };
 
 type Skill = {
-  id: number;
+  id: string;
   title: string;
 };
 
@@ -28,6 +28,8 @@ export function AppSidebar({ tags = [], skills = [] }: { tags?: Tag[], skills?: 
       items: [
         { name: "Przegląd", href: "/", icon: LayoutDashboard },
         { name: "Inbox", href: "/inbox", icon: Inbox },
+        { name: "Miejsca", href: "/places", icon: MapPin },
+        { name: "Graf", href: "/graph", icon: Network },
         { name: "Dzisiaj", href: "/tasks/today", icon: Sun },
         { name: "Jutro", href: "/tasks/tomorrow", icon: Sunset },
         { name: "7 Dni", href: "/tasks/upcoming", icon: CalendarDays },
@@ -102,8 +104,8 @@ export function AppSidebar({ tags = [], skills = [] }: { tags?: Tag[], skills?: 
                 <div className="px-3 py-2 text-xs text-zinc-600">Brak projektów</div>
               ) : (
                 skills.map(skill => {
-                  const href = `/skills/${skill.id}`;
-                  const isActive = pathname === href;
+                  const href = `/skill?id=${skill.id}`;
+                  const isActive = pathname === href || pathname === '/skill';
                   return (
                     <Link
                       key={skill.id}

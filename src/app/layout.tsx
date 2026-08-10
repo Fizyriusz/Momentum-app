@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Quest Log",
-  description: "Personal Dashboard – zarządzaj swoim czasem jak RPG",
+  description: "Personal Dashboard - zarzadzaj swoim czasem jak RPG",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -32,30 +32,25 @@ export const viewport: Viewport = {
 };
 
 import { LayoutWrapper } from "@/components/layout-wrapper";
-import { getAllTags, getSkills } from "@/app/actions";
+import { AuthProvider } from "@/components/auth-provider";
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [tags, skills] = await Promise.all([
-    getAllTags(),
-    getSkills(),
-  ]);
-
   return (
     <html
       lang="pl"
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
     >
       <body className="h-full bg-zinc-950 overflow-hidden">
-        <LayoutWrapper tags={tags} skills={skills}>
-          {children}
-        </LayoutWrapper>
+        <AuthProvider>
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
+        </AuthProvider>
       </body>
     </html>
   );
 }
-
-

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { addMinutesToSkill } from "@/app/actions";
+import { addMinutesToSkill } from "@/lib/services/timeLogs";
 import { Play, Square } from "lucide-react";
 
 type Skill = {
-  id: number;
+  id: string;
   title: string;
 };
 
@@ -13,7 +13,7 @@ export function MiniTimer({ skills }: { skills: Skill[] }) {
   const [isPending, startTransition] = useTransition();
   const [isTracking, setIsTracking] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [activeSkillId, setActiveSkillId] = useState<number | null>(
+  const [activeSkillId, setActiveSkillId] = useState<string | null>(
     skills.length > 0 ? skills[0].id : null
   );
 
@@ -99,7 +99,7 @@ export function MiniTimer({ skills }: { skills: Skill[] }) {
         <select
           disabled={isTracking}
           value={activeSkillId || ""}
-          onChange={(e) => setActiveSkillId(Number(e.target.value))}
+          onChange={(e) => setActiveSkillId(e.target.value)}
           className="bg-transparent text-zinc-200 text-sm font-medium focus:outline-none appearance-none cursor-pointer w-full"
         >
           {skills.map(s => (
@@ -131,3 +131,4 @@ export function MiniTimer({ skills }: { skills: Skill[] }) {
     </div>
   );
 }
+

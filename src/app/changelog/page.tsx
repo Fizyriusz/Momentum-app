@@ -1,7 +1,5 @@
 import { FileText } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-
 export default function ChangelogPage() {
   return (
     <main className="min-h-full px-4 py-8 max-w-4xl mx-auto flex flex-col gap-6">

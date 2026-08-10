@@ -1,11 +1,11 @@
-import { getHabitsForToday } from "@/app/actions";
+"use client";
+
+import { useHabits } from "@/lib/services/habits";
 import { HabitList } from "@/components/habit-list";
 import { Droplet } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-
-export default async function HabitsPage() {
-  const habits = await getHabitsForToday();
+export default function HabitsPage() {
+  const { habits, loading } = useHabits();
 
   return (
     <main className="min-h-full px-4 py-8 lg:px-12 max-w-2xl mx-auto flex flex-col gap-6">
@@ -20,7 +20,11 @@ export default async function HabitsPage() {
       </header>
 
       <section className="mt-4">
-        <HabitList habits={habits} />
+        {loading ? (
+          <div className="text-zinc-500 text-sm">Ładowanie...</div>
+        ) : (
+          <HabitList habits={habits} />
+        )}
       </section>
     </main>
   );

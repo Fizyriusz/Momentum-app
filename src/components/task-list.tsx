@@ -1,8 +1,9 @@
 "use client";
 
-import { TaskItem, FullTask } from "./task-item";
+import { Task } from "@/lib/services/tasks";
+import { TaskItem } from "./task-item";
 
-export function TaskList({ tasks }: { tasks: FullTask[] }) {
+export function TaskList({ tasks }: { tasks: Task[] }) {
   if (tasks.length === 0) {
     return (
       <div className="py-8 text-center text-zinc-500 text-sm font-medium">

@@ -31,8 +31,8 @@ export function FabAddTask() {
           <h2 className="text-lg font-black uppercase tracking-tight text-zinc-100">
             Nowe Zadanie
           </h2>
-          <div onClick={() => setTimeout(() => setOpen(false), 500)}>
-            <QuickAddTask />
+          <div>
+            <QuickAddTask onSuccess={() => setOpen(false)} />
           </div>
         </div>
       </DialogContent>

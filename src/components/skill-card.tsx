@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { addMinutesToSkill, updateSkillDetails } from "@/app/actions";
+import { addMinutesToSkill } from "@/lib/services/timeLogs";
+import { updateSkill as updateSkillDetails } from "@/lib/services/skills";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -21,11 +22,11 @@ import ReactMarkdown from "react-markdown";
 type TimeLog = {
   id: string;
   minutes: number;
-  createdAt: Date;
+  createdAt: number;
 };
 
 export type Skill = {
-  id: number;
+  id: string;
   title: string;
   targetMinutes: number;
   period: string;
@@ -33,7 +34,7 @@ export type Skill = {
   icon: string;
   goal?: string | null;
   description?: string | null;
-  timeLogs?: TimeLog[];
+  status: string;
 };
 
 const IconMap: Record<string, React.ElementType> = {
@@ -51,7 +52,7 @@ const PeriodLabels: Record<string, string> = {
   YEAR: "Rok"
 };
 
-export function SkillCard({ skill }: { skill: Skill }) {
+export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: TimeLog[] }) {
   const [isPending, startTransition] = useTransition();
   const [isTracking, setIsTracking] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -372,8 +373,8 @@ export function SkillCard({ skill }: { skill: Skill }) {
               </DialogHeader>
               
               <div className="max-h-[60vh] overflow-y-auto pr-2 mt-4 space-y-3">
-                {skill.timeLogs && skill.timeLogs.length > 0 ? (
-                  skill.timeLogs.map(log => (
+                {timeLogs && timeLogs.length > 0 ? (
+                  timeLogs.map(log => (
                     <div key={log.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50">
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-zinc-200">
@@ -403,3 +404,4 @@ export function SkillCard({ skill }: { skill: Skill }) {
     </Card>
   );
 }
+

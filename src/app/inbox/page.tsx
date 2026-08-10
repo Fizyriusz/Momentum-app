@@ -1,12 +1,15 @@
-import { getInboxTasks } from "@/app/actions";
+"use client";
+
+import { useTasks } from "@/lib/services/tasks";
 import { QuickAddTask } from "@/components/quick-add-task";
 import { TaskList } from "@/components/task-list";
 import { Inbox } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-
-export default async function InboxPage() {
-  const tasks = await getInboxTasks();
+export default function InboxPage() {
+  const { tasks, loading } = useTasks();
+  
+  // Inbox tasks: brak przypisanego projectId oraz nieukończone
+  const inboxTasks = tasks.filter(t => !t.projectId && !t.isCompleted);
 
   return (
     <main className="min-h-full px-4 py-8 lg:px-12 max-w-4xl mx-auto flex flex-col gap-6">
@@ -24,8 +27,12 @@ export default async function InboxPage() {
         {/* Szybkie dodawanie */}
         <QuickAddTask />
 
-        {/* Lista zadań (bez przypisanego projektu, nieukończone) */}
-        <TaskList tasks={tasks} />
+        {/* Lista zadań */}
+        {loading ? (
+          <div className="text-zinc-500 text-sm p-4">Ładowanie...</div>
+        ) : (
+          <TaskList tasks={inboxTasks} />
+        )}
       </section>
     </main>
   );

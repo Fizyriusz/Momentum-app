@@ -1,23 +1,37 @@
-// Quest Log – Główna strona (Server Component)
-// Pobiera dane z bazy i renderuje 3 sekcje dashboardu: Nawyki, Budżety Tygodniowe, Chill Zone
+"use client";
 
-import { getHabitsForToday, getSkills, getTasksByTimeframe } from "./actions";
+import { useHabits } from "@/lib/services/habits";
+import { useSkills } from "@/lib/services/skills";
+import { useTasks } from "@/lib/services/tasks";
+import { usePlaces, getDistance } from "@/lib/services/places";
 import { RewardSection } from "@/components/reward-section";
-import { Zap, Target, Flame, ArrowRight } from "lucide-react";
+import { Zap, Target, Flame, ArrowRight, MapPin, AlertCircle } from "lucide-react";
 import { MiniTimer } from "@/components/mini-timer";
 import { TaskList } from "@/components/task-list";
 import { QuickAddTask } from "@/components/quick-add-task";
 import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
+import { useEffect, useState } from "react";
+import { Geolocation } from "@capacitor/geolocation";
 
-export const dynamic = "force-dynamic";
+export default function Home() {
+  const { habits, loading: loadingHabits } = useHabits();
+  const { skills, loading: loadingSkills } = useSkills("ACTIVE");
+  const { tasks: allTasks, loading: loadingTasks } = useTasks();
+  const { places, loading: loadingPlaces } = usePlaces();
 
-export default async function Home() {
-  const [habits, skills, todayTasks] = await Promise.all([
-    getHabitsForToday(),
-    getSkills(),
-    getTasksByTimeframe("today")
-  ]);
+  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
+
+  useEffect(() => {
+    // Odczyt jednorazowy po wejściu na stronę główną
+    Geolocation.getCurrentPosition()
+      .then(pos => {
+        setCurrentLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      })
+      .catch(err => {
+        console.error("Geofencing error:", err);
+      });
+  }, []);
 
   const today = new Date().toLocaleDateString("pl-PL", {
     weekday: "long",
@@ -29,7 +43,20 @@ export default async function Home() {
   const offset = d.getTimezoneOffset() * 60000;
   const todayStr = new Date(d.getTime() - offset).toISOString().split("T")[0];
 
-  const dailyLoggedMinutes = skills.reduce((sum, s) => sum + s.loggedMinutesToday, 0);
+  // Filtrujemy dzisiejsze zadania po stronie klienta dla uproszczenia (lub można by użyć query w hooku)
+  // W oryginalnym getTasksByTimeframe było sprawdzanie braku dueDate lub dueDate <= today
+  const todayTasks = allTasks.filter(t => !t.isCompleted && (!t.dueDate || new Date(t.dueDate).toISOString().split("T")[0] <= todayStr));
+
+  // Szukamy, w jakich miejscach się teraz znajdujemy
+  const activePlaces = currentLocation && places ? places.filter(place => {
+    const dist = getDistance(currentLocation.lat, currentLocation.lng, place.lat, place.lng);
+    return dist <= place.radiusMeters;
+  }) : [];
+
+  // Wyciągamy zadania przypisane do tych miejsc
+  const placeTasks = allTasks.filter(t => !t.isCompleted && t.placeId && activePlaces.some(p => p.id === t.placeId));
+
+  const dailyLoggedMinutes = skills.reduce((sum, s) => sum + (s.loggedMinutesToday || 0), 0);
   
   let habitsDone = 0;
   const allHabitsDone = habits.length > 0 && habits.every(h => {
@@ -44,6 +71,16 @@ export default async function Home() {
   
   const rewardUnlocked = dailyLoggedMinutes >= 60 || allHabitsDone;
 
+  const isLoading = loadingHabits || loadingSkills || loadingTasks;
+
+  if (isLoading) {
+    return (
+      <main className="min-h-dvh bg-zinc-950 flex items-center justify-center">
+        <Zap className="h-8 w-8 text-purple-500 fill-purple-500 animate-pulse" />
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-dvh bg-zinc-950 text-zinc-100 selection:bg-purple-500/30 pb-20">
       <div className="mx-auto max-w-md px-4 py-8 flex flex-col gap-6">
@@ -55,6 +92,27 @@ export default async function Home() {
           </div>
           <time className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mt-1">{today}</time>
         </header>
+
+        {/* Baner Geofencingowy */}
+        {activePlaces.length > 0 && placeTasks.length > 0 && (
+          <section className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="p-2 bg-blue-500/20 rounded-lg shrink-0">
+                <MapPin className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-blue-100">Jesteś w zapisanej strefie!</h2>
+                <p className="text-xs text-blue-200/70 mt-0.5">
+                  Wykryto obecność w: <span className="font-bold text-blue-300">{activePlaces.map(p => p.name).join(", ")}</span>.
+                  Masz tu {placeTasks.length} {placeTasks.length === 1 ? 'zadanie' : placeTasks.length >= 2 && placeTasks.length <= 4 ? 'zadania' : 'zadań'}.
+                </p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <TaskList tasks={placeTasks} />
+            </div>
+          </section>
+        )}
 
         {/* 1. Uniwersalny Stoper */}
         <section>
@@ -110,9 +168,9 @@ export default async function Home() {
            </h2>
            <div className="grid grid-cols-2 gap-3">
              {skills.map(skill => {
-                const percent = Math.min(100, Math.round((skill.loggedMinutes / skill.targetMinutes) * 100));
+                const percent = Math.min(100, Math.round(((skill.loggedMinutes || 0) / (skill.targetMinutes || 1)) * 100));
                 return (
-                  <Link key={skill.id} href={`/skills/${skill.id}`} className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-3 hover:bg-zinc-800/50 transition-colors group">
+                  <Link key={skill.id} href={`/skill?id=${skill.id}`} className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-3 hover:bg-zinc-800/50 transition-colors group">
                     <div className="flex items-center gap-2 mb-2">
                       <Target className="w-3.5 h-3.5 text-zinc-500 group-hover:text-purple-400 transition-colors" />
                       <span className="text-xs font-bold text-zinc-300 truncate">{skill.title}</span>
@@ -130,5 +188,3 @@ export default async function Home() {
     </main>
   );
 }
-
-

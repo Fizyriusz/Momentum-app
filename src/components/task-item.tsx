@@ -2,23 +2,12 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { updateTask, toggleTaskStatus } from "@/app/actions";
-import { Check, Calendar, Tag as TagIcon, FileText, Image as ImageIcon, Save } from "lucide-react";
+import { Task, updateTask, toggleTaskComplete } from "@/lib/services/tasks";
+import { usePlaces } from "@/lib/services/places";
+import { Check, Calendar, Tag as TagIcon, FileText, Image as ImageIcon, Save, MapPin } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
-type Tag = { id: string; name: string; color: string; };
-
-export type FullTask = {
-  id: string;
-  title: string;
-  description: string | null;
-  imageUrl: string | null;
-  isCompleted: boolean;
-  dueDate: Date | null;
-  tags?: Tag[];
-};
-
-export function TaskItem({ task }: { task: FullTask }) {
+export function TaskItem({ task }: { task: Task }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -26,14 +15,18 @@ export function TaskItem({ task }: { task: FullTask }) {
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || "");
   const [imageUrl, setImageUrl] = useState(task.imageUrl || "");
-  const [tagNames, setTagNames] = useState(task.tags?.map(t => t.name).join(", ") || "");
+  const [tagNames, setTagNames] = useState(task.tagNames?.join(", ") || "");
+  const [placeId, setPlaceId] = useState<string | null>(task.placeId || null);
   
+  const { places } = usePlaces();
+
   // Zresetuj stan, gdy zmieniają się propsy zadania
   useEffect(() => {
     setTitle(task.title);
     setDescription(task.description || "");
     setImageUrl(task.imageUrl || "");
-    setTagNames(task.tags?.map(t => t.name).join(", ") || "");
+    setTagNames(task.tagNames?.join(", ") || "");
+    setPlaceId(task.placeId || null);
   }, [task]);
 
   const handleSave = () => {
@@ -44,6 +37,7 @@ export function TaskItem({ task }: { task: FullTask }) {
         description: description || null,
         imageUrl: imageUrl || null,
         tagNames: parsedTags,
+        placeId: placeId || null,
       });
       setIsOpen(false);
     });
@@ -64,7 +58,7 @@ export function TaskItem({ task }: { task: FullTask }) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              startTransition(() => toggleTaskStatus(task.id, task.isCompleted));
+              startTransition(() => toggleTaskComplete(task.id, !task.isCompleted));
             }}
             disabled={isPending}
             className={`
@@ -98,20 +92,28 @@ export function TaskItem({ task }: { task: FullTask }) {
                     <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Notatka</span>
                   </div>
                 )}
+                {task.placeId && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-blue-400" />
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-blue-400 truncate max-w-[80px]">
+                      {places.find(p => p.id === task.placeId)?.name || "Miejsce"}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </DialogTrigger>
         </div>
         
         {/* Tagi na liście */}
-        {task.tags && task.tags.length > 0 && (
+        {task.tagNames && task.tagNames.length > 0 && (
           <div className="flex items-center gap-1.5 shrink-0 ml-2">
-            {task.tags.map(tag => (
+            {task.tagNames.map(name => (
               <span 
-                key={tag.id}
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full bg-${tag.color}/10 text-${tag.color}`}
+                key={name}
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-400`}
               >
-                #{tag.name}
+                #{name}
               </span>
             ))}
           </div>
@@ -150,6 +152,25 @@ export function TaskItem({ task }: { task: FullTask }) {
                 <ReactMarkdown>{description}</ReactMarkdown>
               </div>
             )}
+          </div>
+
+          {/* Miejsca */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5" /> Powiązane miejsce
+            </label>
+            <select
+              value={placeId || ""}
+              onChange={e => setPlaceId(e.target.value || null)}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:border-purple-500"
+            >
+              <option value="">Brak (Zadanie niezależne)</option>
+              {places.map(place => (
+                <option key={place.id} value={place.id}>
+                  {place.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Tagi */}

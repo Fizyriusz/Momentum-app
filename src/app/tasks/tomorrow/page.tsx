@@ -1,12 +1,19 @@
-import { getTasksByTimeframe } from "@/app/actions";
+"use client";
+
+import { useTasks } from "@/lib/services/tasks";
 import { TaskList } from "@/components/task-list";
 import { Sunset } from "lucide-react";
 import { QuickAddTask } from "@/components/quick-add-task";
 
-export const dynamic = "force-dynamic";
+export default function TomorrowTasksPage() {
+  const { tasks, loading } = useTasks();
 
-export default async function TomorrowTasksPage() {
-  const tasks = await getTasksByTimeframe("tomorrow");
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  const offset = d.getTimezoneOffset() * 60000;
+  const tomorrowStr = new Date(d.getTime() - offset).toISOString().split("T")[0];
+
+  const tomorrowTasks = tasks.filter(t => !t.isCompleted && t.dueDate && new Date(t.dueDate).toISOString().split("T")[0] === tomorrowStr);
 
   return (
     <main className="min-h-full px-4 py-8 lg:px-12 max-w-4xl mx-auto flex flex-col gap-6">
@@ -23,7 +30,11 @@ export default async function TomorrowTasksPage() {
       <section className="mt-4">
         <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-2xl overflow-hidden backdrop-blur-md p-4">
           <QuickAddTask />
-          <TaskList tasks={tasks} />
+          {loading ? (
+            <div className="text-zinc-500 text-sm p-4">Ładowanie...</div>
+          ) : (
+            <TaskList tasks={tomorrowTasks} />
+          )}
         </div>
       </section>
     </main>

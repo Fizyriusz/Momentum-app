@@ -2,12 +2,12 @@
 
 // Lista nawyków z checkboxami – Client Component dla interaktywności
 import { useTransition, useOptimistic, useMemo } from "react";
-import { toggleHabit } from "@/app/actions";
+import { toggleHabit } from "@/lib/services/habits";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sparkles, Check } from "lucide-react";
 
 type Habit = {
-  id: number;
+  id: string;
   title: string;
   completedDates: string; // JSON array string
 };
@@ -82,7 +82,7 @@ function HabitItem({ habit }: { habit: Habit }) {
     // Zapobiegamy domyślnemu bąbelkowaniu, jeśli potrzeba, chociaż tu button na to nie cierpi
     startTransition(async () => {
       setOptimisticIsDone(!optimisticIsDone);
-      await toggleHabit(habit.id);
+      await toggleHabit(habit.id, todayStr, habit.completedDates);
     });
   }
 
@@ -155,3 +155,4 @@ function HabitItem({ habit }: { habit: Habit }) {
     </button>
   );
 }
+
