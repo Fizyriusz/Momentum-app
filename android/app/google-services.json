@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "994502807564",
+    "project_id": "momentum-app-a0bed",
+    "storage_bucket": "momentum-app-a0bed.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:994502807564:android:afb29608000018eb0e5e29",
+        "android_client_info": {
+          "package_name": "com.fizyriusz.momentum"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "994502807564-chamtlqa1ej8ls0iqp9tmlu6d6hh2t50.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFQ01Lt1O4J4ixQYiKmFF9EW1PD5iw3QE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "994502807564-chamtlqa1ej8ls0iqp9tmlu6d6hh2t50.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
