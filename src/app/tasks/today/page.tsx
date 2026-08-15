@@ -12,7 +12,7 @@ export default function TodayTasksPage() {
   const offset = d.getTimezoneOffset() * 60000;
   const todayStr = new Date(d.getTime() - offset).toISOString().split("T")[0];
 
-  const todayTasks = tasks.filter(t => !t.isCompleted && (!t.dueDate || new Date(t.dueDate).toISOString().split("T")[0] <= todayStr));
+  const todayTasks = tasks.filter(t => !t.isCompleted && t.dueDate && new Date(t.dueDate).toISOString().split("T")[0] <= todayStr);
 
   return (
     <main className="min-h-full px-4 py-8 lg:px-12 max-w-4xl mx-auto flex flex-col gap-6">

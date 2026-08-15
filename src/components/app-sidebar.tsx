@@ -51,9 +51,9 @@ export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], project
 
   // Obliczenia liczników zadań
   const uncompletedTasks = tasks.filter(t => !t.isCompleted);
-  const todayCount = uncompletedTasks.filter(t => !t.dueDate || new Date(t.dueDate).toISOString().split("T")[0] <= todayStr).length;
+  const todayCount = uncompletedTasks.filter(t => t.dueDate && new Date(t.dueDate).toISOString().split("T")[0] <= todayStr).length;
   const upcomingCount = uncompletedTasks.filter(t => t.dueDate && new Date(t.dueDate).toISOString().split("T")[0] <= next7DaysStr).length;
-  const inboxCount = uncompletedTasks.filter(t => !t.taskListId && !t.projectId).length;
+  const inboxCount = uncompletedTasks.filter(t => !t.projectId).length;
 
   const activeTaskLists = taskLists.filter(l => !l.isArchived);
   const archivedTaskLists = taskLists.filter(l => l.isArchived);
@@ -419,7 +419,7 @@ export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], project
 
       <div className="p-4 border-t border-zinc-800/50 shrink-0">
         <Link href="/changelog" className="flex items-center justify-between text-xs font-medium text-zinc-500 hover:text-zinc-300 transition-colors group">
-          <span>v0.6.0</span>
+          <span>v0.6.5</span>
           <span className="flex items-center gap-1">
             Changelog
             <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />

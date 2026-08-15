@@ -65,12 +65,11 @@ export function useTasks(taskListIdOrProjectId?: string) {
 
   useEffect(() => {
     if (!auth.currentUser) return;
-    let q = query(getUserTasksCol(), orderBy("createdAt", "desc"));
+    let q = query(getUserTasksCol());
     if (taskListIdOrProjectId) {
       q = query(
         getUserTasksCol(), 
-        where("taskListId", "==", taskListIdOrProjectId), 
-        orderBy("createdAt", "desc")
+        where("taskListId", "==", taskListIdOrProjectId)
       );
     }
 
@@ -83,6 +82,13 @@ export function useTasks(taskListIdOrProjectId?: string) {
           taskListId: d.taskListId || d.projectId || null
         } as Task;
       });
+
+      data.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (typeof a.createdAt === 'number' ? a.createdAt : 0);
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (typeof b.createdAt === 'number' ? b.createdAt : 0);
+        return timeB - timeA;
+      });
+
       setTasks(data);
       setLoading(false);
     }, (error) => {
@@ -102,13 +108,20 @@ export function useTaskLists(projectId?: string) {
 
   useEffect(() => {
     if (!auth.currentUser) return;
-    let q = query(getUserTaskListsCol(), orderBy("createdAt", "desc"));
+    let q = query(getUserTaskListsCol());
     if (projectId) {
-      q = query(getUserTaskListsCol(), where("projectId", "==", projectId), orderBy("createdAt", "desc"));
+      q = query(getUserTaskListsCol(), where("projectId", "==", projectId));
     }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TaskList));
+      
+      data.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (typeof a.createdAt === 'number' ? a.createdAt : 0);
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (typeof b.createdAt === 'number' ? b.createdAt : 0);
+        return timeB - timeA;
+      });
+
       setTaskLists(data);
       setLoading(false);
     }, (error) => {
@@ -155,9 +168,14 @@ export function useProjectTasks(projectId: string) {
     }
 
     if (taskLists.length === 0) {
-      const qDirect = query(getUserTasksCol(), where("projectId", "==", projectId), orderBy("createdAt", "desc"));
+      const qDirect = query(getUserTasksCol(), where("projectId", "==", projectId));
       const unsubDirect = onSnapshot(qDirect, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
+        data.sort((a, b) => {
+          const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (typeof a.createdAt === 'number' ? a.createdAt : 0);
+          const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (typeof b.createdAt === 'number' ? b.createdAt : 0);
+          return timeB - timeA;
+        });
         setTasks(data);
         setLoadingTasks(false);
       }, () => setLoadingTasks(false));
@@ -169,9 +187,14 @@ export function useProjectTasks(projectId: string) {
       listIds.length = 10;
     }
 
-    const q = query(getUserTasksCol(), where("taskListId", "in", listIds), orderBy("createdAt", "desc"));
+    const q = query(getUserTasksCol(), where("taskListId", "in", listIds));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
+      data.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (typeof a.createdAt === 'number' ? a.createdAt : 0);
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (typeof b.createdAt === 'number' ? b.createdAt : 0);
+        return timeB - timeA;
+      });
       setTasks(data);
       setLoadingTasks(false);
     }, () => setLoadingTasks(false));

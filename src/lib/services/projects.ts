@@ -48,13 +48,21 @@ export function useProjects(status?: ProjectStatus) {
 
   useEffect(() => {
     if (!auth.currentUser) return;
-    let q = query(getUserProjectsCol(), orderBy("createdAt", "desc"));
+    let q = query(getUserProjectsCol());
     if (status) {
-      q = query(getUserProjectsCol(), where("status", "==", status), orderBy("createdAt", "desc"));
+      q = query(getUserProjectsCol(), where("status", "==", status));
     }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
+      
+      // Sortowanie po stronie klienta (bezpieczne dla braku indeksów w Firestore)
+      data.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (typeof a.createdAt === 'number' ? a.createdAt : 0);
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (typeof b.createdAt === 'number' ? b.createdAt : 0);
+        return timeB - timeA;
+      });
+
       setProjects(data);
       setLoading(false);
     }, (error) => {

@@ -68,9 +68,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const next7DaysStr = new Date(d.getTime() - offset + 7 * 86400000).toISOString().split("T")[0];
 
   const uncompletedTasks = tasks.filter(t => !t.isCompleted);
-  const todayCount = uncompletedTasks.filter(t => !t.dueDate || new Date(t.dueDate).toISOString().split("T")[0] <= todayStr).length;
+  const todayCount = uncompletedTasks.filter(t => t.dueDate && new Date(t.dueDate).toISOString().split("T")[0] <= todayStr).length;
   const upcomingCount = uncompletedTasks.filter(t => t.dueDate && new Date(t.dueDate).toISOString().split("T")[0] <= next7DaysStr).length;
-  const inboxCount = uncompletedTasks.filter(t => !t.taskListId && !t.projectId).length;
+  const inboxCount = uncompletedTasks.filter(t => !t.projectId).length;
 
   const activeTaskLists = taskLists.filter(l => !l.isArchived);
   const archivedTaskLists = taskLists.filter(l => l.isArchived);
@@ -350,7 +350,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
                   onClick={() => setOpen(false)}
                   className="flex items-center justify-between text-xs font-medium text-zinc-500 hover:text-zinc-300 transition-colors group"
                 >
-                  <span>v0.6.0</span>
+                  <span>v0.6.5</span>
                   <span className="flex items-center gap-1">
                     Changelog
                     <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />

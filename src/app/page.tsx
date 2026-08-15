@@ -42,8 +42,8 @@ export default function Home() {
   const offset = d.getTimezoneOffset() * 60000;
   const todayStr = new Date(d.getTime() - offset).toISOString().split("T")[0];
 
-  // Filtrujemy dzisiejsze zadania po stronie klienta
-  const todayTasks = allTasks.filter(t => !t.isCompleted && (!t.dueDate || new Date(t.dueDate).toISOString().split("T")[0] <= todayStr));
+  // Filtrujemy dzisiejsze zadania po stronie klienta (tylko zadania z przypisaną datą na dziś lub zaległe)
+  const todayTasks = allTasks.filter(t => !t.isCompleted && t.dueDate && new Date(t.dueDate).toISOString().split("T")[0] <= todayStr);
 
   // Szukamy, w jakich miejscach się teraz znajdujemy
   const activePlaces = currentLocation && places ? places.filter(place => {
