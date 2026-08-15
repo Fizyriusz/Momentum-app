@@ -1,18 +1,18 @@
 "use client";
 
 import { useNotes } from "@/lib/services/notes";
-import { useSkills } from "@/lib/services/skills";
+import { useProjects } from "@/lib/services/projects";
 import { NotesManager } from "@/components/notes-manager";
 import { FileText } from "lucide-react";
 
 export default function NotesPage() {
   const { notes, loading: notesLoading } = useNotes(undefined);
-  const { skills, loading: skillsLoading } = useSkills();
+  const { projects, loading: projectsLoading } = useProjects();
 
   // Dodajemy nazwy projektów do notatek dla lepszego grupowania
-  const notesWithSkills = notes.map(note => ({
+  const notesWithProjects = notes.map(note => ({
     ...note,
-    skill: note.skillId ? { title: skills.find(s => s.id === note.skillId)?.title || "Projekt" } : null
+    project: note.projectId ? { title: projects.find(p => p.id === note.projectId)?.title || "Projekt" } : null
   }));
 
   return (
@@ -23,15 +23,15 @@ export default function NotesPage() {
         </div>
         <div>
           <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">Notatki</h1>
-          <p className="text-zinc-500 text-sm font-medium mt-0.5">Twoja osobista przestrzeń na myśli i wiedzę.</p>
+          <p className="text-zinc-500 text-sm font-medium mt-0.5">Twoja baza wiedzy i dokumentacja projektowa.</p>
         </div>
       </header>
 
       <section>
-        {notesLoading || skillsLoading ? (
+        {notesLoading || projectsLoading ? (
           <div className="text-zinc-500 text-sm">Ładowanie...</div>
         ) : (
-          <NotesManager initialNotes={notesWithSkills} groupByProject={true} />
+          <NotesManager initialNotes={notesWithProjects} groupByProject={true} />
         )}
       </section>
     </main>

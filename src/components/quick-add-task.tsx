@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { createTask } from "@/lib/services/tasks";
 import { createNote } from "@/lib/services/notes";
 import { createPlace } from "@/lib/services/places";
-import { createSkill, useSkills } from "@/lib/services/skills";
+import { createProject, useProjects } from "@/lib/services/projects";
 import { Geolocation } from "@capacitor/geolocation";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -20,7 +20,7 @@ export function QuickAddTask({ projectId, onSuccess }: { projectId?: string, onS
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   
   // Pobieramy wszystkie aktywne projekty do wyboru
-  const { skills } = useSkills("ACTIVE");
+  const { projects } = useProjects("ACTIVE");
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projectId || "");
 
   async function handleLocateHere() {
@@ -50,11 +50,11 @@ export function QuickAddTask({ projectId, onSuccess }: { projectId?: string, onS
 
     startTransition(async () => {
       if (mode === "TASK") {
-        await createTask(title, selectedProjectId || undefined, dueDate || undefined, selectedPlaceId || undefined);
+        await createTask(title, undefined, dueDate || undefined, selectedPlaceId || undefined, selectedProjectId || undefined);
       } else if (mode === "NOTE") {
-        await createNote({ title: title, content: "", skillId: selectedProjectId || undefined });
+        await createNote({ title: title, content: "", projectId: selectedProjectId || undefined });
       } else if (mode === "IDEA") {
-        await createSkill(title, "INBOX");
+        await createProject(title, "INBOX");
       }
       setTitle("");
       setDueDate(null);
@@ -107,7 +107,7 @@ export function QuickAddTask({ projectId, onSuccess }: { projectId?: string, onS
             mode === "IDEA" ? "bg-yellow-600 text-white" : "text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          <Lightbulb className="w-3.5 h-3.5" /> Pomysł
+          <Lightbulb className="w-3.5 h-3.5" /> Pomysł (Inkubator)
         </button>
       </div>
 
@@ -119,7 +119,7 @@ export function QuickAddTask({ projectId, onSuccess }: { projectId?: string, onS
             placeholder={
               mode === "TASK" ? "Co masz do zrobienia?" : 
               mode === "NOTE" ? "Szybka notatka..." : 
-              "Pomysł na nowy projekt..."
+              "Nowy projekt do Inkubatora..."
             }
             className="flex-1 bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 rounded-xl h-12 pl-4 pr-12 focus-visible:ring-purple-500/50"
             disabled={isPending}
@@ -152,8 +152,8 @@ export function QuickAddTask({ projectId, onSuccess }: { projectId?: string, onS
                   className="bg-transparent text-[10px] font-bold text-zinc-400 py-1.5 px-2 focus:outline-none max-w-[120px]"
                 >
                   <option value="">Bez projektu</option>
-                  {skills.map(skill => (
-                    <option key={skill.id} value={skill.id}>{skill.title}</option>
+                  {projects.map(project => (
+                    <option key={project.id} value={project.id}>{project.title}</option>
                   ))}
                 </select>
               </div>
@@ -210,4 +210,3 @@ export function QuickAddTask({ projectId, onSuccess }: { projectId?: string, onS
     </div>
   );
 }
-

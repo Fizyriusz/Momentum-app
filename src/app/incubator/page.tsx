@@ -1,18 +1,18 @@
 "use client";
 
-import { useSkills, createSkill } from "@/lib/services/skills";
+import { useProjects, createProject } from "@/lib/services/projects";
 import { Lightbulb } from "lucide-react";
 import { IncubatorList } from "@/components/incubator-list";
 
 export default function IncubatorPage() {
-  const { skills: incubatorSkills, loading } = useSkills("INBOX");
+  const { projects: incubatorProjects, loading } = useProjects("INBOX");
 
   async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const title = formData.get("title") as string;
     if (title.trim()) {
-      await createSkill(title, "INBOX");
+      await createProject(title, "INBOX");
       e.currentTarget.reset();
     }
   }
@@ -25,7 +25,7 @@ export default function IncubatorPage() {
         </div>
         <div>
           <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">Inkubator</h1>
-          <p className="text-zinc-500 text-sm font-medium mt-0.5">Twoja poczekalnia na potężne projekty. Zapisuj tu grube wizje.</p>
+          <p className="text-zinc-500 text-sm font-medium mt-0.5">Poczekalnia na nowe projekty i koncepcje.</p>
         </div>
       </header>
 
@@ -34,7 +34,7 @@ export default function IncubatorPage() {
         <form onSubmit={handleAdd} className="flex gap-2 w-full mb-6 relative">
           <input
             name="title"
-            placeholder="Opisz swój kolejny wielki projekt..."
+            placeholder="Opisz nowy projekt..."
             className="flex-1 bg-zinc-900/50 border border-zinc-800 text-zinc-100 placeholder:text-zinc-500 rounded-xl h-12 pl-4 pr-12 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
             required
           />
@@ -46,11 +46,11 @@ export default function IncubatorPage() {
           </button>
         </form>
 
-        {/* Lista pomysłów w Inkubatorze */}
+        {/* Lista projektów w Inkubatorze */}
         {loading ? (
           <div className="text-zinc-500 text-sm p-4">Ładowanie...</div>
         ) : (
-          <IncubatorList skills={incubatorSkills} />
+          <IncubatorList projects={incubatorProjects} />
         )}
       </section>
     </main>

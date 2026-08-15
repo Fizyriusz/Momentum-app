@@ -1,4 +1,4 @@
-﻿import type { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -13,13 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Quest Log",
-  description: "Personal Dashboard - zarzadzaj swoim czasem jak RPG",
+  title: "Momentum",
+  description: "System egzekucji projektów, zadań i zarządzania czasem.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Quest Log",
+    title: "Momentum",
   },
 };
 

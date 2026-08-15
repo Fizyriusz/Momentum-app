@@ -6,18 +6,17 @@ import {
   onSnapshot, 
   query, 
   orderBy, 
-  where,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  serverTimestamp,
-  getDocs
+  where, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  serverTimestamp 
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
 const getUserTasksCol = () => collection(db, "users", auth.currentUser?.uid || "unauth", "tasks");
-const getUserProjectsCol = () => collection(db, "users", auth.currentUser?.uid || "unauth", "projects");
+const getUserTaskListsCol = () => collection(db, "users", auth.currentUser?.uid || "unauth", "taskLists");
 
 // --- Typy ---
 export type Tag = {
@@ -34,36 +33,52 @@ export type Task = {
   imageUrl?: string | null;
   isCompleted: boolean;
   dueDate?: any; // Timestamp Firebase
-  projectId?: string | null;
+  taskListId?: string | null; // Przypisanie do podlisty
+  projectId?: string | null; // Przypisanie do głównego projektu
   placeId?: string | null; // Powiązane z geolokalizacją (miejscem)
   column: string;
   tagNames?: string[];
   createdAt: any;
 };
 
-export type Project = {
+export type TaskList = {
   id: string;
   name: string;
   color: string;
-  skillId?: string | null;
+  projectId?: string | null;
   createdAt: any;
 };
 
+// Kompatybilność wsteczna aliasu
+export type Project = TaskList;
+
 // --- Hooki ---
 
-export function useTasks(projectId?: string) {
+export function useTasks(taskListIdOrProjectId?: string) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!auth.currentUser) return;
     let q = query(getUserTasksCol(), orderBy("createdAt", "desc"));
-    if (projectId) {
-      q = query(getUserTasksCol(), where("projectId", "==", projectId), orderBy("createdAt", "desc"));
+    if (taskListIdOrProjectId) {
+      q = query(
+        getUserTasksCol(), 
+        where("taskListId", "==", taskListIdOrProjectId), 
+        orderBy("createdAt", "desc")
+      );
     }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
+      const data = snapshot.docs.map(doc => {
+        const d = doc.data();
+        return { 
+          id: doc.id, 
+          ...d,
+          // Obsługa wsteczna pola projectId z dawnych zadań
+          taskListId: d.taskListId || d.projectId || null
+        } as Task;
+      });
       setTasks(data);
       setLoading(false);
     }, (error) => {
@@ -72,89 +87,107 @@ export function useTasks(projectId?: string) {
     });
   
     return () => unsubscribe();
-  }, [projectId, auth.currentUser?.uid]);
+  }, [taskListIdOrProjectId, auth.currentUser?.uid]);
 
   return { tasks, loading };
 }
 
-export function useProjects(skillId?: string) {
-  const [projects, setProjects] = useState<Project[]>([]);
+export function useTaskLists(projectId?: string) {
+  const [taskLists, setTaskLists] = useState<TaskList[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!auth.currentUser) return;
-    let q = query(getUserProjectsCol(), orderBy("createdAt", "desc"));
-    if (skillId) {
-      q = query(getUserProjectsCol(), where("skillId", "==", skillId), orderBy("createdAt", "desc"));
+    let q = query(getUserTaskListsCol(), orderBy("createdAt", "desc"));
+    if (projectId) {
+      q = query(getUserTaskListsCol(), where("projectId", "==", projectId), orderBy("createdAt", "desc"));
     }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
-      setProjects(data);
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TaskList));
+      setTaskLists(data);
       setLoading(false);
     }, (error) => {
-      console.error("Error fetching projects:", error);
+      console.error("Error fetching task lists:", error);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [skillId]);
+  }, [projectId, auth.currentUser?.uid]);
 
-  return { projects, loading };
+  return { taskLists, loading };
 }
 
-export function useProjectTasks(skillId: string) {
-  // Ten hook jest używany, żeby pobrać wszystkie projekty powiązane ze skillem 
-  // oraz ich zadania. Firestore nie obsługuje relacji typu "join", więc
-  // zrobimy to dwoma subskrypcjami.
-  const { projects, loading: projectsLoading } = useProjects(skillId);
+// Alias dla kompatybilności
+export const useProjects = useTaskLists;
+
+export function useProjectTasks(projectId: string) {
+  const { taskLists, loading: taskListsLoading } = useTaskLists(projectId);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
 
   useEffect(() => {
-    if (projects.length === 0 || !auth.currentUser) {
+    if (!auth.currentUser) {
       setTasks([]);
       setLoadingTasks(false);
       return;
     }
 
-    const projectIds = projects.map(p => p.id);
-    if (projectIds.length > 10) {
-      projectIds.length = 10;
+    if (taskLists.length === 0) {
+      // Pobierz zadania przypisane bezpośrednio do projectId
+      const qDirect = query(getUserTasksCol(), where("projectId", "==", projectId), orderBy("createdAt", "desc"));
+      const unsubDirect = onSnapshot(qDirect, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
+        setTasks(data);
+        setLoadingTasks(false);
+      }, () => setLoadingTasks(false));
+      return () => unsubDirect();
     }
 
-    const q = query(getUserTasksCol(), where("projectId", "in", projectIds), orderBy("createdAt", "desc"));
+    const listIds = taskLists.map(p => p.id);
+    if (listIds.length > 10) {
+      listIds.length = 10;
+    }
+
+    const q = query(getUserTasksCol(), where("taskListId", "in", listIds), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
       setTasks(data);
       setLoadingTasks(false);
-    });
+    }, () => setLoadingTasks(false));
 
     return () => unsubscribe();
-  }, [projects]);
+  }, [taskLists, projectId, auth.currentUser?.uid]);
 
   return { 
-    projects, 
+    taskLists,
+    projects: taskLists, // Kompatybilność wsteczna 
     tasks, 
-    loading: projectsLoading || loadingTasks 
+    loading: taskListsLoading || loadingTasks 
   };
 }
 
 // --- Akcje Mutacji ---
 
-export async function createProjectList(skillId: string, name: string) {
-  return addDoc(getUserProjectsCol(), {
+export async function createTaskList(projectId: string, name: string) {
+  if (!auth.currentUser) return;
+  return addDoc(getUserTaskListsCol(), {
     name,
     color: "purple-500",
-    skillId,
+    projectId,
     createdAt: serverTimestamp()
   });
 }
 
-export async function createTask(title: string, projectId?: string, dueDate?: Date, placeId?: string) {
+// Alias dla kompatybilności
+export const createProjectList = createTaskList;
+
+export async function createTask(title: string, taskListId?: string, dueDate?: Date, placeId?: string, projectId?: string) {
+  if (!auth.currentUser) return;
   return addDoc(getUserTasksCol(), {
     title,
     isCompleted: false,
+    taskListId: taskListId || null,
     projectId: projectId || null,
     placeId: placeId || null,
     column: "todo",

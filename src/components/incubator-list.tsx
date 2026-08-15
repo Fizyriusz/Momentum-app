@@ -1,29 +1,18 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { activateSkill, updateSkill as updateSkillDetails } from "@/lib/services/skills";
+import { activateProject, updateProject as updateProjectDetails, Project } from "@/lib/services/projects";
 import { Rocket, Play, Settings2, Save } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
-type IncubatorSkill = {
-  id: string;
-  title: string;
-  goal?: string | null;
-  description?: string | null;
-  targetMinutes: number;
-  period: string;
-  category?: string | null;
-};
-
-export function IncubatorList({ skills }: { skills: IncubatorSkill[] }) {
+export function IncubatorList({ projects }: { projects: Project[] }) {
   const [isPending, startTransition] = useTransition();
-
   const [openModalId, setOpenModalId] = useState<string | null>(null);
   
-  // State for the currently edited skill
+  // State for the currently edited project
   const [editedTitle, setEditedTitle] = useState("");
   const [editedGoal, setEditedGoal] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
@@ -31,20 +20,19 @@ export function IncubatorList({ skills }: { skills: IncubatorSkill[] }) {
   const [editedPeriod, setEditedPeriod] = useState("WEEK");
   const [editedCategory, setEditedCategory] = useState("");
 
-  function openModal(skill: IncubatorSkill) {
-    setEditedTitle(skill.title);
-    setEditedGoal(skill.goal || "");
-    setEditedDescription(skill.description || "");
-    setEditedTargetHours(Math.floor(skill.targetMinutes / 60) || 0);
-    setEditedPeriod(skill.period || "WEEK");
-    setEditedCategory(skill.category || "");
-    setOpenModalId(skill.id);
+  function openModal(project: Project) {
+    setEditedTitle(project.title);
+    setEditedGoal(project.goal || "");
+    setEditedDescription(project.description || "");
+    setEditedTargetHours(Math.floor(project.targetMinutes / 60) || 0);
+    setEditedPeriod(project.period || "WEEK");
+    setEditedCategory(project.category || "");
+    setOpenModalId(project.id);
   }
 
   function handleSaveDetails(id: string) {
     startTransition(async () => {
-      // W updateSkillDetails możemy również obsłużyć zmianę tytułu
-      await updateSkillDetails(id, {
+      await updateProjectDetails(id, {
         title: editedTitle,
         goal: editedGoal || null,
         description: editedDescription || null,
@@ -58,37 +46,37 @@ export function IncubatorList({ skills }: { skills: IncubatorSkill[] }) {
 
   function handleActivate(id: string) {
     startTransition(async () => {
-      await activateSkill(id);
+      await activateProject(id);
     });
   }
 
-  if (skills.length === 0) {
+  if (projects.length === 0) {
     return (
       <div className="py-8 text-center text-zinc-500 text-sm font-medium">
-        Inkubator jest pusty. Wpadnij tu z nowym pomysłem na super projekt!
+        Inkubator jest pusty. Wpadnij tu z nowym pomysłem na projekt.
       </div>
     );
   }
 
   // Grupowanie
-  const skillsByCategory = skills.reduce((acc, skill) => {
-    const cat = skill.category || "Inne";
+  const projectsByCategory = projects.reduce((acc, project) => {
+    const cat = project.category || "Inne";
     if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(skill);
+    acc[cat].push(project);
     return acc;
-  }, {} as Record<string, IncubatorSkill[]>);
+  }, {} as Record<string, Project[]>);
 
   return (
     <div className="space-y-8 mt-4">
-      {Object.entries(skillsByCategory).map(([category, catSkills]) => (
+      {Object.entries(projectsByCategory).map(([category, catProjects]) => (
         <div key={category} className="space-y-3">
           <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-purple-500/50"></span>
             {category}
           </h2>
-          {catSkills.map((skill) => (
+          {catProjects.map((project) => (
             <div
-              key={skill.id}
+              key={project.id}
               className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800/50 transition-all duration-200 gap-4"
             >
               <div className="flex items-center gap-4">
@@ -96,17 +84,17 @@ export function IncubatorList({ skills }: { skills: IncubatorSkill[] }) {
                   <Rocket className="w-5 h-5 text-zinc-400" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-zinc-200">{skill.title}</h3>
+                  <h3 className="font-bold text-zinc-200">{project.title}</h3>
                   <p className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 mt-0.5 flex gap-2">
                     <span>Status: INBOX</span>
-                    {skill.goal && <span className="text-purple-500">• PRZYGOTOWANY</span>}
+                    {project.goal && <span className="text-purple-500">• PRZYGOTOWANY</span>}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <Dialog open={openModalId === skill.id} onOpenChange={(open) => {
-                  if (open) openModal(skill);
+                <Dialog open={openModalId === project.id} onOpenChange={(open) => {
+                  if (open) openModal(project);
                   else setOpenModalId(null);
                 }}>
                   <DialogTrigger 
@@ -116,13 +104,6 @@ export function IncubatorList({ skills }: { skills: IncubatorSkill[] }) {
                       </Button>
                     }
                   />
-                  {/* Radix renders content via Portal outside this loop usually, 
-                      but since we already put DialogContent inside here earlier, 
-                      it's safe as long as state manages it well. We actually mapped DialogContent inside earlier, 
-                      so let's keep it but just point to the original logic or copy it.
-                      Wait, the previous dialog content was already modified in the same file!
-                      I will just reuse the exact DialogContent structure from before.
-                  */}
                   <DialogContent className="bg-zinc-950 border border-zinc-800 text-zinc-100 sm:max-w-xl w-[90vw] rounded-2xl p-6">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2">
@@ -144,7 +125,7 @@ export function IncubatorList({ skills }: { skills: IncubatorSkill[] }) {
                       </div>
                       <div>
                         <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
-                          Kategoria (np. YouTube, Biznes)
+                          Kategoria
                         </label>
                         <Input 
                           value={editedCategory}
@@ -155,7 +136,7 @@ export function IncubatorList({ skills }: { skills: IncubatorSkill[] }) {
                       </div>
                       <div>
                         <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
-                          Cel Nadrzędny (Jedno zdanie)
+                          Główny Cel (Jedno zdanie)
                         </label>
                         <Input 
                           value={editedGoal}
@@ -202,7 +183,7 @@ export function IncubatorList({ skills }: { skills: IncubatorSkill[] }) {
                         <Textarea 
                           value={editedDescription}
                           onChange={e => setEditedDescription(e.target.value)}
-                          placeholder="Luźne myśli, linki, pomysły..."
+                          placeholder="Szczegóły, notatki, linki..."
                           className="bg-zinc-900/50 border-zinc-800 min-h-[120px]"
                         />
                       </div>
@@ -217,7 +198,7 @@ export function IncubatorList({ skills }: { skills: IncubatorSkill[] }) {
                         </Button>
                         <Button 
                           className="bg-purple-600 hover:bg-purple-500 text-white"
-                          onClick={() => handleSaveDetails(skill.id)}
+                          onClick={() => handleSaveDetails(project.id)}
                           disabled={isPending}
                         >
                           <Save className="w-4 h-4 mr-2" /> Zapisz Detale
@@ -228,7 +209,7 @@ export function IncubatorList({ skills }: { skills: IncubatorSkill[] }) {
                 </Dialog>
 
                 <Button
-                  onClick={() => handleActivate(skill.id)}
+                  onClick={() => handleActivate(project.id)}
                   disabled={isPending}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-wider transition-colors h-9"
                 >
@@ -243,4 +224,3 @@ export function IncubatorList({ skills }: { skills: IncubatorSkill[] }) {
     </div>
   );
 }
-

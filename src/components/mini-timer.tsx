@@ -1,38 +1,34 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { addMinutesToSkill } from "@/lib/services/timeLogs";
+import { addMinutesToProject } from "@/lib/services/timeLogs";
+import { Project } from "@/lib/services/projects";
 import { Play, Square } from "lucide-react";
 
-type Skill = {
-  id: string;
-  title: string;
-};
-
-export function MiniTimer({ skills }: { skills: Skill[] }) {
+export function MiniTimer({ projects }: { projects: Project[] }) {
   const [isPending, startTransition] = useTransition();
   const [isTracking, setIsTracking] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [activeSkillId, setActiveSkillId] = useState<string | null>(
-    skills.length > 0 ? skills[0].id : null
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(
+    projects.length > 0 ? projects[0].id : null
   );
 
-  const storageKey = `quest-log-mini-timer`;
+  const storageKey = `momentum-mini-timer`;
 
   useEffect(() => {
     const stored = localStorage.getItem(storageKey);
     if (stored) {
-      const { startTime, accumulated, skillId } = JSON.parse(stored);
+      const { startTime, accumulated, projectId } = JSON.parse(stored);
       setIsTracking(true);
-      setActiveSkillId(skillId);
+      setActiveProjectId(projectId);
       
       const now = Date.now();
       const diffSeconds = Math.floor((now - startTime) / 1000);
       setElapsedSeconds(accumulated + diffSeconds);
-    } else if (skills.length > 0 && !activeSkillId) {
-       setActiveSkillId(skills[0].id);
+    } else if (projects.length > 0 && !activeProjectId) {
+       setActiveProjectId(projects[0].id);
     }
-  }, [skills, activeSkillId]);
+  }, [projects, activeProjectId]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -58,12 +54,12 @@ export function MiniTimer({ skills }: { skills: Skill[] }) {
   }, [isTracking, elapsedSeconds]);
 
   function handleStart() {
-    if (!activeSkillId) return;
+    if (!activeProjectId) return;
     setIsTracking(true);
     localStorage.setItem(storageKey, JSON.stringify({
       startTime: Date.now(),
       accumulated: elapsedSeconds,
-      skillId: activeSkillId
+      projectId: activeProjectId
     }));
   }
 
@@ -73,9 +69,9 @@ export function MiniTimer({ skills }: { skills: Skill[] }) {
     
     const minutesToLog = Math.floor(elapsedSeconds / 60);
     
-    if (minutesToLog > 0 && activeSkillId) {
+    if (minutesToLog > 0 && activeProjectId) {
       startTransition(async () => {
-        await addMinutesToSkill(activeSkillId, minutesToLog);
+        await addMinutesToProject(activeProjectId, minutesToLog);
         setElapsedSeconds(0);
       });
     } else {
@@ -89,21 +85,21 @@ export function MiniTimer({ skills }: { skills: Skill[] }) {
     return `${m}:${s}`;
   };
 
-  if (skills.length === 0) return null;
+  if (projects.length === 0) return null;
 
   return (
     <div className={`p-4 rounded-2xl border transition-all duration-300 flex items-center justify-between gap-4 backdrop-blur-md ${isTracking ? 'bg-purple-900/20 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.15)] ring-1 ring-purple-500/30' : 'bg-zinc-900/40 border-zinc-800/50'}`}>
       
       <div className="flex-1 flex flex-col gap-1.5">
-        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Uniwersalny Stoper</label>
+        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Rejestrator Czasu</label>
         <select
           disabled={isTracking}
-          value={activeSkillId || ""}
-          onChange={(e) => setActiveSkillId(e.target.value)}
+          value={activeProjectId || ""}
+          onChange={(e) => setActiveProjectId(e.target.value)}
           className="bg-transparent text-zinc-200 text-sm font-medium focus:outline-none appearance-none cursor-pointer w-full"
         >
-          {skills.map(s => (
-            <option key={s.id} value={s.id} className="bg-zinc-900">{s.title}</option>
+          {projects.map(p => (
+            <option key={p.id} value={p.id} className="bg-zinc-900">{p.title}</option>
           ))}
         </select>
       </div>
@@ -131,4 +127,3 @@ export function MiniTimer({ skills }: { skills: Skill[] }) {
     </div>
   );
 }
-

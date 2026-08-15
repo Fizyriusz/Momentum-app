@@ -1,7 +1,7 @@
 {
-  "name": "Quest Log",
-  "short_name": "QuestLog",
-  "description": "Personal Dashboard – zarządzaj swoim czasem jak RPG",
+  "name": "Momentum",
+  "short_name": "Momentum",
+  "description": "System egzekucji projektów, zadań i zarządzania czasem.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#09090b",

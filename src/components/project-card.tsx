@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { addMinutesToSkill } from "@/lib/services/timeLogs";
-import { updateSkill as updateSkillDetails } from "@/lib/services/skills";
+import { addMinutesToProject } from "@/lib/services/timeLogs";
+import { updateProject as updateProjectDetails } from "@/lib/services/projects";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Play, Square, Plus, Swords, Hammer, BookOpen, Code, Zap, History, Edit2, Save, Lightbulb } from "lucide-react";
+import { Play, Square, Briefcase, BookOpen, Code, Layers, History, Edit2, Save, Target } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +25,7 @@ type TimeLog = {
   createdAt: number;
 };
 
-export type Skill = {
+export type Project = {
   id: string;
   title: string;
   targetMinutes: number;
@@ -38,11 +38,11 @@ export type Skill = {
 };
 
 const IconMap: Record<string, React.ElementType> = {
-  Swords,
-  Hammer,
+  Briefcase,
+  Target,
   BookOpen,
   Code,
-  Zap,
+  Layers,
 };
 
 const PeriodLabels: Record<string, string> = {
@@ -52,19 +52,19 @@ const PeriodLabels: Record<string, string> = {
   YEAR: "Rok"
 };
 
-export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: TimeLog[] }) {
+export function ProjectCard({ project, timeLogs = [] }: { project: Project, timeLogs?: TimeLog[] }) {
   const [isPending, startTransition] = useTransition();
   const [isTracking, setIsTracking] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
   // Detale projektu
   const [isEditingDetails, setIsEditingDetails] = useState(false);
-  const [editedGoal, setEditedGoal] = useState(skill.goal || "");
-  const [editedDescription, setEditedDescription] = useState(skill.description || "");
-  const [editedTargetHours, setEditedTargetHours] = useState(Math.floor(skill.targetMinutes / 60));
-  const [editedPeriod, setEditedPeriod] = useState(skill.period);
+  const [editedGoal, setEditedGoal] = useState(project.goal || "");
+  const [editedDescription, setEditedDescription] = useState(project.description || "");
+  const [editedTargetHours, setEditedTargetHours] = useState(Math.floor(project.targetMinutes / 60));
+  const [editedPeriod, setEditedPeriod] = useState(project.period);
 
-  const storageKey = `skill-timer-${skill.id}`;
+  const storageKey = `project-timer-${project.id}`;
 
   useEffect(() => {
     const stored = localStorage.getItem(storageKey);
@@ -117,7 +117,7 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
     
     if (minutesToLog > 0) {
       startTransition(async () => {
-        await addMinutesToSkill(skill.id, minutesToLog);
+        await addMinutesToProject(project.id, minutesToLog);
         setElapsedSeconds(0);
       });
     } else {
@@ -125,15 +125,15 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
     }
   }
 
-  function handlePomodoro() {
+  function handleQuickBlock() {
     startTransition(async () => {
-      await addMinutesToSkill(skill.id, 25);
+      await addMinutesToProject(project.id, 25);
     });
   }
 
   function handleSaveDetails() {
     startTransition(async () => {
-      await updateSkillDetails(skill.id, {
+      await updateProjectDetails(project.id, {
         goal: editedGoal || null,
         description: editedDescription || null,
         targetMinutes: (editedTargetHours || 0) * 60,
@@ -143,10 +143,10 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
     });
   }
 
-  const IconComponent = IconMap[skill.icon] || Swords;
+  const IconComponent = IconMap[project.icon] || Briefcase;
   
-  const currentTotalMinutes = skill.loggedMinutes;
-  const progressPercent = Math.min(100, Math.round((currentTotalMinutes / skill.targetMinutes) * 100));
+  const currentTotalMinutes = project.loggedMinutes;
+  const progressPercent = Math.min(100, Math.round((currentTotalMinutes / project.targetMinutes) * 100));
   
   const formatTime = (minutes: number) => {
     const h = Math.floor(minutes / 60);
@@ -161,7 +161,7 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
     return `${m}:${s}`;
   };
 
-  const isCompleted = currentTotalMinutes >= skill.targetMinutes;
+  const isCompleted = currentTotalMinutes >= project.targetMinutes;
 
   return (
     <Card className={`
@@ -180,16 +180,16 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
             <IconComponent className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-zinc-100 text-lg">{skill.title}</h3>
+            <h3 className="font-bold text-zinc-100 text-lg">{project.title}</h3>
             <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-0.5">
-              Budżet na {PeriodLabels[skill.period]?.toLowerCase() || skill.period.toLowerCase()}
+              Budżet na {PeriodLabels[project.period]?.toLowerCase() || project.period.toLowerCase()}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {isCompleted && (
             <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 border-none">
-              Zaliczony!
+              Cel osiągnięty
             </Badge>
           )}
           <span className="text-xs font-bold text-zinc-400">{progressPercent}%</span>
@@ -204,12 +204,12 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
             <div className="space-y-4 bg-zinc-950/50 p-4 rounded-xl border border-zinc-800">
               <div>
                 <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
-                  Cel Nadrzędny (Jedno zdanie)
+                  Główny Cel (Jedno zdanie)
                 </label>
                 <Input 
                   value={editedGoal}
                   onChange={e => setEditedGoal(e.target.value)}
-                  placeholder="Np. Jeden film tygodniowo..."
+                  placeholder="Np. Wdrożenie produkcyjne do końca miesiąca..."
                   className="bg-zinc-950 border-zinc-800 text-sm"
                 />
               </div>
@@ -249,7 +249,7 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
                 <Textarea 
                   value={editedDescription}
                   onChange={e => setEditedDescription(e.target.value)}
-                  placeholder="Szczegóły, notatki, linki..."
+                  placeholder="Zakres, specyfikacja, linki..."
                   className="bg-zinc-950 border-zinc-800 min-h-[80px] resize-y text-sm"
                 />
               </div>
@@ -274,15 +274,15 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
             </div>
           ) : (
             <div className="group relative pr-8">
-               {skill.goal && (
-                 <p className="text-sm text-zinc-300 font-medium leading-relaxed">{skill.goal}</p>
+               {project.goal && (
+                 <p className="text-sm text-zinc-300 font-medium leading-relaxed">{project.goal}</p>
                )}
-               {skill.description && (
+               {project.description && (
                  <div className="prose prose-invert prose-sm max-w-none text-zinc-500 mt-2">
-                   <ReactMarkdown>{skill.description}</ReactMarkdown>
+                   <ReactMarkdown>{project.description}</ReactMarkdown>
                  </div>
                )}
-               {!skill.goal && !skill.description && (
+               {!project.goal && !project.description && (
                  <p className="text-sm text-zinc-600 italic">Brak opisu projektu...</p>
                )}
                
@@ -291,9 +291,9 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
                  size="sm"
                  className="mt-4 border-zinc-700 bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs h-8"
                  onClick={() => {
-                   setEditedGoal(skill.goal || "");
-                   setEditedDescription(skill.description || "");
-                   setEditedTargetHours(Math.floor(skill.targetMinutes / 60));
+                   setEditedGoal(project.goal || "");
+                   setEditedDescription(project.description || "");
+                   setEditedTargetHours(Math.floor(project.targetMinutes / 60));
                    setIsEditingDetails(true);
                  }}
                >
@@ -308,7 +308,7 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
         {/* Progress Bar & Labels */}
         <div className="mb-4">
           <div className="flex justify-between text-[10px] mb-2 text-zinc-500 font-bold uppercase tracking-widest items-center">
-            <span>{formatTime(currentTotalMinutes)} / {formatTime(skill.targetMinutes)}</span>
+            <span>{formatTime(currentTotalMinutes)} / {formatTime(project.targetMinutes)}</span>
           </div>
           <Progress 
             value={progressPercent} 
@@ -342,10 +342,10 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
 
           <Button 
             variant="outline" 
-            onClick={handlePomodoro}
+            onClick={handleQuickBlock}
             disabled={isTracking || isPending || isCompleted}
             className="h-12 px-4 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white shrink-0 font-bold text-xs"
-            title="+25 min Pomodoro"
+            title="+25 min blok czasu"
           >
             + 25m
           </Button>
@@ -368,7 +368,7 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <History className="w-5 h-5 text-purple-500" />
-                  Historia Sesji: {skill.title}
+                  Historia Sesji: {project.title}
                 </DialogTitle>
               </DialogHeader>
               
@@ -405,3 +405,5 @@ export function SkillCard({ skill, timeLogs = [] }: { skill: Skill, timeLogs?: T
   );
 }
 
+// Alias dla kompatybilności wstecznej
+export const SkillCard = ProjectCard;

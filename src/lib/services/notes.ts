@@ -6,12 +6,12 @@ import {
   onSnapshot, 
   query, 
   orderBy, 
-  where,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  serverTimestamp
+  where, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  serverTimestamp 
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
@@ -22,12 +22,12 @@ export type Note = {
   id: string;
   title: string;
   content: string;
-  skillId?: string | null;
+  projectId?: string | null;
   createdAt: any;
   updatedAt: any;
 };
 
-export function useNotes(skillId?: string) {
+export function useNotes(projectId?: string | null) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,10 +35,8 @@ export function useNotes(skillId?: string) {
     if (!auth.currentUser) return;
     let q = query(getUserNotesCol(), orderBy("updatedAt", "desc"));
     
-    if (skillId) {
-      q = query(getUserNotesCol(), where("skillId", "==", skillId), orderBy("updatedAt", "desc"));
-    } else if (skillId === null) {
-      // Pobieranie tylko globalnych notatek
+    if (projectId) {
+      q = query(getUserNotesCol(), where("projectId", "==", projectId), orderBy("updatedAt", "desc"));
     }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -48,27 +46,31 @@ export function useNotes(skillId?: string) {
           id: doc.id,
           title: d.title,
           content: d.content,
-          skillId: d.skillId,
+          // Kompatybilność z migracją (projectId || skillId)
+          projectId: d.projectId || d.skillId || null,
           createdAt: d.createdAt?.toMillis() || Date.now(),
           updatedAt: d.updatedAt?.toMillis() || Date.now(),
         } as Note;
       });
       setNotes(data);
       setLoading(false);
+    }, (error) => {
+      console.error("Error fetching notes:", error);
+      setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [skillId]);
+  }, [projectId, auth.currentUser?.uid]);
 
   return { notes, loading };
 }
 
-export async function createNote(data: { title: string, content: string, skillId?: string }) {
+export async function createNote(data: { title: string, content: string, projectId?: string }) {
   if (!auth.currentUser) return;
   return addDoc(getUserNotesCol(), {
     title: data.title || "Nowa Notatka",
     content: data.content,
-    skillId: data.skillId || null,
+    projectId: data.projectId || null,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   });

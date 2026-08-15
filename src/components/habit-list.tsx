@@ -1,10 +1,9 @@
 "use client";
 
-// Lista nawyków z checkboxami – Client Component dla interaktywności
 import { useTransition, useOptimistic, useMemo } from "react";
 import { toggleHabit } from "@/lib/services/habits";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Sparkles, Check } from "lucide-react";
+import { Check, CheckCircle2 } from "lucide-react";
 
 type Habit = {
   id: string;
@@ -22,9 +21,9 @@ export function HabitList({ habits }: { habits: Habit[] }) {
     <section className="space-y-1 bg-zinc-900/40 p-4 rounded-2xl border border-zinc-800/50 backdrop-blur-md">
       {/* Nagłówek sekcji */}
       <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="h-4 w-4 text-purple-500" />
+        <CheckCircle2 className="h-4 w-4 text-purple-500" />
         <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400">
-          Nawyki w tle
+          Codzienne Nawyki
         </h2>
       </div>
 
@@ -78,8 +77,7 @@ function HabitItem({ habit }: { habit: Habit }) {
     if (index !== -1) optimisticDatesArray.splice(index, 1);
   }
 
-  function handleToggle(e: React.MouseEvent) {
-    // Zapobiegamy domyślnemu bąbelkowaniu, jeśli potrzeba, chociaż tu button na to nie cierpi
+  function handleToggle() {
     startTransition(async () => {
       setOptimisticIsDone(!optimisticIsDone);
       await toggleHabit(habit.id, todayStr, habit.completedDates);
@@ -137,7 +135,7 @@ function HabitItem({ habit }: { habit: Habit }) {
                 title={dateStr}
                 className={`rounded-full transition-colors ${
                   isCompleted 
-                    ? "bg-purple-500 shadow-[0_0_4px_rgba(168,85,247,0.8)]" 
+                    ? "bg-purple-500" 
                     : "bg-zinc-700/60"
                 } ${isToday ? "w-2 h-2" : "w-1.5 h-1.5"}`}
               />
@@ -146,13 +144,12 @@ function HabitItem({ habit }: { habit: Habit }) {
         </div>
       </div>
 
-      {/* Animowany znacznik ukończenia */}
+      {/* Znacznik ukończenia */}
       {optimisticIsDone && (
-        <span className="ml-auto text-xs text-purple-400 animate-fade-in flex items-center justify-center bg-purple-500/20 rounded-full w-6 h-6 shrink-0">
+        <span className="ml-auto text-xs text-purple-400 flex items-center justify-center bg-purple-500/20 rounded-full w-6 h-6 shrink-0">
           <Check className="w-4 h-4" />
         </span>
       )}
     </button>
   );
 }
-

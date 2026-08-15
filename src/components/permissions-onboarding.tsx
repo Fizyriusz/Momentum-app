@@ -68,7 +68,7 @@ export function PermissionsOnboarding() {
               <ShieldCheck className="w-8 h-8 text-purple-400" />
             </div>
             <h2 className="text-xl font-black uppercase tracking-tight text-white mb-2">
-              Odblokuj Pełną Moc
+              Konfiguracja Uprawnień
             </h2>
             <p className="text-sm text-zinc-400 mb-8">
               Aby przypomnienia w tle działały, gdy jesteś w terenie, Momentum potrzebuje kilku uprawnień.

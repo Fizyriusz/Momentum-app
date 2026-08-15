@@ -6,45 +6,57 @@ import {
   onSnapshot, 
   query, 
   orderBy, 
-  where,
-  addDoc,
-  serverTimestamp,
-  getDocs,
-  doc
+  where, 
+  addDoc, 
+  serverTimestamp, 
+  getDocs, 
+  doc, 
+  updateDoc, 
+  increment, 
+  getDoc 
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
 const getUserTimeLogsCol = () => collection(db, "users", auth.currentUser?.uid || "unauth", "timeLogs");
-const getUserSkillDoc = (id: string) => doc(db, "users", auth.currentUser?.uid || "unauth", "skills", id);
+const getUserProjectDoc = (id: string) => doc(db, "users", auth.currentUser?.uid || "unauth", "projects", id);
 
 export type TimeLog = {
   id: string;
   minutes: number;
-  skillId: string;
+  projectId: string;
   createdAt: any;
 };
 
-export function useTimeLogs(skillId: string) {
+export function useTimeLogs(projectId: string) {
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!skillId || !auth.currentUser) return;
+    if (!projectId || !auth.currentUser) return;
 
     const q = query(
       getUserTimeLogsCol(), 
-      where("skillId", "==", skillId), 
+      where("projectId", "==", projectId), 
       orderBy("createdAt", "desc")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TimeLog));
+      const data = snapshot.docs.map(doc => {
+        const d = doc.data();
+        return {
+          id: doc.id,
+          minutes: d.minutes,
+          // Kompatybilność wsteczna z migracją (projectId || skillId)
+          projectId: d.projectId || d.skillId || "",
+          createdAt: d.createdAt?.toMillis ? d.createdAt.toMillis() : d.createdAt || Date.now()
+        } as TimeLog;
+      });
       setTimeLogs(data);
       setLoading(false);
-    });
+    }, () => setLoading(false));
 
     return () => unsubscribe();
-  }, [skillId]);
+  }, [projectId, auth.currentUser?.uid]);
 
   return { timeLogs, loading };
 }
@@ -59,47 +71,55 @@ export function useAllTimeLogs() {
     const q = query(getUserTimeLogsCol(), orderBy("createdAt", "desc"));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TimeLog));
+      const data = snapshot.docs.map(doc => {
+        const d = doc.data();
+        return {
+          id: doc.id,
+          minutes: d.minutes,
+          projectId: d.projectId || d.skillId || "",
+          createdAt: d.createdAt?.toMillis ? d.createdAt.toMillis() : d.createdAt || Date.now()
+        } as TimeLog;
+      });
       setTimeLogs(data);
       setLoading(false);
-    });
+    }, () => setLoading(false));
 
     return () => unsubscribe();
-  }, []);
+  }, [auth.currentUser?.uid]);
 
   return { timeLogs, loading };
 }
 
-export async function addMinutesToSkill(skillId: string, minutes: number) {
+export async function addMinutesToProject(projectId: string, minutes: number) {
   if (!auth.currentUser) return;
-  // 1. Dodanie logu
+
+  // 1. Dodanie logu czasu
   await addDoc(getUserTimeLogsCol(), {
-    skillId,
+    projectId,
     minutes,
     createdAt: serverTimestamp()
   });
 
-  const { doc, updateDoc, increment, getDoc } = await import("firebase/firestore");
-  const skillRef = getUserSkillDoc(skillId);
-  
-  // Najprościej użyć operacji atomicznej `increment` z Firebase
+  const projectRef = getUserProjectDoc(projectId);
   const dzisiaj = new Date().toISOString().split("T")[0];
   
-  const skillSnap = await getDoc(skillRef);
-  if (skillSnap.exists()) {
-    const data = skillSnap.data();
+  const projectSnap = await getDoc(projectRef);
+  if (projectSnap.exists()) {
+    const data = projectSnap.data();
     let updates: any = {
       loggedMinutes: increment(minutes)
     };
     
     if (data.lastLoggedDate !== dzisiaj) {
-      // Jeśli to pierwszy raz dzisiaj
       updates.lastLoggedDate = dzisiaj;
-      updates.loggedMinutesToday = minutes; // nadpisujemy
+      updates.loggedMinutesToday = minutes;
     } else {
       updates.loggedMinutesToday = increment(minutes);
     }
     
-    await updateDoc(skillRef, updates);
+    await updateDoc(projectRef, updates);
   }
 }
+
+// Alias dla kompatybilności
+export const addMinutesToSkill = addMinutesToProject;

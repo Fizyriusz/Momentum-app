@@ -20,13 +20,16 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Inicjalizacja Firestore z wbudowanym systemem offline
-// Używamy persistentLocalCache, co gwarantuje działanie aplikacji bez internetu.
-// persistentMultipleTabManager pozwala na działanie bazy w wielu kartach przeglądarki jednocześnie.
-const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
-  })
-});
+let db: any;
+try {
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager()
+    })
+  });
+} catch (e) {
+  db = getFirestore(app);
+}
 
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();

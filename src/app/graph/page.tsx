@@ -2,8 +2,8 @@
 
 import { useMemo, useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
-import { useSkills } from "@/lib/services/skills";
-import { useTasks } from "@/lib/services/tasks";
+import { useProjects } from "@/lib/services/projects";
+import { useTasks, useTaskLists } from "@/lib/services/tasks";
 import { useNotes } from "@/lib/services/notes";
 import { usePlaces } from "@/lib/services/places";
 import { Network } from "lucide-react";
@@ -12,7 +12,8 @@ import { Network } from "lucide-react";
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false });
 
 export default function GraphPage() {
-  const { skills, loading: skillsLoading } = useSkills();
+  const { projects, loading: projectsLoading } = useProjects();
+  const { taskLists, loading: taskListsLoading } = useTaskLists();
   const { tasks, loading: tasksLoading } = useTasks();
   const { notes, loading: notesLoading } = useNotes(undefined);
   const { places, loading: placesLoading } = usePlaces();
@@ -37,15 +38,33 @@ export default function GraphPage() {
     const nodes: any[] = [];
     const links: any[] = [];
 
-    // Główne węzły (Projekty / Skille)
-    skills.forEach(skill => {
+    // Główne węzły (Projekty)
+    projects.forEach(project => {
       nodes.push({
-        id: `skill_${skill.id}`,
-        name: skill.title,
+        id: `project_${project.id}`,
+        name: project.title,
         val: 10,
-        color: skill.status === "ACTIVE" ? "#a855f7" : "#52525b", // Fioletowy lub szary
+        color: project.status === "ACTIVE" ? "#a855f7" : "#52525b", // Fioletowy lub szary
         type: "Projekt"
       });
+    });
+
+    // Węzły Podlist
+    taskLists.forEach(list => {
+      nodes.push({
+        id: `list_${list.id}`,
+        name: list.name,
+        val: 6,
+        color: "#c084fc",
+        type: "Lista"
+      });
+
+      if (list.projectId) {
+        links.push({
+          source: `list_${list.id}`,
+          target: `project_${list.projectId}`
+        });
+      }
     });
 
     // Węzły Zadań
@@ -58,11 +77,16 @@ export default function GraphPage() {
         type: "Zadanie"
       });
 
-      // Powiązanie z projektem
-      if (task.projectId) {
+      // Powiązanie z listą lub projektem
+      if (task.taskListId) {
         links.push({
           source: `task_${task.id}`,
-          target: `skill_${task.projectId}`
+          target: `list_${task.taskListId}`
+        });
+      } else if (task.projectId) {
+        links.push({
+          source: `task_${task.id}`,
+          target: `project_${task.projectId}`
         });
       }
       
@@ -74,7 +98,7 @@ export default function GraphPage() {
         });
       }
       
-      // Tagi (Tworzymy węzły dla tagów dynamicznie jeśli nie istnieją)
+      // Tagi
       if (task.tagNames) {
         task.tagNames.forEach(tag => {
           const tagId = `tag_${tag.toLowerCase()}`;
@@ -83,7 +107,7 @@ export default function GraphPage() {
               id: tagId,
               name: `#${tag}`,
               val: 5,
-              color: "#f43f5e", // Różowy dla tagów
+              color: "#f43f5e",
               type: "Tag"
             });
           }
@@ -101,14 +125,14 @@ export default function GraphPage() {
         id: `note_${note.id}`,
         name: note.title,
         val: 4,
-        color: "#3b82f6", // Niebieski dla notatek
+        color: "#3b82f6",
         type: "Notatka"
       });
 
-      if (note.skillId) {
+      if (note.projectId) {
         links.push({
           source: `note_${note.id}`,
-          target: `skill_${note.skillId}`
+          target: `project_${note.projectId}`
         });
       }
     });
@@ -119,15 +143,15 @@ export default function GraphPage() {
         id: `place_${place.id}`,
         name: `📍 ${place.name}`,
         val: 8,
-        color: "#3b82f6", // Niebieski dla miejsc (geofencing)
+        color: "#3b82f6",
         type: "Miejsce"
       });
     });
 
     return { nodes, links };
-  }, [skills, tasks, notes, places]);
+  }, [projects, taskLists, tasks, notes, places]);
 
-  const isLoading = skillsLoading || tasksLoading || notesLoading || placesLoading;
+  const isLoading = projectsLoading || taskListsLoading || tasksLoading || notesLoading || placesLoading;
 
   return (
     <main className="min-h-full flex flex-col">
@@ -136,8 +160,8 @@ export default function GraphPage() {
           <Network className="w-6 h-6 text-purple-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">Mind Map</h1>
-          <p className="text-zinc-500 text-sm font-medium mt-0.5">Wizualizacja wszystkich powiązań w aplikacji.</p>
+          <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">Graf Relacji</h1>
+          <p className="text-zinc-500 text-sm font-medium mt-0.5">Wizualizacja powiązań między projektami, zadaniami i miejscami.</p>
         </div>
       </header>
 
@@ -155,8 +179,8 @@ export default function GraphPage() {
               nodeLabel="name"
               nodeColor="color"
               nodeRelSize={6}
-              linkColor={() => "rgba(161, 161, 170, 0.2)"} // Delikatny cynkowy
-              backgroundColor="#09090b" // bg-zinc-950
+              linkColor={() => "rgba(161, 161, 170, 0.2)"}
+              backgroundColor="#09090b"
               nodeCanvasObject={(node: any, ctx, globalScale) => {
                 const label = node.name;
                 const fontSize = 12 / globalScale;
