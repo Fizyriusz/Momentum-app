@@ -11,12 +11,15 @@ import {
   updateDoc, 
   deleteDoc, 
   doc, 
-  serverTimestamp 
+  serverTimestamp,
+  getDocs
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
 const getUserTasksCol = () => collection(db, "users", auth.currentUser?.uid || "unauth", "tasks");
 const getUserTaskListsCol = () => collection(db, "users", auth.currentUser?.uid || "unauth", "taskLists");
+const getUserTaskListDoc = (id: string) => doc(db, "users", auth.currentUser?.uid || "unauth", "taskLists", id);
+const getUserTaskDoc = (id: string) => doc(db, "users", auth.currentUser?.uid || "unauth", "tasks", id);
 
 // --- Typy ---
 export type Tag = {
@@ -33,7 +36,7 @@ export type Task = {
   imageUrl?: string | null;
   isCompleted: boolean;
   dueDate?: any; // Timestamp Firebase
-  taskListId?: string | null; // Przypisanie do podlisty
+  taskListId?: string | null; // Przypisanie do listy zadań
   projectId?: string | null; // Przypisanie do głównego projektu
   placeId?: string | null; // Powiązane z geolokalizacją (miejscem)
   column: string;
@@ -44,8 +47,10 @@ export type Task = {
 export type TaskList = {
   id: string;
   name: string;
-  color: string;
+  color?: string; // np. "purple", "blue", "emerald", "amber", "rose", "indigo"
+  icon?: string; // np. "List", "Monitor", "Bookmark", "Target", "Home", "Briefcase", "Code", "Zap"
   projectId?: string | null;
+  isArchived?: boolean;
   createdAt: any;
 };
 
@@ -75,7 +80,6 @@ export function useTasks(taskListIdOrProjectId?: string) {
         return { 
           id: doc.id, 
           ...d,
-          // Obsługa wsteczna pola projectId z dawnych zadań
           taskListId: d.taskListId || d.projectId || null
         } as Task;
       });
@@ -118,8 +122,25 @@ export function useTaskLists(projectId?: string) {
   return { taskLists, loading };
 }
 
-// Alias dla kompatybilności
-export const useProjects = useTaskLists;
+export function useTaskList(id: string) {
+  const [taskList, setTaskList] = useState<TaskList | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id || !auth.currentUser) return;
+    const unsubscribe = onSnapshot(getUserTaskListDoc(id), (docSnap) => {
+      if (docSnap.exists()) {
+        setTaskList({ id: docSnap.id, ...docSnap.data() } as TaskList);
+      } else {
+        setTaskList(null);
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [id, auth.currentUser?.uid]);
+
+  return { taskList, loading };
+}
 
 export function useProjectTasks(projectId: string) {
   const { taskLists, loading: taskListsLoading } = useTaskLists(projectId);
@@ -134,7 +155,6 @@ export function useProjectTasks(projectId: string) {
     }
 
     if (taskLists.length === 0) {
-      // Pobierz zadania przypisane bezpośrednio do projectId
       const qDirect = query(getUserTasksCol(), where("projectId", "==", projectId), orderBy("createdAt", "desc"));
       const unsubDirect = onSnapshot(qDirect, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
@@ -161,7 +181,7 @@ export function useProjectTasks(projectId: string) {
 
   return { 
     taskLists,
-    projects: taskLists, // Kompatybilność wsteczna 
+    projects: taskLists,
     tasks, 
     loading: taskListsLoading || loadingTasks 
   };
@@ -169,18 +189,57 @@ export function useProjectTasks(projectId: string) {
 
 // --- Akcje Mutacji ---
 
-export async function createTaskList(projectId: string, name: string) {
+export async function createTaskList(
+  nameOrProjectId: string, 
+  nameOrOptions?: string | { projectId?: string | null, icon?: string, color?: string },
+  optionsParam?: { icon?: string, color?: string }
+) {
   if (!auth.currentUser) return;
+  
+  let name = "";
+  let projectId: string | null = null;
+  let icon = "List";
+  let color = "purple";
+
+  if (typeof nameOrOptions === "string") {
+    // Wywołanie w starym formacie: createTaskList(projectId, name)
+    projectId = nameOrProjectId || null;
+    name = nameOrOptions;
+    if (optionsParam) {
+      icon = optionsParam.icon || "List";
+      color = optionsParam.color || "purple";
+    }
+  } else if (typeof nameOrOptions === "object") {
+    // Nowy format: createTaskList(name, { projectId, icon, color })
+    name = nameOrProjectId;
+    projectId = nameOrOptions.projectId || null;
+    icon = nameOrOptions.icon || "List";
+    color = nameOrOptions.color || "purple";
+  } else {
+    name = nameOrProjectId;
+  }
+
   return addDoc(getUserTaskListsCol(), {
-    name,
-    color: "purple-500",
-    projectId,
+    name: name.trim(),
+    color,
+    icon,
+    projectId: projectId || null,
+    isArchived: false,
     createdAt: serverTimestamp()
   });
 }
 
-// Alias dla kompatybilności
 export const createProjectList = createTaskList;
+
+export async function updateTaskList(id: string, data: Partial<TaskList>) {
+  if (!auth.currentUser) return;
+  return updateDoc(getUserTaskListDoc(id), data);
+}
+
+export async function deleteTaskList(id: string) {
+  if (!auth.currentUser) return;
+  return deleteDoc(getUserTaskListDoc(id));
+}
 
 export async function createTask(title: string, taskListId?: string, dueDate?: Date, placeId?: string, projectId?: string) {
   if (!auth.currentUser) return;
@@ -198,7 +257,7 @@ export async function createTask(title: string, taskListId?: string, dueDate?: D
 
 export async function toggleTaskComplete(id: string, isCompleted: boolean) {
   if (!auth.currentUser) return;
-  return updateDoc(doc(db, "users", auth.currentUser.uid, "tasks", id), {
+  return updateDoc(getUserTaskDoc(id), {
     isCompleted,
     column: isCompleted ? "done" : "todo"
   });
@@ -206,10 +265,10 @@ export async function toggleTaskComplete(id: string, isCompleted: boolean) {
 
 export async function deleteTask(id: string) {
   if (!auth.currentUser) return;
-  return deleteDoc(doc(db, "users", auth.currentUser.uid, "tasks", id));
+  return deleteDoc(getUserTaskDoc(id));
 }
 
 export async function updateTask(id: string, data: Partial<Task>) {
   if (!auth.currentUser) return;
-  return updateDoc(doc(db, "users", auth.currentUser.uid, "tasks", id), data);
+  return updateDoc(getUserTaskDoc(id), data);
 }

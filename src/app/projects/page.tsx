@@ -12,6 +12,8 @@ import { useProject, useProjects, MAX_ACTIVE_PROJECTS } from "@/lib/services/pro
 import { useProjectTasks, createTaskList } from "@/lib/services/tasks";
 import { useNotes } from "@/lib/services/notes";
 import { useTimeLogs } from "@/lib/services/timeLogs";
+import { CreateTaskListDialog } from "@/components/create-task-list-dialog";
+import { EditTaskListDialog } from "@/components/edit-task-list-dialog";
 import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -49,19 +51,33 @@ function ProjectDetailsView({ id }: { id: string }) {
 
       {/* 3. Listy Zadań */}
       <section className="space-y-6 mt-8">
-        <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest px-2">Zadania Projektu</h2>
+        <div className="flex items-center justify-between px-2">
+          <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Listy Zadań Projektu</h2>
+          <CreateTaskListDialog 
+            defaultProjectId={project.id} 
+            trigger={
+              <Button size="sm" variant="outline" className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 text-xs text-zinc-300">
+                <Plus className="w-3.5 h-3.5 mr-1.5" /> Dodaj Listę
+              </Button>
+            }
+          />
+        </div>
         
         {taskLists.length > 0 ? (
           <div className="space-y-8">
             {taskLists.map(list => {
               const listTasks = tasks.filter(t => t.taskListId === list.id);
               return (
-                <div key={list.id} className="space-y-4">
-                  <div className="flex items-center gap-2 px-2">
-                    <span className="w-2 h-2 rounded-full bg-purple-500" />
-                    <h3 className="text-sm font-bold text-zinc-300">{list.name}</h3>
+                <div key={list.id} className="space-y-4 bg-zinc-900/20 border border-zinc-800/40 p-4 rounded-2xl">
+                  <div className="flex items-center justify-between px-1">
+                    <Link href={`/lists?id=${list.id}`} className="flex items-center gap-2 group">
+                      <span className="w-2 h-2 rounded-full bg-purple-500 group-hover:scale-125 transition-transform" />
+                      <h3 className="text-sm font-bold text-zinc-200 group-hover:text-purple-300 transition-colors">{list.name}</h3>
+                      <span className="text-xs text-zinc-500 font-medium">({listTasks.filter(t => !t.isCompleted).length})</span>
+                    </Link>
+                    <EditTaskListDialog taskList={list} />
                   </div>
-                  <QuickAddTask projectId={project.id} />
+                  <QuickAddTask taskListId={list.id} projectId={project.id} />
                   <TaskList tasks={listTasks} />
                 </div>
               );
@@ -74,13 +90,9 @@ function ProjectDetailsView({ id }: { id: string }) {
             </div>
             <div>
               <p className="font-medium text-zinc-300">Projekt nie posiada jeszcze listy zadań.</p>
-              <p className="text-xs mt-1 max-w-sm mx-auto">Aby zacząć dodawać zadania, kliknij poniższy przycisk szybkiego startu.</p>
+              <p className="text-xs mt-1 max-w-sm mx-auto">Aby zacząć dodawać zadania, utwórz nową listę dla tego projektu.</p>
             </div>
-            <form onSubmit={handleCreateDefaultList}>
-              <Button type="submit" className="bg-purple-600 hover:bg-purple-500 text-white mt-2 shadow-lg shadow-purple-900/20">
-                <Plus className="w-4 h-4 mr-2" /> Inicjuj listę zadań
-              </Button>
-            </form>
+            <CreateTaskListDialog defaultProjectId={project.id} />
           </div>
         )}
       </section>

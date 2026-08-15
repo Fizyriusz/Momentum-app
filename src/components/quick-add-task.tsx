@@ -1,16 +1,24 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { createTask } from "@/lib/services/tasks";
+import { createTask, useTaskLists } from "@/lib/services/tasks";
 import { createNote } from "@/lib/services/notes";
 import { createPlace } from "@/lib/services/places";
 import { createProject, useProjects } from "@/lib/services/projects";
 import { Geolocation } from "@capacitor/geolocation";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Plus, Sun, Sunset, CalendarX, FileText, CheckSquare, MapPin, Loader2, Lightbulb, Briefcase } from "lucide-react";
+import { Plus, Sun, Sunset, CalendarX, FileText, CheckSquare, MapPin, Loader2, Lightbulb, Briefcase, ListTodo } from "lucide-react";
 
-export function QuickAddTask({ projectId, onSuccess }: { projectId?: string, onSuccess?: () => void }) {
+export function QuickAddTask({ 
+  projectId, 
+  taskListId, 
+  onSuccess 
+}: { 
+  projectId?: string, 
+  taskListId?: string, 
+  onSuccess?: () => void 
+}) {
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [mode, setMode] = useState<"TASK" | "NOTE" | "IDEA">("TASK");
@@ -19,9 +27,12 @@ export function QuickAddTask({ projectId, onSuccess }: { projectId?: string, onS
   const [locating, setLocating] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   
-  // Pobieramy wszystkie aktywne projekty do wyboru
+  // Pobieramy aktywne projekty oraz listy zadań do wyboru
   const { projects } = useProjects("ACTIVE");
+  const { taskLists } = useTaskLists();
+  
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projectId || "");
+  const [selectedTaskListId, setSelectedTaskListId] = useState<string>(taskListId || "");
 
   async function handleLocateHere() {
     setLocating(true);
@@ -46,20 +57,29 @@ export function QuickAddTask({ projectId, onSuccess }: { projectId?: string, onS
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim()) return;
+    const cleanTitle = title.trim();
+    if (!cleanTitle) return;
 
     startTransition(async () => {
       if (mode === "TASK") {
-        await createTask(title, undefined, dueDate || undefined, selectedPlaceId || undefined, selectedProjectId || undefined);
+        await createTask(
+          cleanTitle, 
+          taskListId || selectedTaskListId || undefined, 
+          dueDate || undefined, 
+          selectedPlaceId || undefined, 
+          projectId || selectedProjectId || undefined
+        );
       } else if (mode === "NOTE") {
-        await createNote({ title: title, content: "", projectId: selectedProjectId || undefined });
+        await createNote({ title: cleanTitle, content: "", projectId: selectedProjectId || undefined });
       } else if (mode === "IDEA") {
-        await createProject(title, "INBOX");
+        await createProject(cleanTitle, "INBOX");
       }
+
       setTitle("");
       setDueDate(null);
       setSelectedPlaceId(null);
-      if (!projectId) setSelectedProjectId(""); // Reset if not constrained by props
+      if (!projectId) setSelectedProjectId("");
+      if (!taskListId) setSelectedTaskListId("");
       if (onSuccess) onSuccess();
     });
   }
@@ -78,6 +98,8 @@ export function QuickAddTask({ projectId, onSuccess }: { projectId?: string, onS
     tomorrow.setDate(tomorrow.getDate() + 1);
     return dueDate.toDateString() === tomorrow.toDateString();
   })();
+
+  const activeTaskLists = taskLists.filter(l => !l.isArchived);
 
   return (
     <div className="flex flex-col gap-2 w-full mb-4">
@@ -138,9 +160,29 @@ export function QuickAddTask({ projectId, onSuccess }: { projectId?: string, onS
           </Button>
         </div>
 
-        {/* Opcje dodatkowe (Projekt i Lokalizacja) */}
+        {/* Opcje dodatkowe */}
         {mode !== "IDEA" && (
           <div className="flex flex-wrap items-center gap-2 px-1">
+            {/* Wybór Listy Zadań */}
+            {mode === "TASK" && !taskListId && activeTaskLists.length > 0 && (
+              <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-md overflow-hidden">
+                <div className="pl-2">
+                  <ListTodo className="w-3 h-3 text-zinc-500" />
+                </div>
+                <select 
+                  value={selectedTaskListId}
+                  onChange={e => setSelectedTaskListId(e.target.value)}
+                  className="bg-transparent text-[10px] font-bold text-zinc-400 py-1.5 px-2 focus:outline-none max-w-[130px]"
+                >
+                  <option value="">Lista: Domyślna</option>
+                  {activeTaskLists.map(list => (
+                    <option key={list.id} value={list.id}>{list.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Wybór Projektu */}
             {!projectId && (
               <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-md overflow-hidden">
                 <div className="pl-2">
