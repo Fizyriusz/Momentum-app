@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { addMinutesToProject } from "@/lib/services/timeLogs";
-import { updateProject as updateProjectDetails } from "@/lib/services/projects";
+import { updateProject as updateProjectDetails, pauseProject, sendProjectToInbox, activateProject, useProjects, MAX_ACTIVE_PROJECTS, Project } from "@/lib/services/projects";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Play, Square, Briefcase, BookOpen, Code, Layers, History, Edit2, Save, Target } from "lucide-react";
+import { Play, Square, Briefcase, BookOpen, Code, Layers, History, Edit2, Save, Target, Pause, Archive, AlertCircle, RefreshCcw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,23 +18,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import ReactMarkdown from "react-markdown";
+import { useRouter } from "next/navigation";
 
 type TimeLog = {
   id: string;
   minutes: number;
   createdAt: number;
-};
-
-export type Project = {
-  id: string;
-  title: string;
-  targetMinutes: number;
-  period: string;
-  loggedMinutes: number;
-  icon: string;
-  goal?: string | null;
-  description?: string | null;
-  status: string;
 };
 
 const IconMap: Record<string, React.ElementType> = {
@@ -53,9 +42,11 @@ const PeriodLabels: Record<string, string> = {
 };
 
 export function ProjectCard({ project, timeLogs = [] }: { project: Project, timeLogs?: TimeLog[] }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isTracking, setIsTracking] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [limitAlertOpen, setLimitAlertOpen] = useState(false);
   
   // Detale projektu
   const [isEditingDetails, setIsEditingDetails] = useState(false);
@@ -63,6 +54,9 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
   const [editedDescription, setEditedDescription] = useState(project.description || "");
   const [editedTargetHours, setEditedTargetHours] = useState(Math.floor(project.targetMinutes / 60));
   const [editedPeriod, setEditedPeriod] = useState(project.period);
+
+  const { projects: activeProjects } = useProjects("ACTIVE");
+  const isLimitReached = activeProjects.length >= MAX_ACTIVE_PROJECTS;
 
   const storageKey = `project-timer-${project.id}`;
 
@@ -86,14 +80,14 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
         setElapsedSeconds(prev => prev + 1);
         
         if (elapsedSeconds % 5 === 0) {
-           const stored = localStorage.getItem(storageKey);
-           if (stored) {
-             const data = JSON.parse(stored);
-             localStorage.setItem(storageKey, JSON.stringify({
-               ...data,
-               accumulated: elapsedSeconds
-             }));
-           }
+            const stored = localStorage.getItem(storageKey);
+            if (stored) {
+              const data = JSON.parse(stored);
+              localStorage.setItem(storageKey, JSON.stringify({
+                ...data,
+                accumulated: elapsedSeconds
+              }));
+            }
         }
       }, 1000);
     }
@@ -143,6 +137,36 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
     });
   }
 
+  function handlePauseProject() {
+    if (isTracking) handleStop();
+    startTransition(async () => {
+      await pauseProject(project.id);
+    });
+  }
+
+  function handleSendToInbox() {
+    if (!confirm("Czy na pewno chcesz przenieść ten projekt z powrotem do Inkubatora?")) return;
+    if (isTracking) handleStop();
+    startTransition(async () => {
+      await sendProjectToInbox(project.id);
+      router.push("/projects");
+    });
+  }
+
+  function handleResumeProject() {
+    if (isLimitReached) {
+      setLimitAlertOpen(true);
+      return;
+    }
+    startTransition(async () => {
+      try {
+        await activateProject(project.id);
+      } catch (e) {
+        setLimitAlertOpen(true);
+      }
+    });
+  }
+
   const IconComponent = IconMap[project.icon] || Briefcase;
   
   const currentTotalMinutes = project.loggedMinutes;
@@ -162,12 +186,14 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
   };
 
   const isCompleted = currentTotalMinutes >= project.targetMinutes;
+  const isPaused = project.status === "PAUSED";
 
   return (
     <Card className={`
       relative overflow-hidden transition-all duration-500
       bg-zinc-900/40 backdrop-blur-md border-zinc-800/50
       ${isTracking ? 'ring-1 ring-purple-500/50 shadow-lg shadow-purple-500/10' : ''}
+      ${isPaused ? 'opacity-90 border-amber-500/20' : ''}
       ${isCompleted ? 'border-purple-500/30' : ''}
     `}>
       {isTracking && (
@@ -176,16 +202,24 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
       
       <CardHeader className="pb-2 pt-4 px-4 flex flex-row items-start justify-between space-y-0">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${isTracking ? 'bg-purple-500/20 text-purple-400' : 'bg-zinc-800 text-zinc-400'}`}>
+          <div className={`p-2 rounded-lg ${isTracking ? 'bg-purple-500/20 text-purple-400' : isPaused ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-800 text-zinc-400'}`}>
             <IconComponent className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-zinc-100 text-lg">{project.title}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-zinc-100 text-lg">{project.title}</h3>
+              {isPaused && (
+                <Badge variant="outline" className="border-amber-500/30 text-amber-400 bg-amber-500/10 text-[10px] uppercase font-bold">
+                  Wstrzymany
+                </Badge>
+              )}
+            </div>
             <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-0.5">
               Budżet na {PeriodLabels[project.period]?.toLowerCase() || project.period.toLowerCase()}
             </p>
           </div>
         </div>
+        
         <div className="flex items-center gap-2">
           {isCompleted && (
             <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 border-none">
@@ -286,19 +320,77 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                  <p className="text-sm text-zinc-600 italic">Brak opisu projektu...</p>
                )}
                
-               <Button
-                 variant="outline"
-                 size="sm"
-                 className="mt-4 border-zinc-700 bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs h-8"
-                 onClick={() => {
-                   setEditedGoal(project.goal || "");
-                   setEditedDescription(project.description || "");
-                   setEditedTargetHours(Math.floor(project.targetMinutes / 60));
-                   setIsEditingDetails(true);
-                 }}
-               >
-                 <Edit2 className="w-3 h-3 mr-1.5" /> Edytuj detale projektu
-               </Button>
+               <div className="flex flex-wrap items-center gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-zinc-700 bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs h-8"
+                  onClick={() => {
+                    setEditedGoal(project.goal || "");
+                    setEditedDescription(project.description || "");
+                    setEditedTargetHours(Math.floor(project.targetMinutes / 60));
+                    setIsEditingDetails(true);
+                  }}
+                >
+                  <Edit2 className="w-3 h-3 mr-1.5" /> Edytuj detale
+                </Button>
+
+                {project.status === "ACTIVE" ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePauseProject}
+                      disabled={isPending}
+                      className="border-zinc-800 bg-zinc-900/50 hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/30 text-zinc-400 text-xs h-8"
+                    >
+                      <Pause className="w-3 h-3 mr-1.5 text-amber-400" /> Wstrzymaj projekt
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSendToInbox}
+                      disabled={isPending}
+                      className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-300 text-xs h-8"
+                    >
+                      <Archive className="w-3 h-3 mr-1.5" /> Cofnij do Inkubatora
+                    </Button>
+                  </>
+                ) : isPaused ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleResumeProject}
+                      disabled={isPending}
+                      className="border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 text-xs h-8 font-bold"
+                    >
+                      <RefreshCcw className="w-3 h-3 mr-1.5" /> Wznów projekt
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSendToInbox}
+                      disabled={isPending}
+                      className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-300 text-xs h-8"
+                    >
+                      <Archive className="w-3 h-3 mr-1.5" /> Cofnij do Inkubatora
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResumeProject}
+                    disabled={isPending}
+                    className="border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 text-xs h-8 font-bold"
+                  >
+                    <Play className="w-3 h-3 mr-1.5" /> Aktywuj projekt
+                  </Button>
+                )}
+               </div>
             </div>
           )}
         </div>
@@ -333,17 +425,17 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
             <Button 
               onClick={handleStart}
               className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 h-12 transition-colors font-bold"
-              disabled={isPending || isCompleted}
+              disabled={isPending || isCompleted || isPaused}
             >
               <Play className="w-4 h-4 mr-2" fill="currentColor" />
-              Start
+              {isPaused ? "Projekt Wstrzymany" : "Start"}
             </Button>
           )}
 
           <Button 
             variant="outline" 
             onClick={handleQuickBlock}
-            disabled={isTracking || isPending || isCompleted}
+            disabled={isTracking || isPending || isCompleted || isPaused}
             className="h-12 px-4 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white shrink-0 font-bold text-xs"
             title="+25 min blok czasu"
           >
@@ -355,7 +447,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
             <DialogTrigger 
               render={
                 <Button 
-                  variant="outline"
+                  variant="outline" 
                   className="h-12 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white shrink-0 font-bold"
                   title="Historia Sesji"
                 >
@@ -401,6 +493,28 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
 
         </div>
       </CardContent>
+
+      {/* Modal Alert Limitu */}
+      <Dialog open={limitAlertOpen} onOpenChange={setLimitAlertOpen}>
+        <DialogContent className="bg-zinc-950 border border-zinc-800 text-zinc-100 sm:max-w-md w-[90vw] rounded-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-400">
+              <AlertCircle className="w-5 h-5" />
+              Limit 2 aktywnych projektów
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 my-2 text-sm text-zinc-300">
+            <p>
+              Masz już <strong>2 aktywne projekty</strong>. Aby wznowić ten projekt, musisz najpierw wstrzymać lub cofnąć do Inkubatora jeden z aktualnie prowadzonych projektów.
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button onClick={() => setLimitAlertOpen(false)} className="bg-purple-600 hover:bg-purple-500 text-white">
+                Rozumiem
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

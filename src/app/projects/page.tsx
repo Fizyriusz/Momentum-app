@@ -6,14 +6,15 @@ import { ProjectCard } from "@/components/project-card";
 import { TaskList } from "@/components/task-list";
 import { QuickAddTask } from "@/components/quick-add-task";
 import { Button } from "@/components/ui/button";
-import { Plus, ListTodo, Briefcase } from "lucide-react";
+import { Plus, ListTodo, Briefcase, Pause, Lightbulb, AlertCircle } from "lucide-react";
 import { NotesManager } from "@/components/notes-manager";
-import { useProject, useProjects } from "@/lib/services/projects";
+import { useProject, useProjects, MAX_ACTIVE_PROJECTS } from "@/lib/services/projects";
 import { useProjectTasks, createTaskList } from "@/lib/services/tasks";
 import { useNotes } from "@/lib/services/notes";
 import { useTimeLogs } from "@/lib/services/timeLogs";
 import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 function ProjectDetailsView({ id }: { id: string }) {
   const { project, loading: projectLoading } = useProject(id);
@@ -88,29 +89,53 @@ function ProjectDetailsView({ id }: { id: string }) {
 }
 
 function ProjectsOverview() {
-  const { projects, loading } = useProjects("ACTIVE");
+  const { projects: activeProjects, loading: activeLoading } = useProjects("ACTIVE");
+  const { projects: pausedProjects, loading: pausedLoading } = useProjects("PAUSED");
+
+  const isLoading = activeLoading || pausedLoading;
 
   return (
-    <main className="min-h-full px-4 py-8 lg:px-12 max-w-4xl mx-auto flex flex-col gap-6">
-      <header className="flex items-center gap-3">
-        <div className="p-3 bg-purple-500/10 rounded-xl">
-          <Briefcase className="w-6 h-6 text-purple-400" />
+    <main className="min-h-full px-4 py-8 lg:px-12 max-w-4xl mx-auto flex flex-col gap-8">
+      <header className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-purple-500/10 rounded-xl">
+            <Briefcase className="w-6 h-6 text-purple-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">Projekty</h1>
+            <p className="text-zinc-500 text-sm font-medium mt-0.5">Obszary robocze i zarządzanie realizacją celów.</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">Projekty</h1>
-          <p className="text-zinc-500 text-sm font-medium mt-0.5">Wszystkie aktywne projekty i obszary robocze.</p>
+
+        <div className="text-right">
+          <span className="text-xs font-bold text-zinc-400 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-lg">
+            Aktywne: <strong className={activeProjects.length >= MAX_ACTIVE_PROJECTS ? "text-amber-400" : "text-purple-400"}>{activeProjects.length}/{MAX_ACTIVE_PROJECTS}</strong>
+          </span>
         </div>
       </header>
 
-      <section className="mt-4">
-        {loading ? (
+      {/* Sekcja 1: Aktywne Projekty */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-purple-500" />
+            Aktywne Projekty ({activeProjects.length}/{MAX_ACTIVE_PROJECTS})
+          </h2>
+          {activeProjects.length < MAX_ACTIVE_PROJECTS && (
+            <Link href="/incubator" className="text-xs font-bold text-purple-400 hover:text-purple-300">
+              + Aktywuj z Inkubatora
+            </Link>
+          )}
+        </div>
+
+        {isLoading ? (
           <div className="text-zinc-500 text-sm p-4 text-center">Ładowanie...</div>
-        ) : projects.length === 0 ? (
-          <div className="text-center p-12 bg-zinc-900/30 border border-dashed border-zinc-800 rounded-2xl">
-            <Briefcase className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-zinc-300">Brak aktywnych projektów</h3>
-            <p className="text-zinc-500 text-sm mt-2">
-              Przejdź do Inkubatora, aby dodać lub aktywować projekt.
+        ) : activeProjects.length === 0 ? (
+          <div className="text-center p-10 bg-zinc-900/30 border border-dashed border-zinc-800 rounded-2xl">
+            <Briefcase className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-zinc-300">Brak aktywnych projektów</h3>
+            <p className="text-zinc-500 text-xs mt-1">
+              Przejdź do Inkubatora, aby dodać lub aktywować projekt do realizacji.
             </p>
             <Link href="/incubator" className="inline-block mt-4 text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-4 py-2 rounded-xl hover:bg-purple-500/20 transition-colors">
               Przejdź do Inkubatora
@@ -118,7 +143,7 @@ function ProjectsOverview() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {projects.map(project => {
+            {activeProjects.map(project => {
               const percent = Math.min(100, Math.round(((project.loggedMinutes || 0) / (project.targetMinutes || 1)) * 100));
               return (
                 <Link
@@ -127,7 +152,7 @@ function ProjectsOverview() {
                   className="bg-zinc-900/40 border border-zinc-800/50 hover:bg-zinc-800/60 p-5 rounded-2xl transition-all duration-200 block group"
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-bold text-lg text-zinc-100 group-hover:text-purple-300 transition-colors">{project.title}</h3>
+                    <h3 className="font-bold text-base text-zinc-100 group-hover:text-purple-300 transition-colors">{project.title}</h3>
                     <span className="text-xs font-bold text-zinc-400">{percent}%</span>
                   </div>
                   {project.goal && (
@@ -139,6 +164,58 @@ function ProjectsOverview() {
             })}
           </div>
         )}
+      </section>
+
+      {/* Sekcja 2: Wstrzymane Projekty (PAUSED) */}
+      {pausedProjects.length > 0 && (
+        <section className="space-y-4 pt-4 border-t border-zinc-800/40">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+            <Pause className="w-3.5 h-3.5 text-amber-500" />
+            Wstrzymane Projekty ({pausedProjects.length})
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {pausedProjects.map(project => {
+              const percent = Math.min(100, Math.round(((project.loggedMinutes || 0) / (project.targetMinutes || 1)) * 100));
+              return (
+                <Link
+                  key={project.id}
+                  href={`/projects?id=${project.id}`}
+                  className="bg-zinc-900/20 border border-zinc-800/40 hover:bg-zinc-900/50 p-5 rounded-2xl transition-all duration-200 block group opacity-80 hover:opacity-100"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-bold text-sm text-zinc-300 group-hover:text-zinc-100 transition-colors">{project.title}</h3>
+                    <Badge variant="outline" className="border-amber-500/30 text-amber-400 bg-amber-500/10 text-[10px] uppercase font-bold">
+                      Wstrzymany
+                    </Badge>
+                  </div>
+                  {project.goal && (
+                    <p className="text-xs text-zinc-500 line-clamp-1 mb-3">{project.goal}</p>
+                  )}
+                  <Progress value={percent} className="h-1.5 bg-zinc-800" indicatorClassName="bg-amber-500" />
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Skrót do Inkubatora */}
+      <section className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-yellow-500/10 rounded-xl">
+            <Lightbulb className="w-5 h-5 text-yellow-500" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-zinc-200">Inkubator Projektów</h3>
+            <p className="text-xs text-zinc-500">Poczekalnia na nowe koncepcje i pomysły.</p>
+          </div>
+        </div>
+        <Link href="/incubator">
+          <Button variant="outline" size="sm" className="border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-xs text-zinc-200">
+            Przejdź do Inkubatora
+          </Button>
+        </Link>
       </section>
     </main>
   );

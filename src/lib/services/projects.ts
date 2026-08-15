@@ -11,7 +11,8 @@ import {
   updateDoc, 
   deleteDoc, 
   doc, 
-  serverTimestamp 
+  serverTimestamp,
+  getDocs
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
@@ -19,10 +20,12 @@ const getUserProjectsCol = () => collection(db, "users", auth.currentUser?.uid |
 const getUserProjectDoc = (id: string) => doc(db, "users", auth.currentUser?.uid || "unauth", "projects", id);
 
 // --- Typy ---
+export type ProjectStatus = "ACTIVE" | "INBOX" | "PAUSED";
+
 export type Project = {
   id: string;
   title: string;
-  status: "ACTIVE" | "INBOX";
+  status: ProjectStatus;
   targetMinutes: number;
   period: string;
   loggedMinutes: number;
@@ -35,9 +38,11 @@ export type Project = {
   createdAt: any;
 };
 
+export const MAX_ACTIVE_PROJECTS = 2;
+
 // --- Hooki do Odczytu ---
 
-export function useProjects(status?: "ACTIVE" | "INBOX") {
+export function useProjects(status?: ProjectStatus) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -85,8 +90,16 @@ export function useProject(id: string) {
 
 // --- Akcje Mutacji ---
 
-export async function createProject(title: string, status: "ACTIVE" | "INBOX" = "ACTIVE", category?: string) {
+export async function createProject(title: string, status: ProjectStatus = "INBOX", category?: string) {
   if (!auth.currentUser) return;
+
+  if (status === "ACTIVE") {
+    const activeSnapshot = await getDocs(query(getUserProjectsCol(), where("status", "==", "ACTIVE")));
+    if (activeSnapshot.size >= MAX_ACTIVE_PROJECTS) {
+      throw new Error(`Osiągnięto limit ${MAX_ACTIVE_PROJECTS} aktywnych projektów.`);
+    }
+  }
+
   return addDoc(getUserProjectsCol(), {
     title,
     status,
@@ -111,10 +124,32 @@ export async function deleteProject(id: string) {
   return deleteDoc(getUserProjectDoc(id));
 }
 
-// Aktywowanie z Inkubatora
-export async function activateProject(id: string) {
+// Zmiana statusu projektu
+export async function setProjectStatus(id: string, status: ProjectStatus) {
   if (!auth.currentUser) return;
+
+  if (status === "ACTIVE") {
+    const activeSnapshot = await getDocs(query(getUserProjectsCol(), where("status", "==", "ACTIVE")));
+    // Jeśli ten dokument już jest aktywny, to nie liczymy go jako "nowy"
+    const currentDoc = activeSnapshot.docs.find(d => d.id === id);
+    if (!currentDoc && activeSnapshot.size >= MAX_ACTIVE_PROJECTS) {
+      throw new Error(`Osiągnięto limit ${MAX_ACTIVE_PROJECTS} aktywnych projektów. Ukończ lub wstrzymaj obecny projekt przed aktywacją nowego.`);
+    }
+  }
+
   return updateDoc(getUserProjectDoc(id), {
-    status: "ACTIVE"
+    status
   });
+}
+
+export async function activateProject(id: string) {
+  return setProjectStatus(id, "ACTIVE");
+}
+
+export async function pauseProject(id: string) {
+  return setProjectStatus(id, "PAUSED");
+}
+
+export async function sendProjectToInbox(id: string) {
+  return setProjectStatus(id, "INBOX");
 }
