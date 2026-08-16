@@ -81,7 +81,11 @@ export function useProject(id: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id || !auth.currentUser) return;
+    if (!id || !auth.currentUser) {
+      setProject(null);
+      setLoading(false);
+      return;
+    }
     const unsubscribe = onSnapshot(getUserProjectDoc(id), (docSnap) => {
       if (docSnap.exists()) {
         setProject({ id: docSnap.id, ...docSnap.data() } as Project);

@@ -10,11 +10,11 @@ export default function ChangelogPage() {
 
       <section className="space-y-8">
         
-        {/* v0.7.0 - AKTUALNA WERSJA */}
+        {/* v0.7.2 - AKTUALNA WERSJA */}
         <div className="bg-zinc-900/40 border border-purple-500/30 rounded-2xl p-6 backdrop-blur-md relative overflow-hidden">
           <div className="flex items-center gap-3 mb-6">
             <h2 className="text-xl font-black text-zinc-100 flex items-center gap-2">
-              <span className="text-purple-400">v0.7.0</span> - Tablica Kanban z Własnymi Kolumnami & Przełącznik Widoków
+              <span className="text-purple-400">v0.7.2</span> - Stabilizacja Stanu Przełączania List
             </h2>
             <span className="text-xs font-bold bg-purple-500/20 text-purple-300 px-2.5 py-1 rounded-md border border-purple-500/30">
               Aktualna wersja
@@ -23,16 +23,39 @@ export default function ChangelogPage() {
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Zaawansowana Tablica Kanban (Faza 1)</h3>
+              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Reaktywność & Zarządzanie Stanem</h3>
               <ul className="space-y-2 text-zinc-300 text-sm list-disc list-inside">
-                <li><strong>Własne Kolumny Kanban:</strong> Możliwość tworzenia, edycji nazwy i usuwania dowolnych kolumn per lista (np. <em>Pomysły</em> ➔ <em>Scenariusz</em> ➔ <em>Montaż</em> ➔ <em>Publikacja</em>).</li>
-                <li><strong>Oznaczanie Kolumn Ukończenia:</strong> Każda kolumna może być oznaczona jako stan docelowy/ukończony (`isCompleted`), co automatycznie aktualizuje status zadania.</li>
-                <li><strong>Przeciąganie & Mobilne Przesuwanie:</strong> Obsługa natywnego Drag & Drop oraz intuicyjnych strzałek przesuwania między kolumnami na smartfonach.</li>
-                <li><strong>Przełącznik Widoków (Lista vs Kanban):</strong> Dostępny w Listach Zadań (`/lists?id=...`) oraz w Projektach (`/projects?id=...`). Wybrany tryb jest zapamiętywany w przeglądarce.</li>
-                <li><strong>Czysty Inbox:</strong> Zgodnie z zasadą prostoty, Inbox pozostaje nienaruszony jako prosta, szybka lista zadań.</li>
+                <li><strong>Natychmiastowe Odpinanie List:</strong> Poprawiono błąd zachowywania starego przypisania do projektu przy nawigacji między różnymi listami bez projektu (naprawiono resetowanie stanu hooków).</li>
+                <li><strong>Rozwiązanie Błędu Globalnego Podpięcia:</strong> Usunięto problem, w którym odpięcie jednej listy sprawiało wrażenie przypisywania wszystkich list do projektów w widokach szczegółów.</li>
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* v0.7.1 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-400">v0.7.1</span> - Poprawki List Zadań, Kaskadowe Odpinanie & Reaktywne Menu
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
+            <li>Natychmiastowe odpinanie list od projektów – w 100% reaktywne.</li>
+            <li>Kaskadowa synchronizacja zadań w odpinanej liście.</li>
+            <li>Naprawa zacinającego się menu przy użyciu <code>useSearchParams</code>.</li>
+          </ul>
+        </div>
+
+
+
+        {/* v0.7.0 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-400">v0.7.0</span> - Tablica Kanban z Własnymi Kolumnami & Przełącznik Widoków
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
+            <li>Własne kolumny Kanban z opcją tworzenia, edycji i oznaczania stanu ukończenia.</li>
+            <li>Przeciąganie Drag & Drop oraz szybkie przesuwanie strzałkami na smartfonach.</li>
+            <li>Przełącznik widoków (Lista vs Kanban) w Listach i Projektach z zapamiętywaniem stanu.</li>
+          </ul>
         </div>
 
         {/* v0.6.8 */}

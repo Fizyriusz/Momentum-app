@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { 
   Inbox, 
   LayoutDashboard, 
@@ -36,6 +36,10 @@ type Tag = {
 
 export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], projects?: Project[] }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentListId = searchParams.get("id");
+  const currentTagName = searchParams.get("name");
+
   const [isTagsOpen, setIsTagsOpen] = useState(false);
   const [isProjectsOpen, setIsProjectsOpen] = useState(true);
   const [isListsOpen, setIsListsOpen] = useState(true);
@@ -211,7 +215,7 @@ export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], project
               ) : (
                 activeTaskLists.map(list => {
                   const href = `/lists?id=${list.id}`;
-                  const isActive = pathname === href || (pathname === '/lists' && typeof window !== 'undefined' && window.location.search.includes(list.id));
+                  const isActive = pathname === "/lists" && currentListId === list.id;
                   const count = uncompletedTasks.filter(t => t.taskListId === list.id).length;
                   const IconComp = (list.icon && LIST_ICONS[list.icon]) ? LIST_ICONS[list.icon] : ListTodo;
                   const colorObj = LIST_COLORS.find(c => c.id === list.color) || LIST_COLORS[0];
@@ -260,7 +264,11 @@ export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], project
                         <Link
                           key={list.id}
                           href={`/lists?id=${list.id}`}
-                          className="flex items-center justify-between px-3 py-1.5 rounded-lg text-xs text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40"
+                          className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition-colors ${
+                            pathname === "/lists" && currentListId === list.id 
+                              ? "bg-purple-500/10 text-purple-400 font-bold" 
+                              : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/40"
+                          }`}
                         >
                           <span className="truncate">{list.name}</span>
                         </Link>
@@ -293,7 +301,7 @@ export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], project
               ) : (
                 projects.map(project => {
                   const href = `/projects?id=${project.id}`;
-                  const isActive = pathname === href || (pathname === '/projects' && typeof window !== 'undefined' && window.location.search.includes(project.id));
+                  const isActive = pathname === "/projects" && currentListId === project.id;
                   return (
                     <Link
                       key={project.id}
@@ -372,7 +380,7 @@ export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], project
               ) : (
                 tags.map(tag => {
                   const href = `/tag?name=${encodeURIComponent(tag.name)}`;
-                  const isActive = pathname === href;
+                  const isActive = pathname === "/tag" && currentTagName === tag.name;
                   return (
                     <Link
                       key={tag.id}
@@ -419,7 +427,7 @@ export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], project
 
       <div className="p-4 border-t border-zinc-800/50 shrink-0">
         <Link href="/changelog" className="flex items-center justify-between text-xs font-medium text-zinc-500 hover:text-zinc-300 transition-colors group">
-          <span>v0.7.0</span>
+          <span>v0.7.2</span>
           <span className="flex items-center gap-1">
             Changelog
             <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />

@@ -78,7 +78,11 @@ export function useTasks(taskListIdOrProjectId?: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth.currentUser) return;
+    if (!auth.currentUser) {
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
     let q = query(getUserTasksCol());
     if (taskListIdOrProjectId) {
       q = query(
@@ -121,7 +125,11 @@ export function useTaskLists(projectId?: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth.currentUser) return;
+    if (!auth.currentUser) {
+      setTaskLists([]);
+      setLoading(false);
+      return;
+    }
     let q = query(getUserTaskListsCol());
     if (projectId) {
       q = query(getUserTaskListsCol(), where("projectId", "==", projectId));
@@ -154,7 +162,11 @@ export function useTaskList(id: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id || !auth.currentUser) return;
+    if (!id || !auth.currentUser) {
+      setTaskList(null);
+      setLoading(false);
+      return;
+    }
     const unsubscribe = onSnapshot(getUserTaskListDoc(id), (docSnap) => {
       if (docSnap.exists()) {
         setTaskList({ id: docSnap.id, ...docSnap.data() } as TaskList);
@@ -175,43 +187,40 @@ export function useProjectTasks(projectId: string) {
   const [loadingTasks, setLoadingTasks] = useState(true);
 
   useEffect(() => {
-    if (!auth.currentUser) {
+    if (!auth.currentUser || !projectId) {
       setTasks([]);
       setLoadingTasks(false);
       return;
     }
 
-    if (taskLists.length === 0) {
-      const qDirect = query(getUserTasksCol(), where("projectId", "==", projectId));
-      const unsubDirect = onSnapshot(qDirect, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
-        data.sort((a, b) => {
-          const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (typeof a.createdAt === 'number' ? a.createdAt : 0);
-          const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (typeof b.createdAt === 'number' ? b.createdAt : 0);
-          return timeB - timeA;
-        });
-        setTasks(data);
-        setLoadingTasks(false);
-      }, () => setLoadingTasks(false));
-      return () => unsubDirect();
-    }
-
-    const listIds = taskLists.map(p => p.id);
-    if (listIds.length > 10) {
-      listIds.length = 10;
-    }
-
-    const q = query(getUserTasksCol(), where("taskListId", "in", listIds));
+    const q = query(getUserTasksCol());
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Task));
-      data.sort((a, b) => {
+      const allTasks = snapshot.docs.map(doc => {
+        const d = doc.data();
+        return {
+          id: doc.id,
+          ...d,
+          taskListId: d.taskListId || d.projectId || null
+        } as Task;
+      });
+
+      const listIds = new Set(taskLists.map(l => l.id));
+      const filtered = allTasks.filter(t => 
+        (t.taskListId && listIds.has(t.taskListId)) || (t.projectId === projectId)
+      );
+
+      filtered.sort((a, b) => {
         const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (typeof a.createdAt === 'number' ? a.createdAt : 0);
         const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (typeof b.createdAt === 'number' ? b.createdAt : 0);
         return timeB - timeA;
       });
-      setTasks(data);
+
+      setTasks(filtered);
       setLoadingTasks(false);
-    }, () => setLoadingTasks(false));
+    }, (error) => {
+      console.error("Error in useProjectTasks:", error);
+      setLoadingTasks(false);
+    });
 
     return () => unsubscribe();
   }, [taskLists, projectId, auth.currentUser?.uid]);
