@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "cap:sync": "npx cap sync android",
+    "build:android": "next build && npx cap sync android"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
