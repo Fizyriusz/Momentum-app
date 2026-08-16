@@ -270,7 +270,20 @@ export const createProjectList = createTaskList;
 
 export async function updateTaskList(id: string, data: Partial<TaskList>) {
   if (!auth.currentUser) return;
-  return updateDoc(getUserTaskListDoc(id), data);
+  
+  // Aktualizacja samej listy
+  await updateDoc(getUserTaskListDoc(id), data);
+
+  // Jeśli zmieniono przypisanie do projektu, zaktualizuj wszystkie zadania należące do tej listy
+  if (data.projectId !== undefined) {
+    const tasksSnapshot = await getDocs(query(getUserTasksCol(), where("taskListId", "==", id)));
+    const updatePromises = tasksSnapshot.docs.map(taskDoc => 
+      updateDoc(doc(db, "users", auth.currentUser!.uid, "tasks", taskDoc.id), {
+        projectId: data.projectId || null
+      })
+    );
+    await Promise.all(updatePromises);
+  }
 }
 
 export async function updateTaskListColumns(id: string, columns: KanbanColumn[]) {

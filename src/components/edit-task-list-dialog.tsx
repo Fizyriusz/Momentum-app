@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { updateTaskList, deleteTaskList, TaskList } from "@/lib/services/tasks";
 import { useProjects } from "@/lib/services/projects";
 import { 
@@ -34,7 +34,15 @@ export function EditTaskListDialog({
   const [selectedColor, setSelectedColor] = useState(taskList.color || "purple");
   const [selectedProjectId, setSelectedProjectId] = useState<string>(taskList.projectId || "");
 
-  const { projects: activeProjects } = useProjects("ACTIVE");
+  const { projects: allProjects } = useProjects();
+
+  // Synchronizacja stanu przy otwarciu okna lub zmianie propsów
+  useEffect(() => {
+    setName(taskList.name);
+    setSelectedIcon(taskList.icon || "List");
+    setSelectedColor(taskList.color || "purple");
+    setSelectedProjectId(taskList.projectId || "");
+  }, [taskList, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +52,7 @@ export function EditTaskListDialog({
     startTransition(async () => {
       await updateTaskList(taskList.id, {
         name: cleanName,
-        projectId: selectedProjectId || null,
+        projectId: selectedProjectId ? selectedProjectId : null,
         icon: selectedIcon,
         color: selectedColor
       });
@@ -174,9 +182,9 @@ export function EditTaskListDialog({
               className="w-full h-10 px-3 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="">Brak (Lista ogólna / niezależna)</option>
-              {activeProjects.map((p) => (
+              {allProjects.map((p) => (
                 <option key={p.id} value={p.id}>
-                  Projekt: {p.title}
+                  Projekt: {p.title} {p.status === "PAUSED" ? "(Wstrzymany)" : ""}
                 </option>
               ))}
             </select>
