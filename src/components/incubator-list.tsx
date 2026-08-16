@@ -1,20 +1,29 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { activateProject, updateProject as updateProjectDetails, deleteProject, Project, useProjects, MAX_ACTIVE_PROJECTS } from "@/lib/services/projects";
-import { Lightbulb, Play, Settings2, Save, AlertCircle, Lock, Trash2 } from "lucide-react";
+import { Lightbulb, Play, Settings2, Save, AlertCircle, Lock, Trash2, Tag, Filter } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export function IncubatorList({ projects }: { projects: Project[] }) {
+export function IncubatorList({ 
+  projects,
+  existingCategories = []
+}: { 
+  projects: Project[],
+  existingCategories?: string[]
+}) {
   const [isPending, startTransition] = useTransition();
   const [openModalId, setOpenModalId] = useState<string | null>(null);
   const [limitAlertOpen, setLimitAlertOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
+  // Stan wybranego filtra kategorii
+  const [selectedFilterCategory, setSelectedFilterCategory] = useState<string>("ALL");
+
   const { projects: activeProjects } = useProjects("ACTIVE");
   const activeCount = activeProjects.length;
   const isLimitReached = activeCount >= MAX_ACTIVE_PROJECTS;
@@ -26,6 +35,15 @@ export function IncubatorList({ projects }: { projects: Project[] }) {
   const [editedTargetHours, setEditedTargetHours] = useState(0);
   const [editedPeriod, setEditedPeriod] = useState("WEEK");
   const [editedCategory, setEditedCategory] = useState("");
+
+  // Połączone kategorie (z przekazanych + obecnych w projektach)
+  const allCategories = useMemo(() => {
+    const set = new Set<string>(existingCategories);
+    projects.forEach(p => {
+      if (p.category?.trim()) set.add(p.category.trim());
+    });
+    return Array.from(set).sort();
+  }, [existingCategories, projects]);
 
   function openModal(project: Project) {
     setEditedTitle(project.title);
@@ -45,7 +63,7 @@ export function IncubatorList({ projects }: { projects: Project[] }) {
         description: editedDescription || null,
         targetMinutes: (editedTargetHours || 0) * 60,
         period: editedPeriod,
-        category: editedCategory || null
+        category: editedCategory.trim() || null
       });
       setOpenModalId(null);
     });
@@ -76,9 +94,16 @@ export function IncubatorList({ projects }: { projects: Project[] }) {
     });
   }
 
-  // Grupowanie
-  const projectsByCategory = projects.reduce((acc, project) => {
-    const cat = project.category || "Inne";
+  // Filtrowane projekty
+  const filteredProjects = useMemo(() => {
+    if (selectedFilterCategory === "ALL") return projects;
+    if (selectedFilterCategory === "UNASSIGNED") return projects.filter(p => !p.category?.trim());
+    return projects.filter(p => p.category?.trim() === selectedFilterCategory);
+  }, [projects, selectedFilterCategory]);
+
+  // Grupowanie przefiltrowanych projektów
+  const projectsByCategory = filteredProjects.reduce((acc, project) => {
+    const cat = project.category?.trim() || "Bez kategorii";
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(project);
     return acc;
@@ -126,16 +151,57 @@ export function IncubatorList({ projects }: { projects: Project[] }) {
         </div>
       </div>
 
-      {projects.length === 0 ? (
+      {/* Pasek filtrowania po kategoriach */}
+      {allCategories.length > 0 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            type="button"
+            onClick={() => setSelectedFilterCategory("ALL")}
+            className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 ${
+              selectedFilterCategory === "ALL"
+                ? "bg-yellow-500 text-black shadow-lg shadow-yellow-950/20"
+                : "bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+            }`}
+          >
+            Wszystkie ({projects.length})
+          </button>
+
+          {allCategories.map(cat => {
+            const count = projects.filter(p => p.category?.trim() === cat).length;
+            const isSelected = selectedFilterCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedFilterCategory(isSelected ? "ALL" : cat)}
+                className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+                  isSelected
+                    ? "bg-yellow-500 text-black shadow-lg shadow-yellow-950/20"
+                    : "bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+                }`}
+              >
+                <span>{cat}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? "bg-black/20 text-black" : "bg-zinc-800 text-zinc-500"}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {filteredProjects.length === 0 ? (
         <div className="py-8 text-center text-zinc-500 text-sm font-medium">
-          Inkubator jest pusty. Zapisz powyżej swój kolejny pomysł na projekt.
+          {projects.length === 0 
+            ? "Inkubator jest pusty. Zapisz powyżej swój kolejny pomysł na projekt."
+            : "Brak projektów w wybranej kategorii."}
         </div>
       ) : (
         Object.entries(projectsByCategory).map(([category, catProjects]) => (
           <div key={category} className="space-y-3">
             <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-purple-500/50"></span>
-              {category}
+              <span className="w-2 h-2 rounded-full bg-yellow-500/80"></span>
+              {category} ({catProjects.length})
             </h2>
             {catProjects.map((project) => (
               <div
@@ -148,10 +214,15 @@ export function IncubatorList({ projects }: { projects: Project[] }) {
                   </div>
                   <div>
                     <h3 className="font-bold text-zinc-200">{project.title}</h3>
-                    <p className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 mt-0.5 flex gap-2">
+                    <div className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 mt-0.5 flex items-center gap-2 flex-wrap">
                       <span>Status: INBOX</span>
-                      {project.goal && <span className="text-purple-500">• PRZYGOTOWANY</span>}
-                    </p>
+                      {project.category && (
+                        <span className="text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded">
+                          {project.category}
+                        </span>
+                      )}
+                      {project.goal && <span className="text-purple-400">• PRZYGOTOWANY</span>}
+                    </div>
                   </div>
                 </div>
 
@@ -186,17 +257,58 @@ export function IncubatorList({ projects }: { projects: Project[] }) {
                             className="bg-zinc-900/50 border-zinc-800"
                           />
                         </div>
-                        <div>
-                          <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
-                            Kategoria
+
+                        {/* Zarządzanie Kategorią z autouzupełnianiem */}
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider block">
+                            Kategoria Projektu
                           </label>
-                          <Input 
-                            value={editedCategory}
-                            onChange={e => setEditedCategory(e.target.value)}
-                            placeholder="Wpisz kategorię..."
-                            className="bg-zinc-900/50 border-zinc-800"
-                          />
+                          
+                          {/* Szybki wybór z istniejących kategorii */}
+                          {allCategories.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mb-1">
+                              {allCategories.map(cat => (
+                                <button
+                                  key={cat}
+                                  type="button"
+                                  onClick={() => setEditedCategory(cat)}
+                                  className={`text-xs px-2.5 py-1 rounded-lg transition-colors border ${
+                                    editedCategory.trim().toLowerCase() === cat.toLowerCase()
+                                      ? "bg-yellow-500 text-black font-bold border-yellow-500"
+                                      : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200"
+                                  }`}
+                                >
+                                  {cat}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-2">
+                            <Input 
+                              list="modal-categories-datalist"
+                              value={editedCategory}
+                              onChange={e => setEditedCategory(e.target.value)}
+                              placeholder="Wpisz nową kategorię lub wybierz z listy..."
+                              className="bg-zinc-900/50 border-zinc-800 text-xs"
+                            />
+                            <datalist id="modal-categories-datalist">
+                              {allCategories.map(cat => (
+                                <option key={cat} value={cat} />
+                              ))}
+                            </datalist>
+                            {editedCategory && (
+                              <button
+                                type="button"
+                                onClick={() => setEditedCategory("")}
+                                className="text-xs text-zinc-500 hover:text-zinc-300 shrink-0"
+                              >
+                                Wyczyść
+                              </button>
+                            )}
+                          </div>
                         </div>
+
                         <div>
                           <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
                             Główny Cel (Jedno zdanie)

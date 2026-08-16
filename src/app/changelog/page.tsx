@@ -1,4 +1,4 @@
-import { Layers, CheckCircle2, ShieldCheck, MapPin, ListTodo, Calendar, Network, Trash2, Droplet } from "lucide-react";
+import { Layers, CheckCircle2, ShieldCheck, MapPin, ListTodo, Calendar, Network, Trash2, Droplet, Tag } from "lucide-react";
 
 export default function ChangelogPage() {
   return (
@@ -10,11 +10,11 @@ export default function ChangelogPage() {
 
       <section className="space-y-8">
         
-        {/* v0.6.7 - AKTUALNA WERSJA */}
+        {/* v0.6.8 - AKTUALNA WERSJA */}
         <div className="bg-zinc-900/40 border border-purple-500/30 rounded-2xl p-6 backdrop-blur-md relative overflow-hidden">
           <div className="flex items-center gap-3 mb-6">
             <h2 className="text-xl font-black text-zinc-100 flex items-center gap-2">
-              <span className="text-purple-400">v0.6.7</span> - Usuwanie z Inkubatora, Tworzenie Nawyków & Pełnoekranowy Graf
+              <span className="text-purple-400">v0.6.8</span> - Dynamiczne Kategorie w Inkubatorze & Autouzupełnianie
             </h2>
             <span className="text-xs font-bold bg-purple-500/20 text-purple-300 px-2.5 py-1 rounded-md border border-purple-500/30">
               Aktualna wersja
@@ -23,21 +23,26 @@ export default function ChangelogPage() {
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Inkubator & Nawyki</h3>
+              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Zarządzanie Kategoriami Projektów</h3>
               <ul className="space-y-2 text-zinc-300 text-sm list-disc list-inside">
-                <li><strong>Usuwanie Projektów z Inkubatora:</strong> Dodano przycisk usuwania pomysłów bezpośrednio z listy Inkubatora oraz z okna szczegółów przygotowania projektu.</li>
-                <li><strong>Tworzenie i Zarządzanie Nawykami (/habits):</strong> Dodano formularz szybkiego tworzenia nowych codziennych nawyków oraz opcję usuwania nieaktualnych pozycji.</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Pełnoekranowy Graf Relacji (/graph)</h3>
-              <ul className="space-y-2 text-zinc-300 text-sm list-disc list-inside">
-                <li><strong>Naprawa Przycinania Widoku:</strong> Wyeliminowano problem ucinania grafu do połowy ekranu – płótno Canvas 2D dynamicznie dopasowuje się do 100% szerokości i wysokości ekranu.</li>
-                <li><strong>Kontrolki Sterowania:</strong> Dodano przyciski przybliżania (Zoom In), oddalania (Zoom Out) oraz natychmiastowego wyśrodkowania (Focus/Center).</li>
+                <li><strong>Dynamiczne Wykrywanie Kategorii:</strong> System automatycznie agreguje wszystkie unikalne kategorie użyte w projektach i proponuje je przy tworzeniu oraz edycji każdego kolejnego pomysłu.</li>
+                <li><strong>Szybki Wybór & Nowa Kategoria:</strong> Możliwość przypisania kategorii jednym kliknięciem z listy dotychczasowych tagów lub wpisania zupełnie nowej z podpowiedziami (datalist).</li>
+                <li><strong>Filtrowanie Inkubatora po Kategoriach:</strong> Dodano pasek zakładek w Inkubatorze umożliwiający błyskawiczne filtrowanie pomysłów wg wybranej kategorii wraz z licznikami.</li>
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* v0.6.7 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-400">v0.6.7</span> - Usuwanie z Inkubatora, Tworzenie Nawyków & Pełnoekranowy Graf
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
+            <li><strong>Usuwanie Projektów z Inkubatora:</strong> Przycisk usuwania pomysłów z listy i modalu.</li>
+            <li><strong>Tworzenie i Zarządzanie Nawykami (/habits):</strong> Szybkie dodawanie i usuwanie nawyków.</li>
+            <li><strong>Pełnoekranowy Graf Relacji (/graph):</strong> Dynamiczne dopasowanie do 100% okna i przyciski sterowania zoomem.</li>
+          </ul>
         </div>
 
         {/* v0.6.5 */}
@@ -46,10 +51,9 @@ export default function ChangelogPage() {
             <span className="text-purple-400">v0.6.5</span> - Poprawki Egzekucji: Edycja Daty Zadań & Stabilizacja Bazy
           </h2>
           <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
-            <li><strong>Pełna Edycja Daty Zadania:</strong> Panel wyboru terminu w modalu szczegółów zadania: <em>Dzisiaj</em>, <em>Jutro</em>, <em>Usuń datę / Inbox</em> oraz kalendarz.</li>
+            <li><strong>Pełna Edycja Daty Zadania:</strong> Panel wyboru terminu w modalu szczegółów zadania.</li>
             <li><strong>Domyślne Trafianie do Inboxa:</strong> Zadania bez daty trafiają wyłącznie do Inboxa.</li>
             <li><strong>Przepięcie Listy / Projektu:</strong> Możliwość zmiany przypisania zadania w oknie edycji.</li>
-            <li><strong>Stabilizacja Zapytań:</strong> Usunięto błędy indeksów złożonych w Firestore.</li>
           </ul>
         </div>
 
@@ -59,10 +63,10 @@ export default function ChangelogPage() {
             <span className="text-purple-400">v0.6.0</span> - Tworzenie List Zadań & Twardy Limit Projektów
           </h2>
           <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
-            <li><strong>Tworzenie i Organizacja List:</strong> Dedykowana sekcja <em>Listy</em> w pasku bocznym z przyciskiem <code>+</code>, customowymi ikonami i kolorami.</li>
-            <li><strong>Dynamiczne Liczniki Zadań:</strong> Prezentacja liczby otwartych zadań przy każdej liście w czasie rzeczywistym.</li>
-            <li><strong>Twardy Limit 2 Aktywnych Projektów:</strong> Blokada aktywacji kolejnych projektów w Inkubatorze z modalem wyjaśniającym.</li>
-            <li><strong>Stan PAUSED:</strong> Możliwość wstrzymywania i wznawiania projektów oraz cofania do Inkubatora.</li>
+            <li><strong>Tworzenie i Organizacja List:</strong> Dedykowana sekcja <em>Listy</em> w pasku bocznym z przyciskiem <code>+</code>.</li>
+            <li><strong>Dynamiczne Liczniki Zadań:</strong> Prezentacja liczby otwartych zadań w czasie rzeczywistym.</li>
+            <li><strong>Twardy Limit 2 Aktywnych Projektów:</strong> Blokada aktywacji z modalem.</li>
+            <li><strong>Stan PAUSED:</strong> Wstrzymywanie i wznawianie projektów.</li>
           </ul>
         </div>
 
@@ -72,10 +76,8 @@ export default function ChangelogPage() {
             <span className="text-purple-400">v0.5.0</span> - De-gamifikacja: Surowy System Egzekucji
           </h2>
           <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
-            <li><strong>Usunięcie Sekcji Nagród:</strong> Całkowicie usunięto komponent RewardSection z Dashboardu.</li>
-            <li><strong>Nawyki bez Serii:</strong> Usunięto liczniki ciągłości i medale.</li>
-            <li><strong>Czyste Słownictwo:</strong> Usunięto terminologię RPG.</li>
-            <li><strong>Refaktor Modelu Danych:</strong> Kolekcja <code>skills</code> ➔ <code>projects</code>, podlisty ➔ <code>taskLists</code>.</li>
+            <li>Usunięcie nagród, XP, serii nawyków i terminologii RPG.</li>
+            <li>Refaktor bazy danych: <code>skills</code> ➔ <code>projects</code>.</li>
           </ul>
         </div>
 
@@ -85,28 +87,8 @@ export default function ChangelogPage() {
             <span className="text-purple-400">v0.4.0</span> - Geofencing w Tle, Miejsca & Natywna Mobilność
           </h2>
           <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
-            <li><strong className="text-zinc-300">Moduł Miejsc (/places):</strong> Punkty docelowe, geofencing oraz baza miast.</li>
-            <li><strong className="text-zinc-300">Natywne Logowanie Google:</strong> Wdrożono bibliotekę <code>@capacitor-firebase/authentication</code>.</li>
-          </ul>
-        </div>
-
-        {/* v0.3.0 */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-bold text-zinc-300 flex items-center gap-2">
-            <span className="text-purple-400">v0.3.0</span> - System Notatek & Przebudowa Inkubatora
-          </h2>
-          <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
-            <li>Globalne notatki Markdown oraz notatki w projektach.</li>
-          </ul>
-        </div>
-
-        {/* v0.2.0 */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-bold text-zinc-300 flex items-center gap-2">
-            <span className="text-purple-400">v0.2.0</span> - Przebudowa Projektów (Flat UI & Historia)
-          </h2>
-          <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
-            <li>Flat UI w projektach oraz historia sesji skupienia (TimeLog).</li>
+            <li>Moduł Miejsc (/places), geofencing oraz baza miast.</li>
+            <li>Natywne Logowanie Google przez Capacitor Firebase Authentication.</li>
           </ul>
         </div>
 
