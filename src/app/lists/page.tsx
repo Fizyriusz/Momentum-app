@@ -1,14 +1,15 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useTaskList, useTasks, useTaskLists } from "@/lib/services/tasks";
 import { useProject } from "@/lib/services/projects";
 import { TaskList } from "@/components/task-list";
+import { TaskKanban } from "@/components/task-kanban";
 import { QuickAddTask } from "@/components/quick-add-task";
 import { EditTaskListDialog } from "@/components/edit-task-list-dialog";
 import { CreateTaskListDialog, LIST_ICONS, LIST_COLORS } from "@/components/create-task-list-dialog";
-import { ListTodo, CheckCircle2, Circle, Layers, Briefcase, Plus } from "lucide-react";
+import { ListTodo, CheckCircle2, Circle, Layers, Briefcase, Plus, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -16,6 +17,21 @@ function ListDetailsView({ id }: { id: string }) {
   const { taskList, loading: listLoading } = useTaskList(id);
   const { tasks: allTasks, loading: tasksLoading } = useTasks();
   const { project } = useProject(taskList?.projectId || "");
+
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+
+  // Odczyt preferencji widoku z localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(`view_mode_${id}`);
+    if (saved === "list" || saved === "kanban") {
+      setViewMode(saved);
+    }
+  }, [id]);
+
+  const handleToggleView = (mode: "list" | "kanban") => {
+    setViewMode(mode);
+    localStorage.setItem(`view_mode_${id}`, mode);
+  };
 
   if (listLoading || tasksLoading) {
     return <div className="text-zinc-500 text-center py-20">Ładowanie listy...</div>;
@@ -40,7 +56,7 @@ function ListDetailsView({ id }: { id: string }) {
   const colorObj = LIST_COLORS.find(c => c.id === taskList.color) || LIST_COLORS[0];
 
   return (
-    <main className="min-h-full px-4 py-8 lg:px-12 max-w-4xl mx-auto flex flex-col gap-8">
+    <main className={`min-h-full px-4 py-8 lg:px-12 mx-auto flex flex-col gap-6 ${viewMode === "kanban" ? "max-w-full" : "max-w-4xl"}`}>
       {/* Nagłówek Listy */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800/60">
         <div className="flex items-center gap-3.5">
@@ -53,7 +69,7 @@ function ListDetailsView({ id }: { id: string }) {
               <span className={`w-2.5 h-2.5 rounded-full ${colorObj.bg} shadow-[0_0_8px_rgba(168,85,247,0.5)]`} />
             </div>
 
-            <div className="flex items-center gap-3 text-xs text-zinc-400 mt-1 font-medium">
+            <div className="flex items-center gap-3 text-xs text-zinc-400 mt-1 font-medium flex-wrap">
               <span>{activeTasks.length} otwartych • {completedTasks.length} ukończonych</span>
               {project && (
                 <Link 
@@ -69,30 +85,71 @@ function ListDetailsView({ id }: { id: string }) {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Przełącznik Widoku: Lista vs Kanban */}
+          <div className="flex items-center bg-zinc-900 border border-zinc-800 p-0.5 rounded-xl">
+            <button
+              type="button"
+              onClick={() => handleToggleView("list")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                viewMode === "list"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <List className="w-3.5 h-3.5" />
+              <span>Lista</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleToggleView("kanban")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                viewMode === "kanban"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Kanban</span>
+            </button>
+          </div>
+
           <EditTaskListDialog taskList={taskList} />
         </div>
       </header>
 
-      {/* Szybkie dodawanie do tej listy */}
-      <section>
-        <QuickAddTask taskListId={taskList.id} projectId={taskList.projectId || undefined} />
-      </section>
+      {/* Widok Zadań */}
+      {viewMode === "kanban" ? (
+        <section className="mt-2">
+          <TaskKanban 
+            taskList={taskList} 
+            tasks={tasks} 
+            projectId={taskList.projectId} 
+          />
+        </section>
+      ) : (
+        <div className="space-y-6">
+          {/* Szybkie dodawanie do tej listy */}
+          <section>
+            <QuickAddTask taskListId={taskList.id} projectId={taskList.projectId || undefined} />
+          </section>
 
-      {/* Zadania */}
-      <section className="space-y-6">
-        <div>
-          <TaskList tasks={activeTasks} />
+          {/* Lista zadań klasyczna */}
+          <section className="space-y-6">
+            <div>
+              <TaskList tasks={activeTasks} />
+            </div>
+
+            {completedTasks.length > 0 && (
+              <div className="pt-6 border-t border-zinc-900 space-y-3">
+                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest px-2">
+                  Ukończone ({completedTasks.length})
+                </h3>
+                <TaskList tasks={completedTasks} />
+              </div>
+            )}
+          </section>
         </div>
-
-        {completedTasks.length > 0 && (
-          <div className="pt-6 border-t border-zinc-900 space-y-3">
-            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest px-2">
-              Ukończone ({completedTasks.length})
-            </h3>
-            <TaskList tasks={completedTasks} />
-          </div>
-        )}
-      </section>
+      )}
     </main>
   );
 }

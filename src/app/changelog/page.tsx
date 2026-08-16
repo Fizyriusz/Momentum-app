@@ -1,4 +1,4 @@
-import { Layers, CheckCircle2, ShieldCheck, MapPin, ListTodo, Calendar, Network, Trash2, Droplet, Tag } from "lucide-react";
+import { Layers, CheckCircle2, ShieldCheck, MapPin, ListTodo, Calendar, Network, Trash2, Droplet, Tag, LayoutGrid } from "lucide-react";
 
 export default function ChangelogPage() {
   return (
@@ -10,11 +10,11 @@ export default function ChangelogPage() {
 
       <section className="space-y-8">
         
-        {/* v0.6.8 - AKTUALNA WERSJA */}
+        {/* v0.7.0 - AKTUALNA WERSJA */}
         <div className="bg-zinc-900/40 border border-purple-500/30 rounded-2xl p-6 backdrop-blur-md relative overflow-hidden">
           <div className="flex items-center gap-3 mb-6">
             <h2 className="text-xl font-black text-zinc-100 flex items-center gap-2">
-              <span className="text-purple-400">v0.6.8</span> - Dynamiczne Kategorie w Inkubatorze & Autouzupełnianie
+              <span className="text-purple-400">v0.7.0</span> - Tablica Kanban z Własnymi Kolumnami & Przełącznik Widoków
             </h2>
             <span className="text-xs font-bold bg-purple-500/20 text-purple-300 px-2.5 py-1 rounded-md border border-purple-500/30">
               Aktualna wersja
@@ -23,14 +23,28 @@ export default function ChangelogPage() {
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Zarządzanie Kategoriami Projektów</h3>
+              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Zaawansowana Tablica Kanban (Faza 1)</h3>
               <ul className="space-y-2 text-zinc-300 text-sm list-disc list-inside">
-                <li><strong>Dynamiczne Wykrywanie Kategorii:</strong> System automatycznie agreguje wszystkie unikalne kategorie użyte w projektach i proponuje je przy tworzeniu oraz edycji każdego kolejnego pomysłu.</li>
-                <li><strong>Szybki Wybór & Nowa Kategoria:</strong> Możliwość przypisania kategorii jednym kliknięciem z listy dotychczasowych tagów lub wpisania zupełnie nowej z podpowiedziami (datalist).</li>
-                <li><strong>Filtrowanie Inkubatora po Kategoriach:</strong> Dodano pasek zakładek w Inkubatorze umożliwiający błyskawiczne filtrowanie pomysłów wg wybranej kategorii wraz z licznikami.</li>
+                <li><strong>Własne Kolumny Kanban:</strong> Możliwość tworzenia, edycji nazwy i usuwania dowolnych kolumn per lista (np. <em>Pomysły</em> ➔ <em>Scenariusz</em> ➔ <em>Montaż</em> ➔ <em>Publikacja</em>).</li>
+                <li><strong>Oznaczanie Kolumn Ukończenia:</strong> Każda kolumna może być oznaczona jako stan docelowy/ukończony (`isCompleted`), co automatycznie aktualizuje status zadania.</li>
+                <li><strong>Przeciąganie & Mobilne Przesuwanie:</strong> Obsługa natywnego Drag & Drop oraz intuicyjnych strzałek przesuwania między kolumnami na smartfonach.</li>
+                <li><strong>Przełącznik Widoków (Lista vs Kanban):</strong> Dostępny w Listach Zadań (`/lists?id=...`) oraz w Projektach (`/projects?id=...`). Wybrany tryb jest zapamiętywany w przeglądarce.</li>
+                <li><strong>Czysty Inbox:</strong> Zgodnie z zasadą prostoty, Inbox pozostaje nienaruszony jako prosta, szybka lista zadań.</li>
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* v0.6.8 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-400">v0.6.8</span> - Dynamiczne Kategorie w Inkubatorze & Autouzupełnianie
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
+            <li>Dynamiczne wykrywanie i agregacja kategorii projektów.</li>
+            <li>Szybkie pigułki wyboru i autouzupełnianie (`datalist`).</li>
+            <li>Pasek zakładek i filtrowanie pomysłów w Inkubatorze.</li>
+          </ul>
         </div>
 
         {/* v0.6.7 */}
@@ -39,9 +53,9 @@ export default function ChangelogPage() {
             <span className="text-purple-400">v0.6.7</span> - Usuwanie z Inkubatora, Tworzenie Nawyków & Pełnoekranowy Graf
           </h2>
           <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
-            <li><strong>Usuwanie Projektów z Inkubatora:</strong> Przycisk usuwania pomysłów z listy i modalu.</li>
-            <li><strong>Tworzenie i Zarządzanie Nawykami (/habits):</strong> Szybkie dodawanie i usuwanie nawyków.</li>
-            <li><strong>Pełnoekranowy Graf Relacji (/graph):</strong> Dynamiczne dopasowanie do 100% okna i przyciski sterowania zoomem.</li>
+            <li>Usuwanie Projektów z Inkubatora: Przycisk usuwania pomysłów z listy i modalu.</li>
+            <li>Tworzenie i Zarządzanie Nawykami (/habits): Szybkie dodawanie i usuwanie nawyków.</li>
+            <li>Pełnoekranowy Graf Relacji (/graph): Dynamiczne dopasowanie do 100% okna i przyciski sterowania zoomem.</li>
           </ul>
         </div>
 
@@ -51,9 +65,9 @@ export default function ChangelogPage() {
             <span className="text-purple-400">v0.6.5</span> - Poprawki Egzekucji: Edycja Daty Zadań & Stabilizacja Bazy
           </h2>
           <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
-            <li><strong>Pełna Edycja Daty Zadania:</strong> Panel wyboru terminu w modalu szczegółów zadania.</li>
-            <li><strong>Domyślne Trafianie do Inboxa:</strong> Zadania bez daty trafiają wyłącznie do Inboxa.</li>
-            <li><strong>Przepięcie Listy / Projektu:</strong> Możliwość zmiany przypisania zadania w oknie edycji.</li>
+            <li>Pełna Edycja Daty Zadania: Panel wyboru terminu w modalu szczegółów zadania.</li>
+            <li>Domyślne Trafianie do Inboxa: Zadania bez daty trafiają wyłącznie do Inboxa.</li>
+            <li>Przepięcie Listy / Projektu: Możliwość zmiany przypisania zadania w oknie edycji.</li>
           </ul>
         </div>
 
@@ -63,10 +77,10 @@ export default function ChangelogPage() {
             <span className="text-purple-400">v0.6.0</span> - Tworzenie List Zadań & Twardy Limit Projektów
           </h2>
           <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
-            <li><strong>Tworzenie i Organizacja List:</strong> Dedykowana sekcja <em>Listy</em> w pasku bocznym z przyciskiem <code>+</code>.</li>
-            <li><strong>Dynamiczne Liczniki Zadań:</strong> Prezentacja liczby otwartych zadań w czasie rzeczywistym.</li>
-            <li><strong>Twardy Limit 2 Aktywnych Projektów:</strong> Blokada aktywacji z modalem.</li>
-            <li><strong>Stan PAUSED:</strong> Wstrzymywanie i wznawianie projektów.</li>
+            <li>Tworzenie i Organizacja List: Dedykowana sekcja <em>Listy</em> w pasku bocznym z przyciskiem <code>+</code>.</li>
+            <li>Dynamiczne Liczniki Zadań: Prezentacja liczby otwartych zadań w czasie rzeczywistym.</li>
+            <li>Twardy Limit 2 Aktywnych Projektów: Blokada aktywacji z modalem.</li>
+            <li>Stan PAUSED: Wstrzymywanie i wznawianie projektów.</li>
           </ul>
         </div>
 

@@ -29,6 +29,19 @@ export type Tag = {
   createdAt: any;
 };
 
+export type KanbanColumn = {
+  id: string;
+  name: string;
+  isCompletedColumn?: boolean;
+  color?: string;
+};
+
+export const DEFAULT_KANBAN_COLUMNS: KanbanColumn[] = [
+  { id: "todo", name: "Do zrobienia", isCompletedColumn: false },
+  { id: "in_progress", name: "W trakcie", isCompletedColumn: false },
+  { id: "done", name: "Zrobione", isCompletedColumn: true }
+];
+
 export type Task = {
   id: string;
   title: string;
@@ -51,6 +64,7 @@ export type TaskList = {
   icon?: string; // np. "List", "Monitor", "Bookmark", "Target", "Home", "Briefcase", "Code", "Zap"
   projectId?: string | null;
   isArchived?: boolean;
+  columns?: KanbanColumn[];
   createdAt: any;
 };
 
@@ -259,23 +273,44 @@ export async function updateTaskList(id: string, data: Partial<TaskList>) {
   return updateDoc(getUserTaskListDoc(id), data);
 }
 
+export async function updateTaskListColumns(id: string, columns: KanbanColumn[]) {
+  if (!auth.currentUser) return;
+  return updateDoc(getUserTaskListDoc(id), { columns });
+}
+
 export async function deleteTaskList(id: string) {
   if (!auth.currentUser) return;
   return deleteDoc(getUserTaskListDoc(id));
 }
 
-export async function createTask(title: string, taskListId?: string, dueDate?: Date, placeId?: string, projectId?: string) {
+export async function createTask(
+  title: string, 
+  taskListId?: string, 
+  dueDate?: Date, 
+  placeId?: string, 
+  projectId?: string,
+  column: string = "todo"
+) {
   if (!auth.currentUser) return;
   return addDoc(getUserTasksCol(), {
     title,
-    isCompleted: false,
+    isCompleted: column === "done",
     taskListId: taskListId || null,
     projectId: projectId || null,
     placeId: placeId || null,
-    column: "todo",
+    column: column || "todo",
     dueDate: dueDate ? dueDate.getTime() : null,
     createdAt: serverTimestamp()
   });
+}
+
+export async function setTaskColumn(taskId: string, columnId: string, isCompleted?: boolean) {
+  if (!auth.currentUser) return;
+  const updatePayload: any = { column: columnId };
+  if (typeof isCompleted === "boolean") {
+    updatePayload.isCompleted = isCompleted;
+  }
+  return updateDoc(getUserTaskDoc(taskId), updatePayload);
 }
 
 export async function toggleTaskComplete(id: string, isCompleted: boolean) {

@@ -350,7 +350,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
                   onClick={() => setOpen(false)}
                   className="flex items-center justify-between text-xs font-medium text-zinc-500 hover:text-zinc-300 transition-colors group"
                 >
-                  <span>v0.6.8</span>
+                  <span>v0.7.0</span>
                   <span className="flex items-center gap-1">
                     Changelog
                     <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
