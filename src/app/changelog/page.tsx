@@ -1,4 +1,4 @@
-import { Layers, CheckCircle2, ShieldCheck, MapPin, ListTodo, Calendar } from "lucide-react";
+import { Layers, CheckCircle2, ShieldCheck, MapPin, ListTodo, Calendar, Network, Trash2, Droplet } from "lucide-react";
 
 export default function ChangelogPage() {
   return (
@@ -10,11 +10,11 @@ export default function ChangelogPage() {
 
       <section className="space-y-8">
         
-        {/* v0.6.5 - AKTUALNA WERSJA */}
+        {/* v0.6.7 - AKTUALNA WERSJA */}
         <div className="bg-zinc-900/40 border border-purple-500/30 rounded-2xl p-6 backdrop-blur-md relative overflow-hidden">
           <div className="flex items-center gap-3 mb-6">
             <h2 className="text-xl font-black text-zinc-100 flex items-center gap-2">
-              <span className="text-purple-400">v0.6.5</span> - Poprawki Egzekucji: Edycja Daty Zadań & Stabilizacja Bazy
+              <span className="text-purple-400">v0.6.7</span> - Usuwanie z Inkubatora, Tworzenie Nawyków & Pełnoekranowy Graf
             </h2>
             <span className="text-xs font-bold bg-purple-500/20 text-purple-300 px-2.5 py-1 rounded-md border border-purple-500/30">
               Aktualna wersja
@@ -23,22 +23,34 @@ export default function ChangelogPage() {
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Zarządzanie Terminami Zadań</h3>
+              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Inkubator & Nawyki</h3>
               <ul className="space-y-2 text-zinc-300 text-sm list-disc list-inside">
-                <li><strong>Pełna Edycja Daty Zadania:</strong> Dodano panel wyboru terminu w modalu szczegółów zadania: przyciski szybkiego wyboru (<em>Dzisiaj</em>, <em>Jutro</em>, <em>Usuń datę / Inbox</em>) oraz kalendarzowy selektor daty.</li>
-                <li><strong>Domyślne Trafianie do Inboxa:</strong> Zadania dodawane bez zaznaczenia terminu trafiają teraz wyłącznie do Inboxa i nie trafiają niepotrzebnie na listę <em>Dzisiaj</em>.</li>
-                <li><strong>Przepięcie Listy / Projektu z Zadania:</strong> W oknie edycji zadania można teraz łatwo zmienić jego listę docelową lub projekt nadrzędny.</li>
+                <li><strong>Usuwanie Projektów z Inkubatora:</strong> Dodano przycisk usuwania pomysłów bezpośrednio z listy Inkubatora oraz z okna szczegółów przygotowania projektu.</li>
+                <li><strong>Tworzenie i Zarządzanie Nawykami (/habits):</strong> Dodano formularz szybkiego tworzenia nowych codziennych nawyków oraz opcję usuwania nieaktualnych pozycji.</li>
               </ul>
             </div>
 
             <div>
-              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Stabilizacja Bazy & Inkubatora</h3>
+              <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Pełnoekranowy Graf Relacji (/graph)</h3>
               <ul className="space-y-2 text-zinc-300 text-sm list-disc list-inside">
-                <li><strong>Natychmiastowe Wyświetlanie w Inkubatorze:</strong> Wyeliminowano problem z zapytaniami Firestore (usunięto zależność od indeksów złożonych) – nowo dodane pomysły pojawiają się na liście Inkubatora od razu.</li>
-                <li><strong>Precyzyjne Liczniki:</strong> Poprawiono algorytm zliczania zadań w Inboxie i w widoku <em>Dzisiaj</em>.</li>
+                <li><strong>Naprawa Przycinania Widoku:</strong> Wyeliminowano problem ucinania grafu do połowy ekranu – płótno Canvas 2D dynamicznie dopasowuje się do 100% szerokości i wysokości ekranu.</li>
+                <li><strong>Kontrolki Sterowania:</strong> Dodano przyciski przybliżania (Zoom In), oddalania (Zoom Out) oraz natychmiastowego wyśrodkowania (Focus/Center).</li>
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* v0.6.5 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-400">v0.6.5</span> - Poprawki Egzekucji: Edycja Daty Zadań & Stabilizacja Bazy
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-400 space-y-2 ml-2">
+            <li><strong>Pełna Edycja Daty Zadania:</strong> Panel wyboru terminu w modalu szczegółów zadania: <em>Dzisiaj</em>, <em>Jutro</em>, <em>Usuń datę / Inbox</em> oraz kalendarz.</li>
+            <li><strong>Domyślne Trafianie do Inboxa:</strong> Zadania bez daty trafiają wyłącznie do Inboxa.</li>
+            <li><strong>Przepięcie Listy / Projektu:</strong> Możliwość zmiany przypisania zadania w oknie edycji.</li>
+            <li><strong>Stabilizacja Zapytań:</strong> Usunięto błędy indeksów złożonych w Firestore.</li>
+          </ul>
         </div>
 
         {/* v0.6.0 */}

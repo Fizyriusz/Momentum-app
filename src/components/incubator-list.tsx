@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { activateProject, updateProject as updateProjectDetails, Project, useProjects, MAX_ACTIVE_PROJECTS } from "@/lib/services/projects";
-import { Lightbulb, Play, Settings2, Save, AlertCircle, Lock, Pause } from "lucide-react";
+import { activateProject, updateProject as updateProjectDetails, deleteProject, Project, useProjects, MAX_ACTIVE_PROJECTS } from "@/lib/services/projects";
+import { Lightbulb, Play, Settings2, Save, AlertCircle, Lock, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,6 +48,14 @@ export function IncubatorList({ projects }: { projects: Project[] }) {
         category: editedCategory || null
       });
       setOpenModalId(null);
+    });
+  }
+
+  function handleDelete(id: string, title: string) {
+    if (!confirm(`Czy na pewno chcesz usunąć pomysł "${title}" z Inkubatora?`)) return;
+    startTransition(async () => {
+      await deleteProject(id);
+      if (openModalId === id) setOpenModalId(null);
     });
   }
 
@@ -243,25 +251,49 @@ export function IncubatorList({ projects }: { projects: Project[] }) {
                           />
                         </div>
                         
-                        <div className="flex justify-end gap-2 pt-4 border-t border-zinc-800/50">
+                        <div className="flex items-center justify-between pt-4 border-t border-zinc-800/50">
                           <Button 
                             variant="ghost" 
-                            onClick={() => setOpenModalId(null)}
+                            size="sm"
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs px-2"
+                            onClick={() => handleDelete(project.id, project.title)}
                             disabled={isPending}
                           >
-                            Anuluj
+                            <Trash2 className="w-4 h-4 mr-1.5" /> Usuń Projekt
                           </Button>
-                          <Button 
-                            className="bg-purple-600 hover:bg-purple-500 text-white"
-                            onClick={() => handleSaveDetails(project.id)}
-                            disabled={isPending}
-                          >
-                            <Save className="w-4 h-4 mr-2" /> Zapisz Detale
-                          </Button>
+
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="ghost" 
+                              onClick={() => setOpenModalId(null)}
+                              disabled={isPending}
+                            >
+                              Anuluj
+                            </Button>
+                            <Button 
+                              className="bg-purple-600 hover:bg-purple-500 text-white"
+                              onClick={() => handleSaveDetails(project.id)}
+                              disabled={isPending}
+                            >
+                              <Save className="w-4 h-4 mr-2" /> Zapisz Detale
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </DialogContent>
                   </Dialog>
+
+                  {/* Szybki przycisk usuwania z listy */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(project.id, project.title)}
+                    disabled={isPending}
+                    className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10 h-9 w-9 p-0"
+                    title="Usuń pomysł z Inkubatora"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
 
                   <Button
                     onClick={() => handleActivate(project.id)}
