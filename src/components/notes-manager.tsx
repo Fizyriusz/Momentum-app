@@ -74,7 +74,7 @@ export function NotesManager({ initialNotes, projectId, groupByProject = false }
             onClick={handleAdd} 
             size="sm" 
             variant="outline" 
-            className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 text-zinc-300 text-xs"
+            className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs rounded-xl shadow-xs"
           >
             <Plus className="w-3.5 h-3.5 mr-1" /> Dodaj Notatkę
           </Button>
@@ -83,12 +83,12 @@ export function NotesManager({ initialNotes, projectId, groupByProject = false }
 
       {/* Formularz Edycji / Dodawania */}
       {editingId && (
-        <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-3 animate-in fade-in zoom-in-95 duration-200">
+        <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-3 animate-in fade-in zoom-in-95 duration-200 shadow-lg dark:shadow-none">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-zinc-200">
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-200">
               {isCreating ? "Nowa Notatka" : "Edycja Notatki"}
             </h3>
-            <Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-400" onClick={handleCancel}>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-zinc-400 rounded-lg" onClick={handleCancel}>
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -97,21 +97,21 @@ export function NotesManager({ initialNotes, projectId, groupByProject = false }
             value={title} 
             onChange={e => setTitle(e.target.value)} 
             placeholder="Tytuł notatki..." 
-            className="bg-zinc-950 border-zinc-800 text-sm font-bold"
+            className="bg-zinc-50 dark:bg-zinc-950 border-zinc-300 dark:border-zinc-800 text-sm font-bold rounded-xl"
           />
 
           <Textarea 
             value={content} 
             onChange={e => setContent(e.target.value)} 
             placeholder="Treść notatki (obsługuje Markdown)..." 
-            className="bg-zinc-950 border-zinc-800 text-sm min-h-[120px] resize-y"
+            className="bg-zinc-50 dark:bg-zinc-950 border-zinc-300 dark:border-zinc-800 text-sm min-h-[120px] resize-y rounded-xl"
           />
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="ghost" size="sm" onClick={handleCancel} disabled={isPending}>
+            <Button variant="ghost" size="sm" onClick={handleCancel} disabled={isPending} className="rounded-xl text-xs">
               Anuluj
             </Button>
-            <Button size="sm" className="bg-purple-600 hover:bg-purple-500 text-white" onClick={handleSave} disabled={isPending}>
+            <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-xs text-xs" onClick={handleSave} disabled={isPending}>
               <Save className="w-3.5 h-3.5 mr-1.5" /> Zapisz
             </Button>
           </div>
@@ -120,30 +120,30 @@ export function NotesManager({ initialNotes, projectId, groupByProject = false }
 
       {/* Lista Notatek */}
       {initialNotes.length === 0 && !editingId ? (
-        <div className="text-center p-6 bg-zinc-900/20 border border-dashed border-zinc-800 rounded-xl text-zinc-600 text-xs">
+        <div className="text-center p-8 bg-white dark:bg-zinc-900/20 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl text-zinc-500 dark:text-zinc-600 text-xs shadow-xs dark:shadow-none">
           Brak notatek. Dodaj pierwszą notatkę dla tego projektu.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {initialNotes.map(note => (
             <div 
               key={note.id} 
-              className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/50 hover:bg-zinc-900/60 transition-colors flex flex-col justify-between group"
+              className="p-5 rounded-3xl bg-white dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-900/60 transition-all flex flex-col justify-between group shadow-xs dark:shadow-none"
             >
               <div>
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <h4 className="font-bold text-sm text-zinc-200 line-clamp-1">{note.title}</h4>
+                  <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-200 line-clamp-1">{note.title}</h4>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={() => handleEdit(note)} 
-                      className="p-1 text-zinc-400 hover:text-zinc-200"
+                      className="p-1 text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
                       title="Edytuj"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button 
                       onClick={() => handleDelete(note.id)} 
-                      className="p-1 text-zinc-400 hover:text-red-400"
+                      className="p-1 text-zinc-400 hover:text-red-600 dark:hover:text-red-400"
                       title="Usuń"
                     >
                       <Trash className="w-3.5 h-3.5" />
@@ -152,17 +152,17 @@ export function NotesManager({ initialNotes, projectId, groupByProject = false }
                 </div>
                 
                 {note.project && groupByProject && (
-                  <span className="inline-block text-[10px] font-bold text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider mb-2">
+                  <span className="inline-block text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded-md uppercase tracking-wider mb-2">
                     {note.project.title}
                   </span>
                 )}
 
-                <div className="prose prose-invert prose-xs text-zinc-400 line-clamp-3">
+                <div className="prose dark:prose-invert prose-xs text-zinc-600 dark:text-zinc-400 line-clamp-3">
                   <ReactMarkdown>{note.content}</ReactMarkdown>
                 </div>
               </div>
 
-              <div className="mt-4 pt-2 border-t border-zinc-800/30 flex justify-between items-center text-[10px] text-zinc-600">
+              <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800/30 flex justify-between items-center text-[10px] text-zinc-400 dark:text-zinc-600">
                 <span>{new Date(note.updatedAt).toLocaleDateString("pl-PL")}</span>
               </div>
             </div>

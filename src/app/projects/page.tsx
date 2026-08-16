@@ -66,14 +66,14 @@ function ProjectDetailsView({ id }: { id: string }) {
           
           <div className="flex items-center gap-2">
             {/* Przełącznik Widoku */}
-            <div className="flex items-center bg-zinc-900 border border-zinc-800 p-0.5 rounded-xl">
+            <div className="flex items-center bg-zinc-200/60 dark:bg-zinc-900 border border-zinc-300/60 dark:border-zinc-800 p-0.5 rounded-xl">
               <button
                 type="button"
                 onClick={() => handleToggleView("list")}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   viewMode === "list"
-                    ? "bg-purple-600 text-white shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-200"
+                    ? "bg-white dark:bg-purple-600 text-zinc-900 dark:text-white shadow-xs"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
                 }`}
               >
                 <List className="w-3.5 h-3.5" />
@@ -82,10 +82,10 @@ function ProjectDetailsView({ id }: { id: string }) {
               <button
                 type="button"
                 onClick={() => handleToggleView("kanban")}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   viewMode === "kanban"
-                    ? "bg-purple-600 text-white shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-200"
+                    ? "bg-white dark:bg-purple-600 text-zinc-900 dark:text-white shadow-xs"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
                 }`}
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
@@ -96,7 +96,7 @@ function ProjectDetailsView({ id }: { id: string }) {
             <CreateTaskListDialog 
               defaultProjectId={project.id} 
               trigger={
-                <Button size="sm" variant="outline" className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 text-xs text-zinc-300">
+                <Button size="sm" variant="outline" className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs text-zinc-700 dark:text-zinc-300 rounded-xl shadow-xs">
                   <Plus className="w-3.5 h-3.5 mr-1.5" /> Dodaj Listę
                 </Button>
               }
@@ -110,11 +110,11 @@ function ProjectDetailsView({ id }: { id: string }) {
               taskLists.map(list => {
                 const listTasks = tasks.filter(t => t.taskListId === list.id);
                 return (
-                  <div key={list.id} className="space-y-4 bg-zinc-900/10 border border-zinc-800/30 p-4 rounded-2xl">
+                  <div key={list.id} className="space-y-4 bg-zinc-100/60 dark:bg-zinc-900/10 border border-zinc-200 dark:border-zinc-800/30 p-4 rounded-3xl shadow-xs dark:shadow-none">
                     <div className="flex items-center justify-between px-1">
                       <Link href={`/lists?id=${list.id}`} className="flex items-center gap-2 group">
-                        <span className="w-2 h-2 rounded-full bg-purple-500 group-hover:scale-125 transition-transform" />
-                        <h3 className="text-sm font-bold text-zinc-200 group-hover:text-purple-300 transition-colors">{list.name}</h3>
+                        <span className="w-2.5 h-2.5 rounded-full bg-purple-600 dark:bg-purple-500 group-hover:scale-125 transition-transform" />
+                        <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-200 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">{list.name}</h3>
                         <span className="text-xs text-zinc-500 font-medium">({listTasks.filter(t => !t.isCompleted).length})</span>
                       </Link>
                       <EditTaskListDialog taskList={list} />
@@ -124,7 +124,7 @@ function ProjectDetailsView({ id }: { id: string }) {
                 );
               })
             ) : (
-              <div className="bg-zinc-900/10 border border-zinc-800/30 p-4 rounded-2xl">
+              <div className="bg-zinc-100/60 dark:bg-zinc-900/10 border border-zinc-200 dark:border-zinc-800/30 p-4 rounded-3xl shadow-xs dark:shadow-none">
                 <TaskKanban tasks={tasks} projectId={project.id} />
               </div>
             )}
@@ -135,11 +135,11 @@ function ProjectDetailsView({ id }: { id: string }) {
               {taskLists.map(list => {
                 const listTasks = tasks.filter(t => t.taskListId === list.id);
                 return (
-                  <div key={list.id} className="space-y-4 bg-zinc-900/20 border border-zinc-800/40 p-4 rounded-2xl">
+                  <div key={list.id} className="space-y-4 bg-white dark:bg-zinc-900/20 border border-zinc-200/80 dark:border-zinc-800/40 p-4 rounded-3xl shadow-xs dark:shadow-none">
                     <div className="flex items-center justify-between px-1">
                       <Link href={`/lists?id=${list.id}`} className="flex items-center gap-2 group">
-                        <span className="w-2 h-2 rounded-full bg-purple-500 group-hover:scale-125 transition-transform" />
-                        <h3 className="text-sm font-bold text-zinc-200 group-hover:text-purple-300 transition-colors">{list.name}</h3>
+                        <span className="w-2.5 h-2.5 rounded-full bg-purple-600 dark:bg-purple-500 group-hover:scale-125 transition-transform" />
+                        <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-200 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">{list.name}</h3>
                         <span className="text-xs text-zinc-500 font-medium">({listTasks.filter(t => !t.isCompleted).length})</span>
                       </Link>
                       <EditTaskListDialog taskList={list} />
@@ -151,13 +151,13 @@ function ProjectDetailsView({ id }: { id: string }) {
               })}
             </div>
           ) : (
-            <div className="text-center p-8 text-zinc-500 flex flex-col items-center gap-4 bg-zinc-900/30 rounded-xl border border-dashed border-zinc-800">
-              <div className="p-3 bg-zinc-800/50 rounded-full">
-                <ListTodo className="w-6 h-6 text-zinc-600" />
+            <div className="text-center p-8 text-zinc-500 flex flex-col items-center gap-4 bg-white dark:bg-zinc-900/30 rounded-3xl border border-dashed border-zinc-200 dark:border-zinc-800 shadow-xs">
+              <div className="p-3 bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl">
+                <ListTodo className="w-6 h-6 text-zinc-400 dark:text-zinc-600" />
               </div>
               <div>
-                <p className="font-medium text-zinc-300">Projekt nie posiada jeszcze listy zadań.</p>
-                <p className="text-xs mt-1 max-w-sm mx-auto">Aby zacząć dodawać zadania, utwórz nową listę dla tego projektu.</p>
+                <p className="font-bold text-zinc-800 dark:text-zinc-300">Projekt nie posiada jeszcze listy zadań.</p>
+                <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">Aby zacząć dodawać zadania, utwórz nową listę dla tego projektu.</p>
               </div>
               <CreateTaskListDialog defaultProjectId={project.id} />
             </div>
@@ -180,11 +180,11 @@ function ProjectsOverview() {
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-purple-500/10 rounded-xl">
-              <Briefcase className="w-6 h-6 text-purple-400" />
+            <div className="p-3 bg-purple-500/10 rounded-2xl">
+              <Briefcase className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">Projekty</h1>
+              <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-900 dark:text-zinc-100">Projekty</h1>
               <p className="text-zinc-500 text-sm font-medium mt-0.5">Twoje główne obszary skupienia i egzekucji.</p>
             </div>
           </div>
@@ -192,8 +192,8 @@ function ProjectsOverview() {
 
         <div className="flex items-center gap-3">
           <Link href="/incubator">
-            <Button variant="outline" className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 text-xs">
-              <Lightbulb className="w-4 h-4 mr-2 text-yellow-500" /> Inkubator
+            <Button variant="outline" className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs rounded-xl shadow-xs text-zinc-800 dark:text-zinc-200">
+              <Lightbulb className="w-4 h-4 mr-2 text-amber-500" /> Inkubator
             </Button>
           </Link>
         </div>
@@ -207,7 +207,7 @@ function ProjectsOverview() {
               Aktywne Projekty ({activeProjects.length} / {MAX_ACTIVE_PROJECTS})
             </h2>
             {activeProjects.length >= MAX_ACTIVE_PROJECTS && (
-              <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-400 text-[10px]">
+              <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px]">
                 Limit Osiągnięty
               </Badge>
             )}
@@ -218,15 +218,15 @@ function ProjectsOverview() {
         {isLoading ? (
           <div className="text-zinc-500 text-sm p-4">Ładowanie...</div>
         ) : activeProjects.length === 0 ? (
-          <div className="text-center p-12 bg-zinc-900/30 border border-dashed border-zinc-800 rounded-2xl space-y-4">
-            <Briefcase className="w-12 h-12 text-zinc-700 mx-auto" />
-            <h3 className="text-lg font-bold text-zinc-300">Brak aktywnych projektów</h3>
+          <div className="text-center p-12 bg-white dark:bg-zinc-900/30 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-4 shadow-xs">
+            <Briefcase className="w-12 h-12 text-zinc-300 dark:text-zinc-700 mx-auto" />
+            <h3 className="text-lg font-bold text-zinc-800 dark:text-zinc-300">Brak aktywnych projektów</h3>
             <p className="text-zinc-500 text-sm max-w-sm mx-auto">
               Przejdź do Inkubatora, aby wybrać i aktywować swój pierwszy projekt do egzekucji.
             </p>
             <Link href="/incubator">
-              <Button className="bg-purple-600 hover:bg-purple-500 text-white mt-2">
-                <Lightbulb className="w-4 h-4 mr-2 text-yellow-400" /> Przejdź do Inkubatora
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white mt-2 rounded-xl shadow-xs">
+                <Lightbulb className="w-4 h-4 mr-2 text-amber-300" /> Przejdź do Inkubatora
               </Button>
             </Link>
           </div>
@@ -241,9 +241,9 @@ function ProjectsOverview() {
 
       {/* Wstrzymane Projekty (PAUSED) */}
       {pausedProjects.length > 0 && (
-        <section className="space-y-4 pt-4 border-t border-zinc-900">
+        <section className="space-y-4 pt-4 border-t border-zinc-200 dark:border-zinc-900">
           <div className="flex items-center gap-2">
-            <Pause className="w-4 h-4 text-amber-400" />
+            <Pause className="w-4 h-4 text-amber-500 dark:text-amber-400" />
             <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
               Wstrzymane Projekty ({pausedProjects.length})
             </h2>

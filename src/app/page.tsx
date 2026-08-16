@@ -66,35 +66,35 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <main className="min-h-dvh bg-zinc-950 flex items-center justify-center">
-        <Layers className="h-8 w-8 text-purple-500 animate-pulse" />
+      <main className="min-h-dvh bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
+        <Layers className="h-8 w-8 text-purple-600 dark:text-purple-500 animate-pulse" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-dvh bg-zinc-950 text-zinc-100 selection:bg-purple-500/30 pb-20">
+    <main className="min-h-dvh bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 selection:bg-purple-500/30 pb-20 transition-colors duration-200">
       <div className="mx-auto max-w-md px-4 py-8 flex flex-col gap-6">
         
         <header className="flex flex-col gap-1 items-center justify-center pt-4 pb-2">
           <div className="flex items-center gap-2">
-            <Layers className="h-6 w-6 text-purple-500" />
-            <h1 className="text-2xl font-black tracking-tight uppercase text-zinc-100">Momentum</h1>
+            <Layers className="h-6 w-6 text-purple-600 dark:text-purple-500" />
+            <h1 className="text-2xl font-black tracking-tight uppercase text-zinc-900 dark:text-zinc-100">Momentum</h1>
           </div>
           <time className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mt-1">{today}</time>
         </header>
 
         {/* Baner Geofencingowy */}
         {activePlaces.length > 0 && placeTasks.length > 0 && (
-          <section className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-4 animate-in fade-in slide-in-from-top-2">
+          <section className="bg-blue-500/10 dark:bg-blue-500/10 border border-blue-500/30 rounded-3xl p-4 animate-in fade-in slide-in-from-top-2 shadow-xs">
             <div className="flex items-start gap-3 mb-3">
-              <div className="p-2 bg-blue-500/20 rounded-lg shrink-0">
-                <MapPin className="w-5 h-5 text-blue-400" />
+              <div className="p-2 bg-blue-500/20 rounded-xl shrink-0">
+                <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-blue-100">Jesteś w zapisanej strefie!</h2>
-                <p className="text-xs text-blue-200/70 mt-0.5">
-                  Wykryto obecność w: <span className="font-bold text-blue-300">{activePlaces.map(p => p.name).join(", ")}</span>.
+                <h2 className="text-sm font-bold text-blue-900 dark:text-blue-100">Jesteś w zapisanej strefie!</h2>
+                <p className="text-xs text-blue-800/80 dark:text-blue-200/70 mt-0.5">
+                  Wykryto obecność w: <span className="font-bold text-blue-700 dark:text-blue-300">{activePlaces.map(p => p.name).join(", ")}</span>.
                   Masz tu {placeTasks.length} {placeTasks.length === 1 ? 'zadanie' : placeTasks.length >= 2 && placeTasks.length <= 4 ? 'zadania' : 'zadań'}.
                 </p>
               </div>
@@ -116,17 +116,17 @@ export default function Home() {
         </section>
 
         {/* 2. Podsumowanie Nawyków */}
-        <section className="bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-4 flex items-center justify-between backdrop-blur-md">
+        <section className="bg-white dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/50 rounded-3xl p-4 flex items-center justify-between backdrop-blur-md shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-500/10 rounded-lg">
+            <div className="p-2.5 bg-orange-500/10 rounded-2xl">
               <Flame className="w-5 h-5 text-orange-500" />
             </div>
             <div>
-              <p className="text-sm font-bold text-zinc-200">Dzisiejsze Nawyki</p>
+              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-200">Dzisiejsze Nawyki</p>
               <p className="text-xs text-zinc-500 font-medium">Ukończono {habitsDone} z {habits.length}</p>
             </div>
           </div>
-          <Link href="/habits" className="text-purple-400 hover:text-purple-300 transition-colors p-2">
+          <Link href="/habits" className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors p-2">
             <ArrowRight className="w-5 h-5" />
           </Link>
         </section>
@@ -134,15 +134,15 @@ export default function Home() {
         {/* 3. Najbliższe Zadania (Dzisiaj) */}
         <section className="space-y-3 mt-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
               Zadania na dziś
             </h2>
-            <Link href="/tasks/today" className="text-[10px] font-bold text-purple-500 uppercase tracking-wider hover:text-purple-400">
+            <Link href="/tasks/today" className="text-[11px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider hover:underline">
               Zobacz wszystkie
             </Link>
           </div>
           
-          <div className="bg-zinc-900/20 border border-zinc-800/50 rounded-2xl p-2">
+          <div className="bg-white/60 dark:bg-zinc-900/20 border border-zinc-200/80 dark:border-zinc-800/50 rounded-3xl p-2 shadow-xs dark:shadow-none">
             <TaskList tasks={todayTasks.slice(0, 5)} />
             {todayTasks.length > 5 && (
               <p className="text-center text-xs text-zinc-500 font-medium py-2 pb-1">
@@ -154,19 +154,19 @@ export default function Home() {
 
         {/* 4. Projekty - Podsumowanie postępu */}
         <section className="space-y-3 mt-2">
-           <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+           <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
              Aktywne Projekty
            </h2>
            <div className="grid grid-cols-2 gap-3">
              {projects.map(project => {
                 const percent = Math.min(100, Math.round(((project.loggedMinutes || 0) / (project.targetMinutes || 1)) * 100));
                 return (
-                  <Link key={project.id} href={`/projects?id=${project.id}`} className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-3 hover:bg-zinc-800/50 transition-colors group">
+                  <Link key={project.id} href={`/projects?id=${project.id}`} className="bg-white dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/50 rounded-2xl p-3.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all group shadow-xs dark:shadow-none">
                     <div className="flex items-center gap-2 mb-2">
-                      <Target className="w-3.5 h-3.5 text-zinc-500 group-hover:text-purple-400 transition-colors" />
-                      <span className="text-xs font-bold text-zinc-300 truncate">{project.title}</span>
+                      <Target className="w-3.5 h-3.5 text-zinc-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
+                      <span className="text-xs font-bold text-zinc-800 dark:text-zinc-300 truncate">{project.title}</span>
                     </div>
-                    <Progress value={percent} className="h-1.5 bg-zinc-800" indicatorClassName={percent >= 100 ? "bg-purple-400" : "bg-purple-600"} />
+                    <Progress value={percent} className="h-1.5 bg-zinc-200 dark:bg-zinc-800" indicatorClassName={percent >= 100 ? "bg-emerald-500" : "bg-purple-600 dark:bg-purple-500"} />
                   </Link>
                 )
              })}

@@ -190,26 +190,26 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
 
   return (
     <Card className={`
-      relative overflow-hidden transition-all duration-500
-      bg-zinc-900/40 backdrop-blur-md border-zinc-800/50
-      ${isTracking ? 'ring-1 ring-purple-500/50 shadow-lg shadow-purple-500/10' : ''}
-      ${isPaused ? 'opacity-90 border-amber-500/20' : ''}
-      ${isCompleted ? 'border-purple-500/30' : ''}
+      relative overflow-hidden transition-all duration-500 rounded-3xl
+      bg-white dark:bg-zinc-900/40 backdrop-blur-md border-zinc-200/80 dark:border-zinc-800/50 shadow-xs dark:shadow-none
+      ${isTracking ? 'ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/10' : ''}
+      ${isPaused ? 'opacity-90 border-amber-500/30' : ''}
+      ${isCompleted ? 'border-purple-500/40' : ''}
     `}>
       {isTracking && (
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent animate-pulse opacity-50 pointer-events-none" />
       )}
       
-      <CardHeader className="pb-2 pt-4 px-4 flex flex-row items-start justify-between space-y-0">
+      <CardHeader className="pb-2 pt-5 px-5 flex flex-row items-start justify-between space-y-0">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${isTracking ? 'bg-purple-500/20 text-purple-400' : isPaused ? 'bg-amber-500/20 text-amber-400' : 'bg-zinc-800 text-zinc-400'}`}>
+          <div className={`p-2.5 rounded-2xl ${isTracking ? 'bg-purple-500/20 text-purple-600 dark:text-purple-400' : isPaused ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'}`}>
             <IconComponent className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-zinc-100 text-lg">{project.title}</h3>
+              <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-lg">{project.title}</h3>
               {isPaused && (
-                <Badge variant="outline" className="border-amber-500/30 text-amber-400 bg-amber-500/10 text-[10px] uppercase font-bold">
+                <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 text-[10px] uppercase font-bold">
                   Wstrzymany
                 </Badge>
               )}
@@ -222,20 +222,20 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
         
         <div className="flex items-center gap-2">
           {isCompleted && (
-            <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 border-none">
+            <Badge variant="secondary" className="bg-purple-500/20 text-purple-700 dark:text-purple-300 border-none font-bold">
               Cel osiągnięty
             </Badge>
           )}
-          <span className="text-xs font-bold text-zinc-400">{progressPercent}%</span>
+          <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">{progressPercent}%</span>
         </div>
       </CardHeader>
 
-      <CardContent className="px-4 pb-4">
+      <CardContent className="px-5 pb-5">
         
         {/* Zintegrowany opis płaski (Flat UI) */}
         <div className="mt-4 mb-6">
           {isEditingDetails ? (
-            <div className="space-y-4 bg-zinc-950/50 p-4 rounded-xl border border-zinc-800">
+            <div className="space-y-4 bg-zinc-50 dark:bg-zinc-950/50 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800">
               <div>
                 <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">
                   Główny Cel (Jedno zdanie)
@@ -244,7 +244,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                   value={editedGoal}
                   onChange={e => setEditedGoal(e.target.value)}
                   placeholder="Np. Wdrożenie produkcyjne do końca miesiąca..."
-                  className="bg-zinc-950 border-zinc-800 text-sm"
+                  className="bg-white dark:bg-zinc-950 border-zinc-300 dark:border-zinc-800 text-sm rounded-xl"
                 />
               </div>
               <div className="flex gap-4">
@@ -257,7 +257,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                     min="1"
                     value={editedTargetHours}
                     onChange={e => setEditedTargetHours(parseInt(e.target.value) || 0)}
-                    className="bg-zinc-950 border-zinc-800 text-sm"
+                    className="bg-white dark:bg-zinc-950 border-zinc-300 dark:border-zinc-800 text-sm rounded-xl"
                   />
                 </div>
                 <div className="flex-1">
@@ -267,7 +267,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                   <select 
                     value={editedPeriod}
                     onChange={e => setEditedPeriod(e.target.value)}
-                    className="w-full h-10 px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full h-10 px-3 py-2 rounded-xl bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     <option value="WEEK">Tydzień</option>
                     <option value="MONTH">Miesiąc</option>
@@ -284,7 +284,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                   value={editedDescription}
                   onChange={e => setEditedDescription(e.target.value)}
                   placeholder="Zakres, specyfikacja, linki..."
-                  className="bg-zinc-950 border-zinc-800 min-h-[80px] resize-y text-sm"
+                  className="bg-white dark:bg-zinc-950 border-zinc-300 dark:border-zinc-800 min-h-[80px] resize-y text-sm rounded-xl"
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">
@@ -293,12 +293,13 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                   size="sm"
                   onClick={() => setIsEditingDetails(false)}
                   disabled={isPending}
+                  className="rounded-xl"
                 >
                   Anuluj
                 </Button>
                 <Button 
                   size="sm"
-                  className="bg-purple-600 hover:bg-purple-500 text-white"
+                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-xs"
                   onClick={handleSaveDetails}
                   disabled={isPending}
                 >
@@ -309,22 +310,22 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
           ) : (
             <div className="group relative pr-8">
                {project.goal && (
-                 <p className="text-sm text-zinc-300 font-medium leading-relaxed">{project.goal}</p>
+                 <p className="text-sm text-zinc-800 dark:text-zinc-300 font-medium leading-relaxed">{project.goal}</p>
                )}
                {project.description && (
-                 <div className="prose prose-invert prose-sm max-w-none text-zinc-500 mt-2">
+                 <div className="prose dark:prose-invert prose-sm max-w-none text-zinc-600 dark:text-zinc-400 mt-2">
                    <ReactMarkdown>{project.description}</ReactMarkdown>
                  </div>
                )}
                {!project.goal && !project.description && (
-                 <p className="text-sm text-zinc-600 italic">Brak opisu projektu...</p>
+                 <p className="text-sm text-zinc-400 dark:text-zinc-600 italic">Brak opisu projektu...</p>
                )}
                
                <div className="flex flex-wrap items-center gap-2 mt-4">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-zinc-700 bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs h-8"
+                  className="border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 text-xs h-8 rounded-xl shadow-xs"
                   onClick={() => {
                     setEditedGoal(project.goal || "");
                     setEditedDescription(project.description || "");
@@ -342,9 +343,9 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                       size="sm"
                       onClick={handlePauseProject}
                       disabled={isPending}
-                      className="border-zinc-800 bg-zinc-900/50 hover:bg-amber-500/10 hover:text-amber-300 hover:border-amber-500/30 text-zinc-400 text-xs h-8"
+                      className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:bg-amber-50 dark:hover:bg-amber-500/10 text-zinc-700 dark:text-zinc-400 hover:text-amber-700 dark:hover:text-amber-300 text-xs h-8 rounded-xl shadow-xs"
                     >
-                      <Pause className="w-3 h-3 mr-1.5 text-amber-400" /> Wstrzymaj projekt
+                      <Pause className="w-3 h-3 mr-1.5 text-amber-500" /> Wstrzymaj projekt
                     </Button>
 
                     <Button
@@ -352,7 +353,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                       size="sm"
                       onClick={handleSendToInbox}
                       disabled={isPending}
-                      className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-300 text-xs h-8"
+                      className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-300 text-xs h-8 rounded-xl shadow-xs"
                     >
                       <Archive className="w-3 h-3 mr-1.5" /> Cofnij do Inkubatora
                     </Button>
@@ -364,7 +365,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                       size="sm"
                       onClick={handleResumeProject}
                       disabled={isPending}
-                      className="border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 text-xs h-8 font-bold"
+                      className="border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs h-8 font-bold rounded-xl"
                     >
                       <RefreshCcw className="w-3 h-3 mr-1.5" /> Wznów projekt
                     </Button>
@@ -374,7 +375,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                       size="sm"
                       onClick={handleSendToInbox}
                       disabled={isPending}
-                      className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-300 text-xs h-8"
+                      className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-300 text-xs h-8 rounded-xl shadow-xs"
                     >
                       <Archive className="w-3 h-3 mr-1.5" /> Cofnij do Inkubatora
                     </Button>
@@ -385,7 +386,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                     size="sm"
                     onClick={handleResumeProject}
                     disabled={isPending}
-                    className="border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 text-xs h-8 font-bold"
+                    className="border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs h-8 font-bold rounded-xl"
                   >
                     <Play className="w-3 h-3 mr-1.5" /> Aktywuj projekt
                   </Button>
@@ -395,7 +396,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
           )}
         </div>
 
-        <div className="w-full h-px bg-zinc-800/50 mb-4" />
+        <div className="w-full h-px bg-zinc-200 dark:bg-zinc-800/50 mb-4" />
 
         {/* Progress Bar & Labels */}
         <div className="mb-4">
@@ -404,8 +405,8 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
           </div>
           <Progress 
             value={progressPercent} 
-            className="h-1.5 bg-zinc-800" 
-            indicatorClassName={isCompleted ? "bg-purple-400" : "bg-purple-600"}
+            className="h-1.5 bg-zinc-200 dark:bg-zinc-800" 
+            indicatorClassName={isCompleted ? "bg-emerald-500" : "bg-purple-600 dark:bg-purple-500"}
           />
         </div>
 
@@ -415,7 +416,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
             <Button 
               variant="destructive" 
               onClick={handleStop}
-              className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 font-mono text-lg font-bold h-12"
+              className="flex-1 bg-red-500/15 text-red-600 dark:text-red-400 hover:bg-red-500/25 border border-red-500/30 font-mono text-lg font-bold h-12 rounded-2xl"
               disabled={isPending}
             >
               <Square className="w-4 h-4 mr-2" fill="currentColor" />
@@ -424,7 +425,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
           ) : (
             <Button 
               onClick={handleStart}
-              className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 h-12 transition-colors font-bold"
+              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white h-12 transition-colors font-bold rounded-2xl shadow-xs"
               disabled={isPending || isCompleted || isPaused}
             >
               <Play className="w-4 h-4 mr-2" fill="currentColor" />
@@ -436,7 +437,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
             variant="outline" 
             onClick={handleQuickBlock}
             disabled={isTracking || isPending || isCompleted || isPaused}
-            className="h-12 px-4 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white shrink-0 font-bold text-xs"
+            className="h-12 px-4 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-800 dark:text-white shrink-0 font-bold text-xs rounded-2xl shadow-xs"
             title="+25 min blok czasu"
           >
             + 25m
@@ -448,18 +449,18 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
               render={
                 <Button 
                   variant="outline" 
-                  className="h-12 border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white shrink-0 font-bold"
+                  className="h-12 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-800 dark:text-white shrink-0 font-bold rounded-2xl shadow-xs"
                   title="Historia Sesji"
                 >
-                  <History className="w-4 h-4 mr-2 text-purple-400" />
+                  <History className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
                   Historia
                 </Button>
               }
             />
-            <DialogContent className="bg-zinc-950 border border-zinc-800 text-zinc-100 sm:max-w-md w-[90vw] rounded-2xl p-6">
+            <DialogContent className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 sm:max-w-md w-[90vw] rounded-3xl p-6 shadow-2xl">
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <History className="w-5 h-5 text-purple-500" />
+                <DialogTitle className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+                  <History className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   Historia Sesji: {project.title}
                 </DialogTitle>
               </DialogHeader>
@@ -467,9 +468,9 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
               <div className="max-h-[60vh] overflow-y-auto pr-2 mt-4 space-y-3">
                 {timeLogs && timeLogs.length > 0 ? (
                   timeLogs.map(log => (
-                    <div key={log.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50">
+                    <div key={log.id} className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/50">
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium text-zinc-200">
+                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-200">
                           +{log.minutes} min
                         </span>
                         <span className="text-xs text-zinc-500">
@@ -480,7 +481,7 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                         </span>
                       </div>
                       <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center">
-                        <Play className="w-3 h-3 text-purple-400" />
+                        <Play className="w-3 h-3 text-purple-600 dark:text-purple-400" />
                       </div>
                     </div>
                   ))
@@ -496,19 +497,19 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
 
       {/* Modal Alert Limitu */}
       <Dialog open={limitAlertOpen} onOpenChange={setLimitAlertOpen}>
-        <DialogContent className="bg-zinc-950 border border-zinc-800 text-zinc-100 sm:max-w-md w-[90vw] rounded-2xl p-6">
+        <DialogContent className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 sm:max-w-md w-[90vw] rounded-3xl p-6 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-amber-400">
+            <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
               <AlertCircle className="w-5 h-5" />
               Limit 2 aktywnych projektów
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 my-2 text-sm text-zinc-300">
+          <div className="space-y-4 my-2 text-sm text-zinc-700 dark:text-zinc-300">
             <p>
               Masz już <strong>2 aktywne projekty</strong>. Aby wznowić ten projekt, musisz najpierw wstrzymać lub cofnąć do Inkubatora jeden z aktualnie prowadzonych projektów.
             </p>
             <div className="flex justify-end gap-2 pt-2">
-              <Button onClick={() => setLimitAlertOpen(false)} className="bg-purple-600 hover:bg-purple-500 text-white">
+              <Button onClick={() => setLimitAlertOpen(false)} className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl">
                 Rozumiem
               </Button>
             </div>

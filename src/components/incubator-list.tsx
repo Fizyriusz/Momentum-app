@@ -112,28 +112,28 @@ export function IncubatorList({
   return (
     <div className="space-y-6 mt-4">
       {/* Baner Twardego Limitu Aktywnych Projektów */}
-      <div className={`p-4 rounded-2xl border transition-all ${
+      <div className={`p-5 rounded-3xl border transition-all shadow-xs dark:shadow-none ${
         isLimitReached 
-          ? "bg-amber-500/10 border-amber-500/30 text-amber-200" 
-          : "bg-zinc-900/40 border-zinc-800/50 text-zinc-400"
+          ? "bg-amber-500/15 border-amber-500/30 text-amber-900 dark:text-amber-200" 
+          : "bg-white dark:bg-zinc-900/40 border-zinc-200/80 dark:border-zinc-800/50 text-zinc-600 dark:text-zinc-400"
       }`}>
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className={`p-2 rounded-xl shrink-0 ${isLimitReached ? "bg-amber-500/20 text-amber-400" : "bg-zinc-800 text-zinc-400"}`}>
+          <div className="flex items-start gap-3.5">
+            <div className={`p-2.5 rounded-2xl shrink-0 ${isLimitReached ? "bg-amber-500/20 text-amber-600 dark:text-amber-400" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"}`}>
               {isLimitReached ? <AlertCircle className="w-5 h-5" /> : <Lightbulb className="w-5 h-5" />}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-zinc-100">
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
                   Aktywne projekty: {activeCount} / {MAX_ACTIVE_PROJECTS}
                 </h3>
                 {isLimitReached && (
-                  <span className="text-[10px] uppercase font-bold tracking-wider bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">
+                  <span className="text-[10px] uppercase font-bold tracking-wider bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-md">
                     Limit Osiągnięty
                   </span>
                 )}
               </div>
-              <p className="text-xs mt-1 text-zinc-400 leading-relaxed">
+              <p className="text-xs mt-1 text-zinc-600 dark:text-zinc-400 leading-relaxed">
                 {isLimitReached 
                   ? "Osiągnięto twardy limit 2 aktywnych projektów. Aby aktywować kolejny projekt, musisz najpierw ukończyć, wstrzymać lub cofnąć do Inkubatora jeden z obecnych." 
                   : `Możesz aktywować jeszcze ${MAX_ACTIVE_PROJECTS - activeCount} projekt(y).`}
@@ -143,9 +143,9 @@ export function IncubatorList({
           {isLimitReached && (
             <Link 
               href="/projects" 
-              className="text-xs font-bold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg shrink-0 transition-colors"
+              className="text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-xl shrink-0 transition-colors shadow-xs"
             >
-              Zarządzaj aktywnymi
+              Zarządzaj
             </Link>
           )}
         </div>
@@ -157,10 +157,10 @@ export function IncubatorList({
           <button
             type="button"
             onClick={() => setSelectedFilterCategory("ALL")}
-            className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 ${
+            className={`text-xs px-3.5 py-1.5 rounded-xl font-bold transition-all shrink-0 shadow-xs ${
               selectedFilterCategory === "ALL"
-                ? "bg-yellow-500 text-black shadow-lg shadow-yellow-950/20"
-                : "bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+                ? "bg-amber-500 text-black shadow-md"
+                : "bg-white dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 border border-zinc-200 dark:border-zinc-800"
             }`}
           >
             Wszystkie ({projects.length})
@@ -174,14 +174,14 @@ export function IncubatorList({
                 key={cat}
                 type="button"
                 onClick={() => setSelectedFilterCategory(isSelected ? "ALL" : cat)}
-                className={`text-xs px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+                className={`text-xs px-3.5 py-1.5 rounded-xl font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-xs ${
                   isSelected
-                    ? "bg-yellow-500 text-black shadow-lg shadow-yellow-950/20"
-                    : "bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+                    ? "bg-amber-500 text-black shadow-md"
+                    : "bg-white dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 border border-zinc-200 dark:border-zinc-800"
                 }`}
               >
                 <span>{cat}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? "bg-black/20 text-black" : "bg-zinc-800 text-zinc-500"}`}>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${isSelected ? "bg-black/20 text-black" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"}`}>
                   {count}
                 </span>
               </button>
@@ -199,29 +199,29 @@ export function IncubatorList({
       ) : (
         Object.entries(projectsByCategory).map(([category, catProjects]) => (
           <div key={category} className="space-y-3">
-            <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-yellow-500/80"></span>
+            <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2 px-1">
+              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
               {category} ({catProjects.length})
             </h2>
             {catProjects.map((project) => (
               <div
                 key={project.id}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800/50 transition-all duration-200 gap-4"
+                className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-3xl bg-white dark:bg-zinc-900/60 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-800/50 transition-all duration-200 gap-4 shadow-xs dark:shadow-none"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-zinc-800 rounded-lg flex items-center justify-center shrink-0">
-                    <Lightbulb className="w-5 h-5 text-zinc-400" />
+                  <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center shrink-0">
+                    <Lightbulb className="w-5 h-5 text-amber-500" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-zinc-200">{project.title}</h3>
+                    <h3 className="font-bold text-zinc-900 dark:text-zinc-200">{project.title}</h3>
                     <div className="text-[10px] uppercase font-bold tracking-wider text-zinc-500 mt-0.5 flex items-center gap-2 flex-wrap">
                       <span>Status: INBOX</span>
                       {project.category && (
-                        <span className="text-yellow-500 bg-yellow-500/10 px-1.5 py-0.5 rounded">
+                        <span className="text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-md font-bold">
                           {project.category}
                         </span>
                       )}
-                      {project.goal && <span className="text-purple-400">• PRZYGOTOWANY</span>}
+                      {project.goal && <span className="text-purple-600 dark:text-purple-400 font-bold">• PRZYGOTOWANY</span>}
                     </div>
                   </div>
                 </div>
@@ -233,15 +233,15 @@ export function IncubatorList({
                   }}>
                     <DialogTrigger 
                       render={
-                        <Button variant="outline" className="border-zinc-700 bg-zinc-800 hover:bg-zinc-700 hover:text-white text-xs">
-                          <Settings2 className="w-3 h-3 mr-1.5" /> Przygotuj
+                        <Button variant="outline" className="border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 text-xs rounded-xl shadow-xs">
+                          <Settings2 className="w-3.5 h-3.5 mr-1.5 text-zinc-400" /> Przygotuj
                         </Button>
                       }
                     />
-                    <DialogContent className="bg-zinc-950 border border-zinc-800 text-zinc-100 sm:max-w-xl w-[90vw] rounded-2xl p-6">
+                    <DialogContent className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 sm:max-w-xl w-[90vw] rounded-3xl p-6 shadow-2xl">
                       <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                          <Lightbulb className="w-5 h-5 text-yellow-500" />
+                        <DialogTitle className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+                          <Lightbulb className="w-5 h-5 text-amber-500" />
                           Przygotowanie Projektu
                         </DialogTitle>
                       </DialogHeader>
@@ -254,7 +254,7 @@ export function IncubatorList({
                           <Input 
                             value={editedTitle}
                             onChange={e => setEditedTitle(e.target.value)}
-                            className="bg-zinc-900/50 border-zinc-800"
+                            className="bg-zinc-50 dark:bg-zinc-900/50 border-zinc-300 dark:border-zinc-800 rounded-xl"
                           />
                         </div>
 
@@ -272,10 +272,10 @@ export function IncubatorList({
                                   key={cat}
                                   type="button"
                                   onClick={() => setEditedCategory(cat)}
-                                  className={`text-xs px-2.5 py-1 rounded-lg transition-colors border ${
+                                  className={`text-xs px-2.5 py-1 rounded-xl transition-colors border ${
                                     editedCategory.trim().toLowerCase() === cat.toLowerCase()
-                                      ? "bg-yellow-500 text-black font-bold border-yellow-500"
-                                      : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200"
+                                      ? "bg-amber-500 text-black font-bold border-amber-500 shadow-xs"
+                                      : "bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
                                   }`}
                                 >
                                   {cat}
@@ -290,7 +290,7 @@ export function IncubatorList({
                               value={editedCategory}
                               onChange={e => setEditedCategory(e.target.value)}
                               placeholder="Wpisz nową kategorię lub wybierz z listy..."
-                              className="bg-zinc-900/50 border-zinc-800 text-xs"
+                              className="bg-zinc-50 dark:bg-zinc-900/50 border-zinc-300 dark:border-zinc-800 text-xs rounded-xl"
                             />
                             <datalist id="modal-categories-datalist">
                               {allCategories.map(cat => (
@@ -301,7 +301,7 @@ export function IncubatorList({
                               <button
                                 type="button"
                                 onClick={() => setEditedCategory("")}
-                                className="text-xs text-zinc-500 hover:text-zinc-300 shrink-0"
+                                className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 shrink-0 font-bold"
                               >
                                 Wyczyść
                               </button>
@@ -317,7 +317,7 @@ export function IncubatorList({
                             value={editedGoal}
                             onChange={e => setEditedGoal(e.target.value)}
                             placeholder="Np. Główny cel do osiągnięcia..."
-                            className="bg-zinc-900/50 border-zinc-800"
+                            className="bg-zinc-50 dark:bg-zinc-900/50 border-zinc-300 dark:border-zinc-800 rounded-xl"
                           />
                         </div>
                         
@@ -331,7 +331,7 @@ export function IncubatorList({
                               min="1"
                               value={editedTargetHours}
                               onChange={e => setEditedTargetHours(parseInt(e.target.value) || 0)}
-                              className="bg-zinc-900/50 border-zinc-800 text-sm"
+                              className="bg-zinc-50 dark:bg-zinc-900/50 border-zinc-300 dark:border-zinc-800 text-sm rounded-xl"
                             />
                           </div>
                           <div className="flex-1">
@@ -341,7 +341,7 @@ export function IncubatorList({
                             <select 
                               value={editedPeriod}
                               onChange={e => setEditedPeriod(e.target.value)}
-                              className="w-full h-10 px-3 py-2 rounded-md bg-zinc-900/50 border border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                              className="w-full h-10 px-3 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-300 dark:border-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                             >
                               <option value="WEEK">Tydzień</option>
                               <option value="MONTH">Miesiąc</option>
@@ -359,15 +359,15 @@ export function IncubatorList({
                             value={editedDescription}
                             onChange={e => setEditedDescription(e.target.value)}
                             placeholder="Szczegóły, notatki, linki..."
-                            className="bg-zinc-900/50 border-zinc-800 min-h-[120px]"
+                            className="bg-zinc-50 dark:bg-zinc-900/50 border-zinc-300 dark:border-zinc-800 min-h-[120px] rounded-xl"
                           />
                         </div>
                         
-                        <div className="flex items-center justify-between pt-4 border-t border-zinc-800/50">
+                        <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-zinc-800/50">
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs px-2"
+                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs px-3 rounded-xl"
                             onClick={() => handleDelete(project.id, project.title)}
                             disabled={isPending}
                           >
@@ -379,15 +379,16 @@ export function IncubatorList({
                               variant="ghost" 
                               onClick={() => setOpenModalId(null)}
                               disabled={isPending}
+                              className="rounded-xl text-xs"
                             >
                               Anuluj
                             </Button>
                             <Button 
-                              className="bg-purple-600 hover:bg-purple-500 text-white"
+                              className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs"
                               onClick={() => handleSaveDetails(project.id)}
                               disabled={isPending}
                             >
-                              <Save className="w-4 h-4 mr-2" /> Zapisz Detale
+                              <Save className="w-4 h-4 mr-1.5" /> Zapisz Detale
                             </Button>
                           </div>
                         </div>
@@ -401,7 +402,7 @@ export function IncubatorList({
                     size="sm"
                     onClick={() => handleDelete(project.id, project.title)}
                     disabled={isPending}
-                    className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10 h-9 w-9 p-0"
+                    className="text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 h-9 w-9 p-0 rounded-xl"
                     title="Usuń pomysł z Inkubatora"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -410,10 +411,10 @@ export function IncubatorList({
                   <Button
                     onClick={() => handleActivate(project.id)}
                     disabled={isPending}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all h-9 ${
+                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all h-9 shadow-xs ${
                       isLimitReached
-                        ? "bg-zinc-800 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300 border border-zinc-700/50"
-                        : "bg-purple-600 hover:bg-purple-500 text-white"
+                        ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-500 hover:bg-zinc-300 dark:hover:bg-zinc-700 hover:text-zinc-800 dark:hover:text-zinc-300 border border-zinc-300 dark:border-zinc-700/50"
+                        : "bg-purple-600 hover:bg-purple-700 text-white"
                     }`}
                   >
                     {isLimitReached ? <Lock className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
@@ -428,22 +429,22 @@ export function IncubatorList({
 
       {/* Modal Informacji o Twardym Limicie */}
       <Dialog open={limitAlertOpen} onOpenChange={setLimitAlertOpen}>
-        <DialogContent className="bg-zinc-950 border border-zinc-800 text-zinc-100 sm:max-w-md w-[90vw] rounded-2xl p-6">
+        <DialogContent className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 sm:max-w-md w-[90vw] rounded-3xl p-6 shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-amber-400">
+            <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
               <AlertCircle className="w-5 h-5" />
               Osiągnięto limit aktywnych projektów
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4 my-2 text-sm text-zinc-300">
+          <div className="space-y-4 my-2 text-sm text-zinc-700 dark:text-zinc-300">
             <p>
               Momentum to system egzekucji oparty na <strong>bezwzględnym skupieniu</strong>. Możesz prowadzić maksymalnie <strong>2 aktywne projekty</strong> jednocześnie.
             </p>
             
-            <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800 space-y-2 text-xs">
-              <p className="font-bold text-zinc-200">Aby zwolnić miejsce na nowy projekt:</p>
-              <ul className="list-disc list-inside text-zinc-400 space-y-1">
+            <div className="bg-zinc-100 dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-2 text-xs">
+              <p className="font-bold text-zinc-800 dark:text-zinc-200">Aby zwolnić miejsce na nowy projekt:</p>
+              <ul className="list-disc list-inside text-zinc-600 dark:text-zinc-400 space-y-1">
                 <li>Wstrzymaj obecny projekt (status <strong>PAUSED</strong>),</li>
                 <li>Przenieś go z powrotem do <strong>Inkubatora</strong>,</li>
                 <li>Lub oznacz jako zrealizowany.</li>
@@ -454,11 +455,12 @@ export function IncubatorList({
               <Button 
                 variant="ghost" 
                 onClick={() => setLimitAlertOpen(false)}
+                className="rounded-xl text-xs"
               >
                 Rozumiem
               </Button>
               <Link href="/projects" onClick={() => setLimitAlertOpen(false)}>
-                <Button className="bg-purple-600 hover:bg-purple-500 text-white">
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-xs">
                   Przejdź do Projektów
                 </Button>
               </Link>

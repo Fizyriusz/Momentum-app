@@ -104,8 +104,11 @@ export function TaskItem({ task }: { task: Task }) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <div
         className={`
-          group flex items-center justify-between p-3 rounded-xl transition-all duration-200 cursor-pointer
-          ${task.isCompleted ? "bg-zinc-900/20 opacity-50" : "bg-zinc-900/60 hover:bg-zinc-800/80"}
+          group flex items-center justify-between p-3.5 rounded-2xl transition-all duration-200 cursor-pointer border
+          ${task.isCompleted 
+            ? "bg-zinc-100/50 dark:bg-zinc-900/20 border-zinc-200/50 dark:border-zinc-800/30 opacity-60" 
+            : "bg-white dark:bg-zinc-900/60 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 border-zinc-200/80 dark:border-zinc-800/60 shadow-xs dark:shadow-none"
+          }
         `}
       >
         <div className="flex items-center gap-3 overflow-hidden flex-1">
@@ -116,10 +119,10 @@ export function TaskItem({ task }: { task: Task }) {
             }}
             disabled={isPending}
             className={`
-              shrink-0 w-5 h-5 rounded flex items-center justify-center border transition-colors
+              shrink-0 w-5 h-5 rounded-lg flex items-center justify-center border transition-all
               ${task.isCompleted 
-                ? "bg-purple-500 border-purple-500 text-white" 
-                : "border-zinc-600 text-transparent hover:border-purple-400 group-hover:border-purple-500"
+                ? "bg-purple-600 border-purple-600 text-white shadow-xs" 
+                : "border-zinc-300 dark:border-zinc-600 text-transparent hover:border-purple-500 group-hover:border-purple-500 bg-white/50 dark:bg-zinc-800/50"
               }
             `}
           >
@@ -127,15 +130,15 @@ export function TaskItem({ task }: { task: Task }) {
           </button>
           
           <DialogTrigger className="flex flex-col flex-1 text-left bg-transparent border-none p-0 cursor-pointer focus:outline-none">
-            <span className={`text-sm font-medium truncate ${task.isCompleted ? "line-through text-zinc-500" : "text-zinc-200"}`}>
+            <span className={`text-sm font-semibold truncate ${task.isCompleted ? "line-through text-zinc-400 dark:text-zinc-500" : "text-zinc-900 dark:text-zinc-200"}`}>
               {task.title}
             </span>
             {(task.dueDate || task.description || task.placeId || task.taskListId) && !task.isCompleted && (
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 {task.dueDate && (
                   <div className="flex items-center gap-1">
-                    <Calendar className={`w-3 h-3 ${isOverdue ? "text-red-400" : (isToday ? "text-purple-400" : "text-zinc-500")}`} />
-                    <span className={`text-[10px] uppercase tracking-wider font-bold ${isOverdue ? "text-red-400" : (isToday ? "text-purple-400" : "text-zinc-500")}`}>
+                    <Calendar className={`w-3 h-3 ${isOverdue ? "text-red-500" : (isToday ? "text-purple-600 dark:text-purple-400" : "text-zinc-500")}`} />
+                    <span className={`text-[10px] uppercase tracking-wider font-bold ${isOverdue ? "text-red-500 font-black" : (isToday ? "text-purple-600 dark:text-purple-400" : "text-zinc-500")}`}>
                       {isToday ? "Dzisiaj" : new Date(task.dueDate).toLocaleDateString("pl-PL", { day: "numeric", month: "short" })}
                     </span>
                   </div>
@@ -148,8 +151,8 @@ export function TaskItem({ task }: { task: Task }) {
                 )}
                 {task.placeId && (
                   <div className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-blue-400" />
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-blue-400 truncate max-w-[80px]">
+                    <MapPin className="w-3 h-3 text-blue-500 dark:text-blue-400" />
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-blue-600 dark:text-blue-400 truncate max-w-[80px]">
                       {places.find(p => p.id === task.placeId)?.name || "Miejsce"}
                     </span>
                   </div>
@@ -165,7 +168,7 @@ export function TaskItem({ task }: { task: Task }) {
             {task.tagNames.map(name => (
               <span 
                 key={name}
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-400`}
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200/50 dark:border-zinc-700/50`}
               >
                 #{name}
               </span>
@@ -174,9 +177,9 @@ export function TaskItem({ task }: { task: Task }) {
         )}
       </div>
 
-      <DialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100 max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-2xl p-6">
+      <DialogContent className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="text-lg font-black uppercase tracking-tight">Szczegóły Zadania</DialogTitle>
+          <DialogTitle className="text-lg font-black uppercase tracking-tight text-zinc-900 dark:text-zinc-100">Szczegóły Zadania</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 py-2">
@@ -186,18 +189,18 @@ export function TaskItem({ task }: { task: Task }) {
             <input 
               value={title} 
               onChange={e => setTitle(e.target.value)} 
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-zinc-200 focus:outline-none focus:border-purple-500 font-medium"
+              className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:border-purple-500 font-medium"
             />
           </div>
 
           {/* Data wykonania (Termin) */}
-          <div className="space-y-2 p-3.5 bg-zinc-900/40 border border-zinc-800/60 rounded-xl">
-            <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
+          <div className="space-y-2 p-3.5 bg-zinc-100/70 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/60 rounded-2xl">
+            <label className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-purple-400" /> Termin wykonania
+                <Calendar className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" /> Termin wykonania
               </span>
               {dateStr ? (
-                <span className="text-[10px] text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded">
+                <span className="text-[10px] text-purple-700 dark:text-purple-300 bg-purple-500/15 px-2 py-0.5 rounded-md font-bold">
                   {dateStr}
                 </span>
               ) : (
@@ -209,22 +212,22 @@ export function TaskItem({ task }: { task: Task }) {
               <button
                 type="button"
                 onClick={setTodayDate}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors shadow-xs"
               >
-                <Sun className="w-3 h-3 text-purple-400" /> Dzisiaj
+                <Sun className="w-3 h-3 text-purple-600 dark:text-purple-400" /> Dzisiaj
               </button>
               <button
                 type="button"
                 onClick={setTomorrowDate}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 transition-colors shadow-xs"
               >
-                <Sunset className="w-3 h-3 text-purple-400" /> Jutro
+                <Sunset className="w-3 h-3 text-purple-600 dark:text-purple-400" /> Jutro
               </button>
               {dateStr && (
                 <button
                   type="button"
                   onClick={clearDate}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-zinc-800 hover:bg-red-500/20 text-red-400 transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-zinc-800 hover:bg-red-500/10 text-red-600 dark:text-red-400 border border-zinc-200 dark:border-zinc-700 transition-colors shadow-xs"
                 >
                   <CalendarX className="w-3 h-3" /> Usuń datę (Inbox)
                 </button>
@@ -236,7 +239,7 @@ export function TaskItem({ task }: { task: Task }) {
                 type="date"
                 value={dateStr}
                 onChange={(e) => setDateStr(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-purple-500"
+                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-zinc-300 focus:outline-none focus:border-purple-500"
               />
             </div>
           </div>
@@ -250,7 +253,7 @@ export function TaskItem({ task }: { task: Task }) {
               <select
                 value={taskListId || ""}
                 onChange={e => setTaskListId(e.target.value || null)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-purple-500 font-medium"
               >
                 <option value="">Brak (Domyślna / Inbox)</option>
                 {taskLists.map(list => (
@@ -266,7 +269,7 @@ export function TaskItem({ task }: { task: Task }) {
               <select
                 value={projectId || ""}
                 onChange={e => setProjectId(e.target.value || null)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-purple-500 font-medium"
               >
                 <option value="">Brak (Bez projektu)</option>
                 {projects.map(p => (
@@ -286,10 +289,10 @@ export function TaskItem({ task }: { task: Task }) {
               onChange={e => setDescription(e.target.value)} 
               rows={3}
               placeholder="Zanotuj szczegóły, linki, przemyślenia..."
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500 font-mono resize-y"
+              className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-purple-500 font-mono resize-y"
             />
             {description && (
-              <div className="p-3 bg-zinc-900/50 rounded-lg border border-zinc-800/50 mt-1 text-xs prose prose-invert max-w-none">
+              <div className="p-3 bg-zinc-100 dark:bg-zinc-900/50 rounded-xl border border-zinc-200 dark:border-zinc-800/50 mt-1 text-xs prose dark:prose-invert max-w-none text-zinc-800 dark:text-zinc-300">
                 <ReactMarkdown>{description}</ReactMarkdown>
               </div>
             )}
@@ -298,12 +301,12 @@ export function TaskItem({ task }: { task: Task }) {
           {/* Miejsca */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-blue-400" /> Powiązane miejsce
+              <MapPin className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" /> Powiązane miejsce
             </label>
             <select
               value={placeId || ""}
               onChange={e => setPlaceId(e.target.value || null)}
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500"
+              className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-purple-500 font-medium"
             >
               <option value="">Brak (Zadanie niezależne od miejsca)</option>
               {places.map(place => (
@@ -323,7 +326,7 @@ export function TaskItem({ task }: { task: Task }) {
               value={tagNames} 
               onChange={e => setTagNames(e.target.value)} 
               placeholder="np. pilne, finanse, praca"
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500"
+              className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-purple-500 font-medium"
             />
           </div>
 
@@ -336,31 +339,31 @@ export function TaskItem({ task }: { task: Task }) {
               value={imageUrl} 
               onChange={e => setImageUrl(e.target.value)} 
               placeholder="https://..."
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-purple-500"
+              className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-purple-500 font-medium"
             />
             {imageUrl && (
-              <div className="mt-2 rounded-lg overflow-hidden border border-zinc-800">
+              <div className="mt-2 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
                 <img src={imageUrl} alt="Podgląd" className="w-full h-auto object-cover max-h-40" />
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+        <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-zinc-800">
           <Button 
             variant="ghost"
             size="sm"
             onClick={handleDelete}
             disabled={isPending}
-            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs px-2"
+            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs px-3 rounded-xl"
           >
-            <Trash2 className="w-4 h-4 mr-1" /> Usuń
+            <Trash2 className="w-4 h-4 mr-1.5" /> Usuń
           </Button>
 
           <Button 
             onClick={handleSave}
             disabled={isPending}
-            className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs"
+            className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-4 rounded-xl shadow-xs"
           >
             <Save className="w-3.5 h-3.5 mr-1.5" /> Zapisz Zmiany
           </Button>

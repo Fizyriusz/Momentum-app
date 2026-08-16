@@ -93,7 +93,7 @@ export function EditTaskListDialog({
             <Button 
               variant="outline"
               size="sm" 
-              className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs"
+              className="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 text-xs rounded-xl shadow-xs"
             >
               <Settings2 className="w-3.5 h-3.5 mr-1" /> Ustawienia Listy
             </Button>
@@ -101,10 +101,10 @@ export function EditTaskListDialog({
         }
       />
 
-      <DialogContent className="bg-zinc-950 border border-zinc-800 text-zinc-100 sm:max-w-md w-[90vw] rounded-2xl p-6">
+      <DialogContent className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 sm:max-w-md w-[90vw] rounded-3xl p-6 shadow-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg font-black uppercase tracking-tight">
-            <Settings2 className="w-5 h-5 text-purple-500" />
+          <DialogTitle className="flex items-center gap-2 text-lg font-black uppercase tracking-tight text-zinc-900 dark:text-zinc-100">
+            <Settings2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             Edycja Listy Zadań
           </DialogTitle>
         </DialogHeader>
@@ -118,7 +118,7 @@ export function EditTaskListDialog({
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="bg-zinc-900/50 border-zinc-800 text-sm font-medium"
+              className="bg-zinc-50 dark:bg-zinc-900/50 border-zinc-300 dark:border-zinc-800 text-sm font-medium rounded-xl"
               required
             />
           </div>
@@ -138,8 +138,8 @@ export function EditTaskListDialog({
                     onClick={() => setSelectedIcon(key)}
                     className={`p-2.5 rounded-xl border flex items-center justify-center transition-all ${
                       isSelected 
-                        ? "bg-purple-500/20 border-purple-500 text-purple-300 scale-105" 
-                        : "bg-zinc-900/40 border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+                        ? "bg-purple-500/20 border-purple-500 text-purple-700 dark:text-purple-300 scale-105 shadow-xs" 
+                        : "bg-zinc-100 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800"
                     }`}
                   >
                     <IconComp className="w-4 h-4" />
@@ -163,7 +163,7 @@ export function EditTaskListDialog({
                     type="button"
                     onClick={() => setSelectedColor(col.id)}
                     className={`w-6 h-6 rounded-full ${col.bg} transition-all relative flex items-center justify-center ${
-                      isSelected ? "ring-2 ring-white ring-offset-2 ring-offset-zinc-950 scale-110" : "opacity-60 hover:opacity-100"
+                      isSelected ? "ring-2 ring-purple-600 dark:ring-white ring-offset-2 ring-offset-white dark:ring-offset-zinc-950 scale-110" : "opacity-60 hover:opacity-100"
                     }`}
                   />
                 );
@@ -179,7 +179,7 @@ export function EditTaskListDialog({
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="w-full h-10 px-3 rounded-xl bg-zinc-900/50 border border-zinc-800 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full h-10 px-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-300 dark:border-zinc-800 text-sm text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="">Brak (Lista ogólna / niezależna)</option>
               {allProjects.map((p) => (
@@ -190,7 +190,7 @@ export function EditTaskListDialog({
             </select>
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-zinc-800/50">
+          <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-zinc-800/50">
             <div className="flex items-center gap-2">
               <Button
                 type="button"
@@ -198,10 +198,10 @@ export function EditTaskListDialog({
                 size="sm"
                 onClick={handleDelete}
                 disabled={isPending}
-                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs px-2"
+                className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs px-3 rounded-xl"
                 title="Usuń listę"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4 h-4 mr-1" /> Usuń
               </Button>
 
               <Button
@@ -210,10 +210,10 @@ export function EditTaskListDialog({
                 size="sm"
                 onClick={handleToggleArchive}
                 disabled={isPending}
-                className="text-zinc-400 hover:text-zinc-200 text-xs px-2"
+                className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 text-xs px-3 rounded-xl"
                 title={taskList.isArchived ? "Przywróć listę" : "Zarchiwizuj listę"}
               >
-                <Archive className="w-4 h-4" />
+                <Archive className="w-4 h-4 mr-1" /> {taskList.isArchived ? "Przywróć" : "Archiwizuj"}
               </Button>
             </div>
 
@@ -223,13 +223,14 @@ export function EditTaskListDialog({
                 variant="ghost"
                 onClick={() => setOpen(false)}
                 disabled={isPending}
+                className="rounded-xl text-xs"
               >
                 Anuluj
               </Button>
               <Button
                 type="submit"
                 disabled={isPending || !name.trim()}
-                className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-wider"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-xs"
               >
                 <Save className="w-3.5 h-3.5 mr-1.5" /> Zapisz
               </Button>

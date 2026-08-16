@@ -47,16 +47,16 @@ export default function IncubatorPage() {
   return (
     <main className="min-h-full px-4 py-8 lg:px-12 max-w-4xl mx-auto flex flex-col gap-6">
       <header className="flex items-center gap-3">
-        <div className="p-3 bg-yellow-500/10 rounded-xl">
-          <Lightbulb className="w-6 h-6 text-yellow-500" />
+        <div className="p-3 bg-amber-500/10 rounded-2xl">
+          <Lightbulb className="w-6 h-6 text-amber-500" />
         </div>
         <div>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-100">Inkubator</h1>
+          <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-900 dark:text-zinc-100">Inkubator</h1>
           <p className="text-zinc-500 text-sm font-medium mt-0.5">Poczekalnia na nowe projekty i koncepcje.</p>
         </div>
       </header>
 
-      <section className="bg-zinc-950 rounded-2xl p-1">
+      <section className="bg-white/60 dark:bg-zinc-950 rounded-3xl p-1">
         {/* Formularz dodawania pomysłu z kategoriami */}
         <form onSubmit={handleAdd} className="space-y-3 mb-6">
           <div className="flex gap-2 w-full relative">
@@ -65,13 +65,13 @@ export default function IncubatorPage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Opisz nowy pomysł na projekt..."
               disabled={isSubmitting}
-              className="flex-1 bg-zinc-900/50 border border-zinc-800 text-zinc-100 placeholder:text-zinc-500 rounded-xl h-12 pl-4 pr-12 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-sm"
+              className="flex-1 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 rounded-2xl h-12 pl-4 pr-12 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm shadow-xs dark:shadow-none font-medium"
               required
             />
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="absolute right-1 top-1 h-10 w-10 flex items-center justify-center rounded-lg bg-yellow-600 hover:bg-yellow-500 text-white disabled:opacity-50 transition-colors"
+              className="absolute right-1 top-1 h-10 w-10 flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-600 text-white disabled:opacity-50 transition-colors shadow-xs"
             >
               <Plus className="w-5 h-5" />
             </button>
@@ -83,13 +83,13 @@ export default function IncubatorPage() {
               <button
                 type="button"
                 onClick={() => setShowCategoryInput(!showCategoryInput)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                   category || showCategoryInput
-                    ? "bg-yellow-500/20 text-yellow-300 border-yellow-500/40"
-                    : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-zinc-200"
+                    ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40"
+                    : "bg-white dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 shadow-xs dark:shadow-none"
                 }`}
               >
-                <Tag className="w-3 h-3" />
+                <Tag className="w-3.5 h-3.5" />
                 {category ? `Kategoria: ${category}` : "+ Kategoria"}
               </button>
 
@@ -104,10 +104,10 @@ export default function IncubatorPage() {
                       setCategory(isSelected ? "" : cat);
                       setShowCategoryInput(false);
                     }}
-                    className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
+                    className={`text-xs px-3 py-1.5 rounded-xl font-medium transition-all ${
                       isSelected
-                        ? "bg-yellow-500 text-black font-bold scale-105"
-                        : "bg-zinc-900/80 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 border border-zinc-800/80"
+                        ? "bg-amber-500 text-black font-bold scale-105 shadow-xs"
+                        : "bg-white dark:bg-zinc-900/80 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800/80 shadow-xs dark:shadow-none"
                     }`}
                   >
                     {cat}
@@ -124,7 +124,7 @@ export default function IncubatorPage() {
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="Wpisz nową kategorię lub wybierz..."
-                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-yellow-500 w-64"
+                  className="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-amber-500 w-64 shadow-xs"
                   autoFocus
                 />
                 <datalist id="categories-datalist">
@@ -136,7 +136,7 @@ export default function IncubatorPage() {
                   <button
                     type="button"
                     onClick={() => setCategory("")}
-                    className="text-xs text-zinc-500 hover:text-zinc-300"
+                    className="text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 font-bold"
                   >
                     Wyczyść
                   </button>

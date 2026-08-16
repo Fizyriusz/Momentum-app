@@ -88,7 +88,11 @@ export function MiniTimer({ projects }: { projects: Project[] }) {
   if (projects.length === 0) return null;
 
   return (
-    <div className={`p-4 rounded-2xl border transition-all duration-300 flex items-center justify-between gap-4 backdrop-blur-md ${isTracking ? 'bg-purple-900/20 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.15)] ring-1 ring-purple-500/30' : 'bg-zinc-900/40 border-zinc-800/50'}`}>
+    <div className={`p-4 rounded-3xl border transition-all duration-300 flex items-center justify-between gap-4 backdrop-blur-md shadow-xs ${
+      isTracking 
+        ? 'bg-purple-500/15 dark:bg-purple-900/20 border-purple-500/50 shadow-md ring-1 ring-purple-500/30' 
+        : 'bg-white dark:bg-zinc-900/40 border-zinc-200/80 dark:border-zinc-800/50'
+    }`}>
       
       <div className="flex-1 flex flex-col gap-1.5">
         <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Rejestrator Czasu</label>
@@ -96,17 +100,17 @@ export function MiniTimer({ projects }: { projects: Project[] }) {
           disabled={isTracking}
           value={activeProjectId || ""}
           onChange={(e) => setActiveProjectId(e.target.value)}
-          className="bg-transparent text-zinc-200 text-sm font-medium focus:outline-none appearance-none cursor-pointer w-full"
+          className="bg-transparent text-zinc-900 dark:text-zinc-200 text-sm font-semibold focus:outline-none appearance-none cursor-pointer w-full"
         >
           {projects.map(p => (
-            <option key={p.id} value={p.id} className="bg-zinc-900">{p.title}</option>
+            <option key={p.id} value={p.id} className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">{p.title}</option>
           ))}
         </select>
       </div>
 
       <div className="flex items-center gap-3">
         {isTracking ? (
-          <div className="font-mono text-lg font-bold text-purple-400 w-16 text-center tabular-nums">
+          <div className="font-mono text-lg font-bold text-purple-600 dark:text-purple-400 w-16 text-center tabular-nums">
             {formatTimer(elapsedSeconds)}
           </div>
         ) : null}
@@ -114,13 +118,13 @@ export function MiniTimer({ projects }: { projects: Project[] }) {
         <button
           onClick={isTracking ? handleStop : handleStart}
           disabled={isPending}
-          className={`h-12 w-12 rounded-xl flex items-center justify-center transition-all ${
+          className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all shadow-xs ${
             isTracking 
-              ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' 
-              : 'bg-purple-600 text-white hover:bg-purple-500 shadow-lg shadow-purple-900/50'
+              ? 'bg-red-500/15 text-red-600 dark:text-red-400 hover:bg-red-500/25 border border-red-500/30' 
+              : 'bg-purple-600 text-white hover:bg-purple-700 shadow-md shadow-purple-600/20'
           }`}
         >
-          {isTracking ? <Square className="w-5 h-5" fill="currentColor" /> : <Play className="w-5 h-5 ml-1" fill="currentColor" />}
+          {isTracking ? <Square className="w-5 h-5" fill="currentColor" /> : <Play className="w-5 h-5 ml-0.5" fill="currentColor" />}
         </button>
       </div>
       
