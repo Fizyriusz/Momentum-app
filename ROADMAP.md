@@ -53,7 +53,8 @@ Niniejszy dokument jest nadrzędnym planem rozwoju systemu **Momentum**, podziel
 *Cel: Przekształcenie systemu w potężną przestrzeń myśli (Second Brain) oraz lokalnego asystenta decyzyjnego.*
 
 - [ ] **Etap 3.1: Infinite Canvas / Obsidian-style Mind Map dla Zadań i Notatek (`/graph`)** `[DO ZROBIENIA]`
-  - **Tryb 1 (Sieć Fizyczna):** Zachowanie obecnego grafu 2D ze sprężystą fizyką węzłów i dynamicznymi powiązaniami relacyjnymi.
+  - **Tryb 1 (Sieć Fizyczna Obsidian Dark-Tech):** Sprężysta fizyka węzłów z soczystymi kulami, etykietami monospace i filtrami kategorii (wdrożone w `v0.8.5`).
+  - **Przełącznik stylu węzłów:** Możliwość przełączania widoku między `Kule (Orbs)` a `Karty z napisami (Pills/Labels)` w odpowiednich kolorach.
   - **Tryb 2 (Infinite Canvas / Mind Mapa):** Nieskończone, czyste płótno z siatką (dot grid), stałe pozycje kart `(x, y)` zapisywane w chmurze, ręczne łączenie bloczków strzałkami z własnymi etykietami.
 
 - [ ] **Etap 3.2: Lokalne Offline AI: Profil Decyzyjny & Wycena Opłacalności Projektów** `[DO ZROBIENIA]`

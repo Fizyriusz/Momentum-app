@@ -10,7 +10,7 @@ export default function ChangelogPage() {
 
       <section className="space-y-8">
         
-        {/* v0.8.1 - AKTUALNA WERSJA */}
+        {/* v0.8.5 - AKTUALNA WERSJA */}
         <div className="bg-white dark:bg-zinc-900/40 border border-purple-500/40 dark:border-purple-500/30 rounded-3xl p-6 backdrop-blur-md relative overflow-hidden shadow-md dark:shadow-none">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-3">
@@ -19,9 +19,9 @@ export default function ChangelogPage() {
               </div>
               <div>
                 <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                  <span className="text-purple-600 dark:text-purple-400">v0.8.1</span> - Stabilizacja Grafu 2D & Naprawa Notatek
+                  <span className="text-purple-600 dark:text-purple-400">v0.8.5</span> - Nowy Silnik Wizualny Grafu 2D (Obsidian Dark-Tech) & System Filtrów
                 </h2>
-                <p className="text-xs text-zinc-500 font-medium">Poprawki stabilności i optymalizacja zapytań</p>
+                <p className="text-xs text-zinc-500 font-medium">Zaawansowana wizualizacja sieci powiązań i eksploracja wiedzy</p>
               </div>
             </div>
             <span className="text-xs font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-xl border border-purple-500/30">
@@ -31,15 +31,37 @@ export default function ChangelogPage() {
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Zrealizowane Poprawki</h3>
+              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Główne Zmiany Grafu</h3>
               <ul className="space-y-2 text-zinc-700 dark:text-zinc-300 text-sm list-disc list-inside">
-                <li><strong>Stabilizacja Grafu Relacji (D3 Safe Links):</strong> Wprowadzono filtr połączeń uniemożliwiający awarię symulacji D3 przy odwołaniach do usuniętych list lub projektów.</li>
-                <li><strong>Interakcja Grafu:</strong> Kliknięcie w węzeł płynnie przybliża go i wyśrodkowuje na ekranie, a kliknięcie w tło resetuje widok. Usunięto mimowolne uciekanie kamery.</li>
-                <li><strong>Optymalizacja Zapytań Notatek:</strong> Przeniesiono sortowanie notatek na stronę klienta, eliminując błąd wymagania indeksu złożonego w Firestore.</li>
-                <li><strong>Poprawka Manifestu PWA:</strong> Naprawiono ścieżkę ikony w <code>manifest.json</code>.</li>
+                <li><strong>Estetyka Obsidian Dark-Tech:</strong> Przejście z prostokątnych ramek na soczyste, neonowe kule ze świecącą poświatą (Aura Glow) i minimalistyczną typografią monospace (<code>Geist Mono</code> / <code>Consolas</code>) umieszczoną pod węzłami.</li>
+                <li><strong>Hierarchia Kolorów i Rozmiarów:</strong>
+                  <ul className="list-circle list-inside ml-6 mt-1 space-y-1 text-xs text-zinc-600 dark:text-zinc-400">
+                    <li>🟣 <strong>Główne Projekty:</strong> Duże fioletowe kule (<code>#a855f7</code>) jako centra grawitacji.</li>
+                    <li>🟡 <strong>Inkubator:</strong> Bursztynowo-złote kule (<code>#f59e0b</code>) dla pomysłów w poczekalni.</li>
+                    <li>🗂️ <strong>Listy Zadań:</strong> Średnie indygo kule (<code>#6366f1</code>) spajające zadania.</li>
+                    <li>⚪ <strong>Zadania Otwarte:</strong> Drobne chłodno-szare kule (<code>#94a3b8</code>) — zadania wykonane są ukrywane.</li>
+                    <li>🔵 <strong>Notatki:</strong> Lazurowo-błękitne kule (<code>#3b82f6</code>).</li>
+                    <li>📍 <strong>Miejsca GPS:</strong> Turkusowo-morskie kule (<code>#06b6d4</code>).</li>
+                    <li>💖 <strong>Tagi:</strong> Neonowo-różowe kule (<code>#ec4899</code>).</li>
+                  </ul>
+                </li>
+                <li><strong>Interaktywny Pasek Filtrów (Pills):</strong> Dolny pływający pasek umożliwiający włączanie i wyłączanie widoczności dowolnej kategorii elementów w czasie rzeczywistym z licznikami obiektów.</li>
+                <li><strong>Dynamiczna Interakcja:</strong> Płynne przybliżenie (<code>zoom 2.8</code>) po kliknięciu w węzeł oraz wyśrodkowanie całości po kliknięciu w tło.</li>
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* v0.8.1 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-600 dark:text-purple-400">v0.8.1</span> - Stabilizacja Grafu 2D & Naprawa Notatek
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-600 dark:text-zinc-400 space-y-2 ml-2">
+            <li>Filtr bezpiecznych połączeń D3 zapobiegający awarii przy usuniętych listach.</li>
+            <li>Optymalizacja zapytań notatek bez konieczności tworzenia indeksu w Firestore.</li>
+            <li>Poprawka ikony w manifest.json.</li>
+          </ul>
         </div>
 
         {/* v0.8.0 */}

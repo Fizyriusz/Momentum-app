@@ -7,11 +7,32 @@ import { useTasks, useTaskLists } from "@/lib/services/tasks";
 import { useNotes } from "@/lib/services/notes";
 import { usePlaces } from "@/lib/services/places";
 import { useTheme } from "@/components/theme-provider";
-import { Network, ZoomIn, ZoomOut, Focus } from "lucide-react";
+import { 
+  Network, 
+  ZoomIn, 
+  ZoomOut, 
+  Focus, 
+  Filter,
+  Check,
+  Eye,
+  EyeOff
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Dynamic import with SSR disabled for Canvas 2D
+// Dynamiczny import wyłączający SSR dla silnika Canvas 2D
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false });
+
+type FilterType = "projects" | "incubator" | "lists" | "tasks" | "notes" | "places" | "tags";
+
+const FILTER_CONFIG: Record<FilterType, { label: string; color: string; bgActive: string; border: string }> = {
+  projects: { label: "Projekty", color: "#a855f7", bgActive: "bg-purple-500/15 text-purple-700 dark:text-purple-300", border: "border-purple-500/40" },
+  incubator: { label: "Inkubator", color: "#f59e0b", bgActive: "bg-amber-500/15 text-amber-700 dark:text-amber-300", border: "border-amber-500/40" },
+  lists: { label: "Listy Zadań", color: "#6366f1", bgActive: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300", border: "border-indigo-500/40" },
+  tasks: { label: "Zadania Otwarte", color: "#94a3b8", bgActive: "bg-slate-500/15 text-slate-700 dark:text-slate-300", border: "border-slate-500/40" },
+  notes: { label: "Notatki", color: "#3b82f6", bgActive: "bg-blue-500/15 text-blue-700 dark:text-blue-300", border: "border-blue-500/40" },
+  places: { label: "Miejsca", color: "#06b6d4", bgActive: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300", border: "border-cyan-500/40" },
+  tags: { label: "Tagi", color: "#ec4899", bgActive: "bg-pink-500/15 text-pink-700 dark:text-pink-300", border: "border-pink-500/40" },
+};
 
 export default function GraphPage() {
   const { theme } = useTheme();
@@ -44,6 +65,21 @@ export default function GraphPage() {
     height: 800
   });
 
+  // Filtry widoczności kategorii
+  const [filters, setFilters] = useState<Record<FilterType, boolean>>({
+    projects: true,
+    incubator: true,
+    lists: true,
+    tasks: true,
+    notes: true,
+    places: true,
+    tags: true,
+  });
+
+  const toggleFilter = (key: FilterType) => {
+    setFilters(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   useEffect(() => {
     const updateSize = () => {
       if (containerRef.current) {
@@ -68,121 +104,184 @@ export default function GraphPage() {
     };
   }, []);
 
+  // Zliczanie elementów dla filtrów
+  const counts = useMemo(() => {
+    const activeProjectsCount = projects.filter(p => p.status === "ACTIVE" || p.status === "PAUSED").length;
+    const incubatorCount = projects.filter(p => p.status === "INBOX").length;
+    const openTasksCount = tasks.filter(t => !t.isCompleted).length;
+    const tagsSet = new Set<string>();
+    tasks.filter(t => !t.isCompleted).forEach(t => t.tagNames?.forEach(tag => tagsSet.add(tag.toLowerCase())));
+
+    return {
+      projects: activeProjectsCount,
+      incubator: incubatorCount,
+      lists: taskLists.length,
+      tasks: openTasksCount,
+      notes: notes.length,
+      places: places.length,
+      tags: tagsSet.size,
+    };
+  }, [projects, taskLists, tasks, notes, places]);
+
+  // Generowanie grafu
   const graphData = useMemo(() => {
     const nodes: any[] = [];
     const links: any[] = [];
 
-    // Główne węzły (Projekty)
-    projects.forEach(project => {
-      nodes.push({
-        id: `project_${project.id}`,
-        name: project.title,
-        val: 10,
-        color: project.status === "ACTIVE" ? (isDark ? "#c084fc" : "#9333ea") : (project.status === "PAUSED" ? "#f59e0b" : (isDark ? "#71717a" : "#64748b")),
-        type: "Projekt"
+    // 1. Główne Projekty (ACTIVE / PAUSED)
+    if (filters.projects) {
+      projects.filter(p => p.status === "ACTIVE" || p.status === "PAUSED").forEach(project => {
+        nodes.push({
+          id: `project_${project.id}`,
+          name: project.title,
+          radius: 13,
+          color: "#a855f7",
+          glowColor: "rgba(168, 85, 247, 0.4)",
+          category: "projects",
+          type: "Projekt"
+        });
       });
-    });
+    }
 
-    // Węzły List Zadań
-    taskLists.forEach(list => {
-      nodes.push({
-        id: `list_${list.id}`,
-        name: list.name,
-        val: 6,
-        color: isDark ? "#a855f7" : "#7c3aed",
-        type: "Lista"
+    // 2. Inkubator (INBOX)
+    if (filters.incubator) {
+      projects.filter(p => p.status === "INBOX").forEach(idea => {
+        nodes.push({
+          id: `project_${idea.id}`,
+          name: idea.title,
+          radius: 9,
+          color: "#f59e0b",
+          glowColor: "rgba(245, 158, 11, 0.35)",
+          category: "incubator",
+          type: "Inkubator"
+        });
       });
+    }
 
-      if (list.projectId) {
-        links.push({
-          source: `list_${list.id}`,
-          target: `project_${list.projectId}`
+    // 3. Listy Zadań
+    if (filters.lists) {
+      taskLists.forEach(list => {
+        nodes.push({
+          id: `list_${list.id}`,
+          name: list.name,
+          radius: 8,
+          color: "#6366f1",
+          glowColor: "rgba(99, 102, 241, 0.35)",
+          category: "lists",
+          type: "Lista"
         });
-      }
-    });
 
-    // Węzły Zadań
-    tasks.forEach(task => {
-      nodes.push({
-        id: `task_${task.id}`,
-        name: task.title,
-        val: 3,
-        color: task.isCompleted ? "#10b981" : (isDark ? "#e4e4e7" : "#18181b"),
-        type: "Zadanie"
+        if (list.projectId) {
+          links.push({
+            source: `list_${list.id}`,
+            target: `project_${list.projectId}`
+          });
+        }
       });
+    }
 
-      // Powiązanie z listą lub projektem
-      if (task.taskListId) {
-        links.push({
-          source: `task_${task.id}`,
-          target: `list_${task.taskListId}`
+    // 4. Zadania Otwarte (Ukrywamy zadania wykonane)
+    const activeTasks = tasks.filter(t => !t.isCompleted);
+    if (filters.tasks) {
+      activeTasks.forEach(task => {
+        nodes.push({
+          id: `task_${task.id}`,
+          name: task.title,
+          radius: 4.5,
+          color: isDark ? "#e2e8f0" : "#475569",
+          glowColor: "transparent",
+          category: "tasks",
+          type: "Zadanie"
         });
-      } else if (task.projectId) {
-        links.push({
-          source: `task_${task.id}`,
-          target: `project_${task.projectId}`
-        });
-      }
-      
-      // Powiązanie z miejscem
-      if (task.placeId) {
-        links.push({
-          source: `task_${task.id}`,
-          target: `place_${task.placeId}`
-        });
-      }
-      
-      // Tagi
-      if (task.tagNames) {
-        task.tagNames.forEach(tag => {
-          const tagId = `tag_${tag.toLowerCase()}`;
-          if (!nodes.find(n => n.id === tagId)) {
-            nodes.push({
-              id: tagId,
-              name: `#${tag}`,
-              val: 5,
-              color: "#f43f5e",
-              type: "Tag"
-            });
-          }
+
+        // Relacje zadania
+        if (task.taskListId) {
           links.push({
             source: `task_${task.id}`,
-            target: tagId
+            target: `list_${task.taskListId}`
           });
-        });
-      }
-    });
-
-    // Węzły Notatek
-    notes.forEach(note => {
-      nodes.push({
-        id: `note_${note.id}`,
-        name: note.title,
-        val: 4,
-        color: "#3b82f6",
-        type: "Notatka"
+        } else if (task.projectId) {
+          links.push({
+            source: `task_${task.id}`,
+            target: `project_${task.projectId}`
+          });
+        }
+        
+        if (task.placeId) {
+          links.push({
+            source: `task_${task.id}`,
+            target: `place_${task.placeId}`
+          });
+        }
       });
+    }
 
-      if (note.projectId) {
-        links.push({
-          source: `note_${note.id}`,
-          target: `project_${note.projectId}`
-        });
-      }
-    });
-
-    // Węzły Miejsc
-    places.forEach(place => {
-      nodes.push({
-        id: `place_${place.id}`,
-        name: `📍 ${place.name}`,
-        val: 8,
-        color: "#06b6d4",
-        type: "Miejsce"
+    // 5. Tagi (Powiązane z otwartymi zadaniami)
+    if (filters.tags) {
+      activeTasks.forEach(task => {
+        if (task.tagNames) {
+          task.tagNames.forEach(tag => {
+            const tagId = `tag_${tag.toLowerCase()}`;
+            if (!nodes.find(n => n.id === tagId)) {
+              nodes.push({
+                id: tagId,
+                name: `#${tag}`,
+                radius: 5.5,
+                color: "#ec4899",
+                glowColor: "rgba(236, 72, 153, 0.3)",
+                category: "tags",
+                type: "Tag"
+              });
+            }
+            if (filters.tasks) {
+              links.push({
+                source: `task_${task.id}`,
+                target: tagId
+              });
+            }
+          });
+        }
       });
-    });
+    }
 
-    // ZABEZPIECZENIE PRZED AWARIĄ D3: filtrujemy linki tak, aby oba węzły (source i target) na pewno istniały w grafie
+    // 6. Notatki
+    if (filters.notes) {
+      notes.forEach(note => {
+        nodes.push({
+          id: `note_${note.id}`,
+          name: note.title,
+          radius: 5.5,
+          color: "#3b82f6",
+          glowColor: "rgba(59, 130, 246, 0.3)",
+          category: "notes",
+          type: "Notatka"
+        });
+
+        if (note.projectId) {
+          links.push({
+            source: `note_${note.id}`,
+            target: `project_${note.projectId}`
+          });
+        }
+      });
+    }
+
+    // 7. Miejsca GPS
+    if (filters.places) {
+      places.forEach(place => {
+        nodes.push({
+          id: `place_${place.id}`,
+          name: place.name,
+          radius: 7,
+          color: "#06b6d4",
+          glowColor: "rgba(6, 182, 212, 0.35)",
+          category: "places",
+          type: "Miejsce"
+        });
+      });
+    }
+
+    // Bezpieczne linki (oba końce muszą istnieć w widocznych węzłach)
     const nodeIdsSet = new Set(nodes.map(n => n.id));
     const safeLinks = links.filter(l => 
       nodeIdsSet.has(typeof l.source === "object" ? l.source.id : l.source) && 
@@ -190,7 +289,7 @@ export default function GraphPage() {
     );
 
     return { nodes, links: safeLinks };
-  }, [projects, taskLists, tasks, notes, places, isDark]);
+  }, [projects, taskLists, tasks, notes, places, isDark, filters]);
 
   const isLoading = projectsLoading || taskListsLoading || tasksLoading || notesLoading || placesLoading;
 
@@ -202,49 +301,52 @@ export default function GraphPage() {
 
   const handleZoomIn = () => {
     if (fgRef.current) {
-      fgRef.current.zoom(fgRef.current.zoom() * 1.3, 300);
+      fgRef.current.zoom(fgRef.current.zoom() * 1.35, 300);
     }
   };
 
   const handleZoomOut = () => {
     if (fgRef.current) {
-      fgRef.current.zoom(fgRef.current.zoom() * 0.7, 300);
+      fgRef.current.zoom(fgRef.current.zoom() * 0.65, 300);
     }
   };
 
   return (
-    <main className="h-[calc(100vh-3.5rem)] md:h-screen flex flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+    <main className="h-[calc(100vh-3.5rem)] md:h-screen flex flex-col overflow-hidden bg-zinc-950 text-zinc-100">
       {/* Pasek nagłówka */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-zinc-200/80 dark:border-zinc-900 bg-white/90 dark:bg-zinc-950/90 backdrop-blur shrink-0 z-10">
+      <header className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur shrink-0 z-10">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-500/10 rounded-2xl">
-            <Network className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <div className="p-2 bg-purple-500/10 rounded-2xl text-purple-400">
+            <Network className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-base font-black uppercase tracking-tight text-zinc-900 dark:text-zinc-100">Graf Relacji</h1>
-            <p className="text-zinc-500 text-xs font-medium">Wizualizacja powiązań między projektami, zadaniami i miejscami.</p>
+            <h1 className="text-base font-black uppercase tracking-tight text-zinc-100 flex items-center gap-2">
+              <span>GRAF</span>
+              <span className="text-zinc-600 font-normal">•</span>
+              <span className="text-xs text-zinc-400 font-mono tracking-wider font-semibold">POWIĄZANIA RYSOWANE NA ŻYWO</span>
+            </h1>
           </div>
         </div>
 
-        {/* Przyciski sterowania */}
-        <div className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800/80 p-1 rounded-2xl shadow-xs">
+        {/* Przyciski sterowania powiększeniem */}
+        <div className="flex items-center gap-1.5 bg-zinc-900/90 border border-zinc-800 p-1 rounded-2xl shadow-xs">
           <button
             onClick={handleZoomIn}
-            className="p-1.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-colors"
+            className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"
             title="Przybliż"
           >
             <ZoomIn className="w-4 h-4" />
           </button>
           <button
             onClick={handleZoomOut}
-            className="p-1.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-colors"
+            className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"
             title="Oddal"
           >
             <ZoomOut className="w-4 h-4" />
           </button>
           <button
             onClick={handleCenter}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-white dark:hover:bg-zinc-800 rounded-xl transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"
             title="Wyśrodkuj cały graf"
           >
             <Focus className="w-3.5 h-3.5" /> Wyśrodkuj
@@ -252,15 +354,15 @@ export default function GraphPage() {
         </div>
       </header>
 
-      {/* Kontener canvas na 100% szerokości i wysokości */}
-      <section ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+      {/* Główny kontener Canvas 2D */}
+      <section ref={containerRef} className="flex-1 w-full h-full relative overflow-hidden bg-[#0d0f14]">
         {isLoading ? (
-          <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm">
-            Ładowanie grafu powiązań...
+          <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm font-mono animate-pulse">
+            Ładowanie węzłów wiedzy...
           </div>
         ) : graphData.nodes.length === 0 ? (
-          <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm">
-            Brak danych do wygenerowania grafu.
+          <div className="absolute inset-0 flex items-center justify-center text-zinc-500 text-sm font-mono">
+            Brak widocznych elementów dla zaznaczonych filtrów.
           </div>
         ) : (
           <ForceGraph2D
@@ -271,9 +373,11 @@ export default function GraphPage() {
             nodeLabel="name"
             nodeColor="color"
             nodeRelSize={6}
-            linkColor={() => isDark ? "rgba(161, 161, 170, 0.25)" : "rgba(100, 116, 139, 0.3)"}
-            backgroundColor={isDark ? "#09090b" : "#fafafa"}
+            linkColor={() => "rgba(113, 113, 122, 0.22)"}
+            linkWidth={1.2}
+            backgroundColor="#0d0f14"
             cooldownTicks={120}
+            d3VelocityDecay={0.3}
             onEngineStop={() => {
               if (fgRef.current && !hasInitiallyFittedRef.current) {
                 hasInitiallyFittedRef.current = true;
@@ -283,7 +387,7 @@ export default function GraphPage() {
             onNodeClick={(node: any) => {
               if (fgRef.current && node.x !== undefined && node.y !== undefined && !isNaN(node.x) && !isNaN(node.y)) {
                 fgRef.current.centerAt(node.x, node.y, 600);
-                fgRef.current.zoom(2.5, 600);
+                fgRef.current.zoom(2.8, 600);
               }
             }}
             onBackgroundClick={() => {
@@ -294,32 +398,85 @@ export default function GraphPage() {
             nodeCanvasObject={(node: any, ctx, globalScale) => {
               if (node.x === undefined || node.y === undefined || isNaN(node.x) || isNaN(node.y)) return;
               
+              const radius = node.radius || 6;
+
+              // 1. Rysowanie subtelnej poświaty (Aura / Glow) dla większych węzłów
+              if (node.glowColor && node.glowColor !== "transparent") {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, radius + 2.5, 0, 2 * Math.PI, false);
+                ctx.fillStyle = node.glowColor;
+                ctx.fill();
+              }
+
+              // 2. Rysowanie głównej, soczystej kuli (Solid Orb)
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+              ctx.fillStyle = node.color || "#a855f7";
+              ctx.fill();
+              
+              // Cienki obrys dla kontrastu
+              ctx.lineWidth = 1.2 / globalScale;
+              ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+              ctx.stroke();
+
+              // 3. Rysowanie etykiety monospace pod kulą
               const label = node.name || "";
-              const fontSize = Math.max(12 / globalScale, 4);
-              ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-              const textWidth = ctx.measureText(label).width;
-              const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.35);
-
-              ctx.fillStyle = isDark ? 'rgba(9, 9, 11, 0.85)' : 'rgba(255, 255, 255, 0.9)';
-              ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
-
+              const truncated = label.length > 22 ? label.substring(0, 20) + "..." : label;
+              const fontSize = Math.max(11 / globalScale, 3.5);
+              
+              ctx.font = `600 ${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
               ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillStyle = node.color || (isDark ? "#a855f7" : "#7c3aed");
-              ctx.fillText(label, node.x, node.y);
+              ctx.textBaseline = 'top';
 
-              node.__bckgDimensions = bckgDimensions;
+              // Cień tekstu dla maksymalnej czytelności na ciemnym tle
+              ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+              ctx.shadowBlur = 4;
+              ctx.fillStyle = node.category === "projects" || node.category === "incubator" ? "#f4f4f5" : "#a1a1aa";
+              ctx.fillText(truncated, node.x, node.y + radius + (3 / globalScale));
+              
+              // Reset cienia dla reszty rysowania
+              ctx.shadowColor = 'transparent';
+              ctx.shadowBlur = 0;
             }}
             nodePointerAreaPaint={(node: any, color, ctx) => {
               if (node.x === undefined || node.y === undefined || isNaN(node.x) || isNaN(node.y)) return;
+              const radius = (node.radius || 6) + 4;
               ctx.fillStyle = color;
-              const bckgDimensions = node.__bckgDimensions;
-              if (bckgDimensions) {
-                ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
-              }
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+              ctx.fill();
             }}
           />
         )}
+
+        {/* Pływający dolny pasek filtrów kategorii & Legenda */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 max-w-[95vw] overflow-x-auto p-1.5 bg-zinc-900/90 border border-zinc-800/90 rounded-2xl backdrop-blur-md shadow-2xl flex items-center gap-1.5 scrollbar-none">
+          {(Object.keys(FILTER_CONFIG) as FilterType[]).map((key) => {
+            const cfg = FILTER_CONFIG[key];
+            const isVisible = filters[key];
+            const count = counts[key];
+
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => toggleFilter(key)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all shrink-0 border select-none ${
+                  isVisible 
+                    ? `${cfg.bgActive} ${cfg.border} shadow-xs scale-100` 
+                    : "bg-zinc-950/60 border-zinc-800/60 text-zinc-600 opacity-50 hover:opacity-80"
+                }`}
+              >
+                <div 
+                  className="w-2.5 h-2.5 rounded-full shadow-xs" 
+                  style={{ backgroundColor: isVisible ? cfg.color : "#52525b" }} 
+                />
+                <span className="uppercase tracking-wider">{cfg.label}</span>
+                <span className="text-[10px] font-black opacity-80 ml-0.5">({count})</span>
+              </button>
+            );
+          })}
+        </div>
       </section>
     </main>
   );
