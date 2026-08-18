@@ -1,8 +1,17 @@
+import { Capacitor } from '@capacitor/core';
 import { BackgroundGeolocation } from '@capgo/background-geolocation';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Place } from './places';
+import { Task } from './tasks';
+
+export const MAX_ACTIVE_GEOFENCES = 15;
 
 export async function initGeofencing() {
+  if (!Capacitor.isNativePlatform()) {
+    // Na platformie Web (PC) geofencing natywny nie jest wspierany
+    return;
+  }
+
   try {
     // Żądamy uprawnień do powiadomień
     await LocalNotifications.requestPermissions();
@@ -33,26 +42,48 @@ export async function initGeofencing() {
     });
 
   } catch (error) {
-    console.error("Błąd inicjalizacji Geofencingu:", error);
+    console.warn("Geofencing natywny nie mógł zostać zainicjalizowany:", error);
   }
 }
 
-export async function syncGeofences(places: Place[]) {
+/**
+ * Synchronizacja stref GPS według Reguły Aktywnych Zadań (Task-Driven Geofencing).
+ * Do natywnego rejestru trafia maksymalnie 15 stref posiadających nieukończone zadania.
+ */
+export async function syncGeofences(places: Place[], tasks?: Task[]) {
+  // Wybieramy miejsca, które posiadają przynajmniej jedno nieukończone zadanie
+  let eligiblePlaces = places;
+  if (tasks && tasks.length > 0) {
+    eligiblePlaces = places.filter(place => 
+      tasks.some(task => task.placeId === place.id && !task.isCompleted)
+    );
+  }
+
+  // Bezpieczny limit maksymalnie 15 stref (gwarantuje bezawaryjność na iOS i Androidzie)
+  const activePlaces = eligiblePlaces.slice(0, MAX_ACTIVE_GEOFENCES);
+
+  if (!Capacitor.isNativePlatform()) {
+    return activePlaces;
+  }
+
   try {
     // Czyścimy obecne strefy
     await BackgroundGeolocation.removeAllGeofences();
 
-    // Rejestrujemy nowe strefy na podstawie aktywnych miejsc użytkownika
-    for (const place of places) {
+    // Rejestrujemy aktywne strefy
+    for (const place of activePlaces) {
       await BackgroundGeolocation.addGeofence({
-        identifier: place.name, // użyjemy nazwy miejsca jako identyfikatora
+        identifier: place.name,
         latitude: place.lat,
         longitude: place.lng,
         radius: place.radiusMeters || 500,
         notifyOnEntry: true
       });
     }
+
+    return activePlaces;
   } catch (error) {
     console.error("Błąd synchronizacji Geofencingu:", error);
+    return [];
   }
 }

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -167,4 +168,23 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Stylizacja Map Leaflet */
+.dark .leaflet-tile {
+  filter: brightness(0.65) invert(1) contrast(1.25) hue-rotate(200deg) saturate(0.35);
+}
+
+.leaflet-container {
+  font-family: inherit;
+  width: 100%;
+  min-height: 260px;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.custom-map-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

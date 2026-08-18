@@ -4,7 +4,7 @@ Niniejszy dokument jest nadrzędnym planem rozwoju systemu **Momentum**, podziel
 
 ---
 
-## 📌 FAZA 1: UX & Codzienna Egzekucja (Szybkie i Praktyczne)
+## 📌 FAZA 1: UX & Codzienna Egzekucja (Szybkie i Praktyczne) `[FAZA UKOŃCZONA W 100% ✅]`
 *Cel: Zapewnienie maksymalnej wygody, elastyczności pracy z zadaniami oraz czytelności interfejsu w każdych warunkach.*
 
 - [x] **Etap 1.1: Widok Kanban vs Lista w Projektach i Listach Zadań** `[ZREALIZOWANE — v0.7.0 / v0.7.2]`
@@ -20,16 +20,25 @@ Niniejszy dokument jest nadrzędnym planem rozwoju systemu **Momentum**, podziel
   - Dynamiczny silnik Canvas 2D w Grafie Powiązań (`/graph`) z automatyczną zmianą tła i barw węzłów.
   - Anti-FOUC i trwałe zapamiętywanie wyboru użytkownika.
 
-- [ ] **Etap 1.3: Własne Pinezki i Adresy na Mapie w Miejscach (`/places`)** `[NAJBLIŻSZY CEL]`
-  - Wskazywanie dowolnych punktów na interaktywnej mapie (zamiast polegania wyłącznie na bazie miast).
-  - Wpisywanie precyzyjnych adresów, automatyczne geokodowanie i ustawianie promienia geofencingu (np. biuro, magazyn, klient).
+- [x] **Etap 1.3: Własne Pinezki, Wyszukiwarka Adresów & Inteligentny Geofencing w Miejscach (`/places`)** `[ZREALIZOWANE — v0.8.0]`
+  - Interaktywna mapa (Leaflet / OpenStreetMap) ze swobodnym klikaniem i przeciąganiem pinezek.
+  - Dynamiczny Toggle Focus (FlyTo ➔ FlyFrom) przybliżający do strefy i płynnie cofający do widoku całości.
+  - Wyszukiwarka adresów na żywo (OpenStreetMap Nominatim Geocoding).
+  - Konfigurowalny promień strefy (100m, 300m, 500m, 1km, 3km, 5km) z dynamicznym okręgiem na mapie.
+  - **Task-Driven Geofencing & Wspólny Limit 15 Stref:** W tle aktywnie monitorowane są wyłącznie strefy z nieukończonymi zadaniami (ochrona baterii i stabilność iOS/Android).
+  - Bezpośredni podgląd i zarządzanie zadaniami przypisanymi do stref w widoku `/places`.
+
+- [x] **Dodatkowy Moduł UX: Zaznaczanie Masowe & Pływający Pasek Narzędzi (Multi-Select & Bulk Actions)** `[ZREALIZOWANE — v0.7.7]`
+  - Tryb masowego wyboru zadań na listach z licznikiem zaznaczonych.
+  - Pływający dock (`BulkActionToolbar`): hurtowa zmiana terminu, przenoszenie do listy/projektu, tagowanie, przypisanie miejsc, usuwanie oraz oznaczanie jako wykonane.
+  - Błyskawiczne operacje w pojedynczej transakcji Firestore `writeBatch`.
 
 ---
 
 ## 📌 FAZA 2: Planowanie Strategiczne & Rozwój
 *Cel: Zarządzanie czasem w perspektywie długoterminowej oraz zintegrowane budowanie wiedzy.*
 
-- [ ] **Etap 2.1: Zadania Okresowe, Pływające & Zarządzanie Zaległościami (Smart Overdue & Auto-Rollover)** `[DO ZROBIENIA]`
+- [ ] **Etap 2.1: Zadania Okresowe, Pływające & Zarządzanie Zaległościami (Smart Overdue & Auto-Rollover)** `[NAJBLIŻSZY CEL]`
   - **Zaległe zadania w Dzisiaj (Smart Overdue):** Zadania z przeszłości automatycznie pojawiają się na szczycie widoku `Dzisiaj` z wyróżnioną etykietą opóźnienia (*„Wczoraj”*, *„3 dni temu”*) i szybkimi akcjami (*„Przełóż na dziś”*, *„Na jutro”*, *„Zdejmij termin do Inboxa”*).
   - **Zadania Pływające (Floating Tasks):** Możliwość zdefiniowania zadań do wykonania w horyzoncie tygodniowym bez sztywnej daty dziennej.
   - **Przeglądy Cykliczne (Review):** Mechanizm cyklicznych podsumowań (tygodniowych / kwartalnych).
@@ -53,4 +62,4 @@ Niniejszy dokument jest nadrzędnym planem rozwoju systemu **Momentum**, podziel
 
 ---
 
-*Ostatnia aktualizacja: 17 sierpnia 2026 r. (v0.7.5)*
+*Ostatnia aktualizacja: 18 sierpnia 2026 r. (v0.7.8)*

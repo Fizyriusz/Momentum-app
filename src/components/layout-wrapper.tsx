@@ -310,7 +310,7 @@ function MobileSidebarNav({ onClose }: { onClose: () => void }) {
           onClick={onClose}
           className="flex items-center justify-between text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors group"
         >
-          <span>v0.7.7</span>
+          <span>v0.8.0</span>
           <span className="flex items-center gap-1">
             Changelog
             <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -326,6 +326,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const { user, loading, signInWithGoogle, signOut } = useAuth();
   const { projects } = useProjects("ACTIVE");
   const { places } = usePlaces();
+  const { tasks } = useTasks();
   const tags: Tag[] = [];
 
   // Inicjalizacja usług tła
@@ -333,11 +334,11 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     if (user) {
       initGeofencing().then(() => {
         if (places.length > 0) {
-          syncGeofences(places);
+          syncGeofences(places, tasks);
         }
       });
     }
-  }, [user, places]);
+  }, [user, places, tasks]);
 
   if (loading) {
     return <div className="h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 text-zinc-500">Ładowanie...</div>;
