@@ -12,7 +12,8 @@ import {
   deleteDoc, 
   doc, 
   serverTimestamp,
-  getDocs
+  getDocs,
+  writeBatch
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
@@ -352,3 +353,42 @@ export async function updateTask(id: string, data: Partial<Task>) {
   if (!auth.currentUser) return;
   return updateDoc(getUserTaskDoc(id), data);
 }
+
+// --- Akcje Masowe (Bulk / Batch Operations) ---
+
+export async function batchUpdateTasks(taskIds: string[], data: Partial<Task>) {
+  if (!auth.currentUser || taskIds.length === 0) return;
+  const batch = writeBatch(db);
+  for (const id of taskIds) {
+    batch.update(getUserTaskDoc(id), data as any);
+  }
+  return batch.commit();
+}
+
+export async function batchDeleteTasks(taskIds: string[]) {
+  if (!auth.currentUser || taskIds.length === 0) return;
+  const batch = writeBatch(db);
+  for (const id of taskIds) {
+    batch.delete(getUserTaskDoc(id));
+  }
+  return batch.commit();
+}
+
+export async function batchAddTagToTasks(taskIds: string[], tag: string) {
+  if (!auth.currentUser || taskIds.length === 0 || !tag.trim()) return;
+  const cleanTag = tag.trim().replace(/^#/, "");
+  
+  // Pobieramy zadania, aby scalić tagi
+  const promises = taskIds.map(async (id) => {
+    const taskDoc = getUserTaskDoc(id);
+    const snap = await getDocs(query(getUserTasksCol(), where("__name__", "==", id)));
+    if (!snap.empty) {
+      const currentTags: string[] = snap.docs[0].data().tagNames || [];
+      if (!currentTags.includes(cleanTag)) {
+        await updateDoc(taskDoc, { tagNames: [...currentTags, cleanTag] });
+      }
+    }
+  });
+  return Promise.all(promises);
+}
+

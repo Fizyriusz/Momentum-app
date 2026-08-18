@@ -10,18 +10,18 @@ export default function ChangelogPage() {
 
       <section className="space-y-8">
         
-        {/* v0.7.6 - AKTUALNA WERSJA */}
+        {/* v0.7.7 - AKTUALNA WERSJA */}
         <div className="bg-white dark:bg-zinc-900/40 border border-purple-500/40 dark:border-purple-500/30 rounded-3xl p-6 backdrop-blur-md relative overflow-hidden shadow-md dark:shadow-none">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                <Sparkles className="w-6 h-6" />
+                <ListTodo className="w-6 h-6" />
               </div>
               <div>
                 <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                  <span className="text-purple-600 dark:text-purple-400">v0.7.6</span> - Inteligentny FAB, Pełne Zawijanie Zadań & Mobilny Przegląd
+                  <span className="text-purple-600 dark:text-purple-400">v0.7.7</span> - Zaznaczanie Wielu Zadań & Akcje Masowe (Bulk Actions)
                 </h2>
-                <p className="text-xs text-zinc-500 font-medium">Usprawnienia UX i Mobile</p>
+                <p className="text-xs text-zinc-500 font-medium">Zarządzanie masowe i optymalizacja produktywności</p>
               </div>
             </div>
             <span className="text-xs font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-xl border border-purple-500/30">
@@ -31,14 +31,35 @@ export default function ChangelogPage() {
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Usprawnienia & Poprawki</h3>
+              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Nowości & Możliwości Masowe</h3>
               <ul className="space-y-2 text-zinc-700 dark:text-zinc-300 text-sm list-disc list-inside">
-                <li><strong>Pełne Wyświetlanie Tytułów Zadań:</strong> Usunięto obcinanie tekstu (<code>truncate</code>) na rzecz naturalnego zawijania wierszy (<code>break-words</code>), zapewniając pełną czytelność długich nazw zadań na smartfonach.</li>
-                <li><strong>Inteligentny Przycisk FAB:</strong> Przycisk szybkiego dodawania (+) automatycznie wykrywa aktualny widok — ustawia termin na <em>„Dzisiaj”</em> w widoku Dzisiaj, <em>„Jutro”</em> w widoku Jutro, a w otwartych Listach/Projektach wstępnie przypisuje nowe zadanie.</li>
-                <li><strong>Przegląd w Menu Mobilnym:</strong> Dodano brakującą pozycję <em>„Przegląd”</em> (Dashboard) na samym szczycie menu nawigacyjnego na telefonie.</li>
+                <li><strong>Tryb Zaznaczania Wielu Zadań (Multi-Select):</strong> Przycisk <em>„Zaznacz”</em> na listach zadań, szybki wybór pojedynczych elementów kliknięciem lub przełącznik <em>„Zaznacz wszystkie”</em> z licznikiem wybranych pozycji.</li>
+                <li><strong>Pływający Pasek Narzędzi (Bulk Actions Toolbar):</strong> Automatyczny dolny dock z zestawem operacji grupowych:
+                  <ul className="list-circle list-inside ml-6 mt-1 space-y-1 text-xs text-zinc-600 dark:text-zinc-400">
+                    <li>📅 <strong>Zmień Termin:</strong> Dzisiaj, Jutro, dowolna data z kalendarza lub zdjęcie terminu (do Inboxa).</li>
+                    <li>📁 <strong>Przenieś:</strong> Przeniesienie grupy zadań do wybranej Listy lub Projektu (albo odpięcie do czystego Inboxa).</li>
+                    <li>✅ <strong>Ukończ / Przywróć:</strong> Błyskawiczne masowe odhaczenie lub przywrócenie.</li>
+                    <li>🏷️ <strong>Tagi:</strong> Masowe nadanie taga całej grupie zadań.</li>
+                    <li>📍 <strong>Miejsce:</strong> Zbiorcze przypisanie lokalizacji geofencingowej.</li>
+                    <li>🗑️ <strong>Usuń:</strong> Bezpieczne usunięcie grupy zadań z potwierdzeniem w modalu.</li>
+                  </ul>
+                </li>
+                <li><strong>Atomiczne Operacje Firestore:</strong> Wszystkie zmiany hurtowe przetwarzane są natychmiastowo w pojedynczym zapytaniu wsadowym (<code>writeBatch</code>).</li>
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* v0.7.6 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-600 dark:text-purple-400">v0.7.6</span> - Inteligentny FAB, Pełne Zawijanie Zadań & Mobilny Przegląd
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-600 dark:text-zinc-400 space-y-2 ml-2">
+            <li>Pełne wyświetlanie i naturalne zawijanie długich tytułów zadań (brak ucinania tekstu).</li>
+            <li>Inteligentny przycisk FAB automatycznie wykrywający kontekst bieżącego widoku (Dzisiaj, Jutro, Lista, Projekt, Notatki, Inkubator).</li>
+            <li>Dodanie pozycji „Przegląd” na szczycie menu mobilnego.</li>
+          </ul>
         </div>
 
         {/* v0.7.5 */}
