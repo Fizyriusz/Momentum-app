@@ -55,9 +55,6 @@ export default function GraphPage() {
   const fgRef = useRef<any>(null);
   const hasInitiallyFittedRef = useRef(false);
   
-  // Zapamiętywanie pozycji współrzędnych węzłów
-  const nodeCoordsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
-  
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
     width: 1200,
     height: 800
@@ -121,29 +118,22 @@ export default function GraphPage() {
     };
   }, [projects, taskLists, tasks, notes, places]);
 
-  // Generowanie grafu
+  // Generowanie grafu z zachowaniem naturalnego rozstawu sił D3
   const graphData = useMemo(() => {
     const nodes: any[] = [];
     const links: any[] = [];
 
-    const getInitialCoords = (id: string) => {
-      return nodeCoordsRef.current.get(id);
-    };
-
     // 1. Główne Projekty (ACTIVE / PAUSED)
     if (filters.projects) {
       projects.filter(p => p.status === "ACTIVE" || p.status === "PAUSED").forEach(project => {
-        const id = `project_${project.id}`;
-        const coords = getInitialCoords(id);
         nodes.push({
-          id,
+          id: `project_${project.id}`,
           name: project.title,
-          radius: 14,
+          radius: 15,
           color: "#a855f7",
           glowColor: "rgba(168, 85, 247, 0.45)",
           category: "projects",
-          type: "Projekt",
-          ...(coords ? { x: coords.x, y: coords.y } : {})
+          type: "Projekt"
         });
       });
     }
@@ -151,17 +141,14 @@ export default function GraphPage() {
     // 2. Inkubator (INBOX)
     if (filters.incubator) {
       projects.filter(p => p.status === "INBOX").forEach(idea => {
-        const id = `project_${idea.id}`;
-        const coords = getInitialCoords(id);
         nodes.push({
-          id,
+          id: `project_${idea.id}`,
           name: idea.title,
-          radius: 9,
+          radius: 10,
           color: "#f59e0b",
           glowColor: "rgba(245, 158, 11, 0.4)",
           category: "incubator",
-          type: "Inkubator",
-          ...(coords ? { x: coords.x, y: coords.y } : {})
+          type: "Inkubator"
         });
       });
     }
@@ -170,16 +157,14 @@ export default function GraphPage() {
     if (filters.lists) {
       taskLists.forEach(list => {
         const id = `list_${list.id}`;
-        const coords = getInitialCoords(id);
         nodes.push({
           id,
           name: list.name,
-          radius: 8.5,
+          radius: 9,
           color: "#6366f1",
           glowColor: "rgba(99, 102, 241, 0.4)",
           category: "lists",
-          type: "Lista",
-          ...(coords ? { x: coords.x, y: coords.y } : {})
+          type: "Lista"
         });
 
         if (list.projectId) {
@@ -196,16 +181,14 @@ export default function GraphPage() {
     if (filters.tasks) {
       activeTasks.forEach(task => {
         const id = `task_${task.id}`;
-        const coords = getInitialCoords(id);
         nodes.push({
           id,
           name: task.title,
-          radius: 5,
+          radius: 6,
           color: isDark ? "#e2e8f0" : "#475569",
           glowColor: "transparent",
           category: "tasks",
-          type: "Zadanie",
-          ...(coords ? { x: coords.x, y: coords.y } : {})
+          type: "Zadanie"
         });
 
         // Relacje zadania
@@ -237,16 +220,14 @@ export default function GraphPage() {
           task.tagNames.forEach(tag => {
             const tagId = `tag_${tag.toLowerCase()}`;
             if (!nodes.find(n => n.id === tagId)) {
-              const coords = getInitialCoords(tagId);
               nodes.push({
                 id: tagId,
                 name: `#${tag}`,
-                radius: 5.5,
+                radius: 6,
                 color: "#ec4899",
                 glowColor: "rgba(236, 72, 153, 0.35)",
                 category: "tags",
-                type: "Tag",
-                ...(coords ? { x: coords.x, y: coords.y } : {})
+                type: "Tag"
               });
             }
             if (filters.tasks) {
@@ -264,16 +245,14 @@ export default function GraphPage() {
     if (filters.notes) {
       notes.forEach(note => {
         const id = `note_${note.id}`;
-        const coords = getInitialCoords(id);
         nodes.push({
           id,
           name: note.title,
-          radius: 6,
+          radius: 7,
           color: "#3b82f6",
           glowColor: "rgba(59, 130, 246, 0.35)",
           category: "notes",
-          type: "Notatka",
-          ...(coords ? { x: coords.x, y: coords.y } : {})
+          type: "Notatka"
         });
 
         if (note.projectId) {
@@ -289,16 +268,14 @@ export default function GraphPage() {
     if (filters.places) {
       places.forEach(place => {
         const id = `place_${place.id}`;
-        const coords = getInitialCoords(id);
         nodes.push({
           id,
           name: place.name,
-          radius: 7.5,
+          radius: 8.5,
           color: "#06b6d4",
           glowColor: "rgba(6, 182, 212, 0.4)",
           category: "places",
-          type: "Miejsce",
-          ...(coords ? { x: coords.x, y: coords.y } : {})
+          type: "Miejsce"
         });
       });
     }
@@ -313,36 +290,43 @@ export default function GraphPage() {
     return { nodes, links: safeLinks };
   }, [projects, taskLists, tasks, notes, places, isDark, filters]);
 
-  // Konfiguracja zaawansowanej fizyki D3:
-  // 1. Zwiększony dystans połączeń (link distance) o ponad 60% (75px) - koniec nakładania się powiązanych kulek!
-  // 2. Siła odpychania i centrowania
+  // Dynamiczne ustawienie sił D3:
+  // Duży link distance (110px) zapobiega nachodzeniu na siebie węzłów, a silniejsze odpychanie rozsuwa etykiety
   useEffect(() => {
     if (fgRef.current) {
-      // Siła odpychania (pozwala na swobodną przestrzeń wokół etykiet)
-      fgRef.current.d3Force("charge")?.strength(-140);
-      
-      // Zwiększony dystans nitki (75px) -> brak nakładania się podłączonych obiektów (wzrost o ponad 60%)
-      fgRef.current.d3Force("link")?.distance(75);
+      fgRef.current.d3Force("charge")?.strength(-220);
+      fgRef.current.d3Force("link")?.distance(110);
     }
   }, [graphData]);
+
+  // Jednorazowe wycentrowanie na starcie
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (fgRef.current && !hasInitiallyFittedRef.current) {
+        hasInitiallyFittedRef.current = true;
+        fgRef.current.zoomToFit(500, 80);
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const isLoading = projectsLoading || taskListsLoading || tasksLoading || notesLoading || placesLoading;
 
   const handleCenter = () => {
     if (fgRef.current) {
-      fgRef.current.zoomToFit(500, 70);
+      fgRef.current.zoomToFit(500, 80);
     }
   };
 
   const handleZoomIn = () => {
     if (fgRef.current) {
-      fgRef.current.zoom(fgRef.current.zoom() * 1.35, 300);
+      fgRef.current.zoom(fgRef.current.zoom() * 1.3, 250);
     }
   };
 
   const handleZoomOut = () => {
     if (fgRef.current) {
-      fgRef.current.zoom(fgRef.current.zoom() * 0.65, 300);
+      fgRef.current.zoom(fgRef.current.zoom() * 0.7, 250);
     }
   };
 
@@ -407,43 +391,33 @@ export default function GraphPage() {
             height={dimensions.height}
             nodeLabel="name"
             nodeColor="color"
-            nodeRelSize={5}
-            // Pogrubione, wyraźne nitki połączeń
-            linkColor={() => "rgba(161, 161, 170, 0.45)"}
-            linkWidth={2.2}
+            nodeRelSize={6}
+            // Pogrubione, jasne i wyraźne linie połączeń
+            linkColor={() => "rgba(212, 212, 216, 0.45)"}
+            linkWidth={2.4}
+            linkDirectionalParticles={2}
+            linkDirectionalParticleSpeed={0.006}
+            linkDirectionalParticleWidth={2.5}
+            linkDirectionalParticleColor={() => "#c084fc"}
             backgroundColor="#0d0f14"
-            cooldownTicks={50}
-            d3VelocityDecay={0.4}
-            onEngineStop={() => {
-              // ZoomToFit odpalamy WYŁĄCZNIE raz na starcie strony, nigdy przy filtrach!
-              if (fgRef.current && !hasInitiallyFittedRef.current) {
-                hasInitiallyFittedRef.current = true;
-                fgRef.current.zoomToFit(400, 70);
-              }
-            }}
+            cooldownTicks={80}
+            d3VelocityDecay={0.35}
+            // BRAK automatycznego zoomowania przy przeciąganiu, klikaniu czy zatrzymaniu silnika
             onNodeClick={(node: any) => {
-              if (fgRef.current && node.x !== undefined && node.y !== undefined && !isNaN(node.x) && !isNaN(node.y)) {
-                fgRef.current.centerAt(node.x, node.y, 600);
-                fgRef.current.zoom(2.5, 600);
-              }
-            }}
-            onBackgroundClick={() => {
-              if (fgRef.current) {
-                fgRef.current.zoomToFit(600, 70);
-              }
+              // Kliknięcie nie wymusza zoomu - zachowuje obecną skalę użytkownika
             }}
             nodeCanvasObject={(node: any, ctx, globalScale) => {
               if (node.x === undefined || node.y === undefined || isNaN(node.x) || isNaN(node.y)) return;
-              
-              // Zapisujemy pozycję na żywo w pamięci podręcznej (dla stabilności filtrów)
-              nodeCoordsRef.current.set(node.id, { x: node.x, y: node.y });
 
-              const radius = node.radius || 5;
+              // Skalowanie adaptacyjne: zapobiega kurczeniu się kulek w mikroskopijne kropki przy oddalaniu
+              const baseRadius = node.radius || 6;
+              const minScreenRadius = 5.5;
+              const radius = Math.max(baseRadius, minScreenRadius / globalScale);
 
               // 1. Rysowanie subtelnej poświaty (Aura / Glow) dla większych węzłów
               if (node.glowColor && node.glowColor !== "transparent") {
                 ctx.beginPath();
-                ctx.arc(node.x, node.y, radius + 2.8, 0, 2 * Math.PI, false);
+                ctx.arc(node.x, node.y, radius + (3 / globalScale), 0, 2 * Math.PI, false);
                 ctx.fillStyle = node.glowColor;
                 ctx.fill();
               }
@@ -454,33 +428,35 @@ export default function GraphPage() {
               ctx.fillStyle = node.color || "#a855f7";
               ctx.fill();
               
-              // Cienki obrys dla kontrastu
+              // Cienki, elegancki obrys
               ctx.lineWidth = 1.4 / globalScale;
-              ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+              ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
               ctx.stroke();
 
-              // 3. Rysowanie etykiety monospace pod kulą
+              // 3. Rysowanie etykiety monospace pod kulą z minimalnym rozmiarem czytelności
               const label = node.name || "";
-              const truncated = label.length > 20 ? label.substring(0, 18) + "..." : label;
-              const fontSize = Math.max(10.5 / globalScale, 3.2);
+              const truncated = label.length > 22 ? label.substring(0, 20) + "..." : label;
+              const minFontSize = 3.8;
+              const fontSize = Math.max(11.5 / globalScale, minFontSize);
               
               ctx.font = `600 ${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
               ctx.textAlign = 'center';
               ctx.textBaseline = 'top';
 
-              // Cień tekstu dla maksymalnej czytelności na ciemnym tle
+              // Cień tekstu dla czytelności na ciemnym tle
               ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
               ctx.shadowBlur = 4;
-              ctx.fillStyle = node.category === "projects" || node.category === "incubator" ? "#f4f4f5" : "#a1a1aa";
-              ctx.fillText(truncated, node.x, node.y + radius + (3 / globalScale));
+              ctx.fillStyle = node.category === "projects" || node.category === "incubator" ? "#f4f4f5" : "#cbd5e1";
+              ctx.fillText(truncated, node.x, node.y + radius + (3.5 / globalScale));
               
               // Reset cienia dla reszty rysowania
               ctx.shadowColor = 'transparent';
               ctx.shadowBlur = 0;
             }}
-            nodePointerAreaPaint={(node: any, color, ctx) => {
+            nodePointerAreaPaint={(node: any, color, ctx, globalScale) => {
               if (node.x === undefined || node.y === undefined || isNaN(node.x) || isNaN(node.y)) return;
-              const radius = (node.radius || 5) + 5;
+              const baseRadius = node.radius || 6;
+              const radius = Math.max(baseRadius, 6 / (globalScale || 1)) + 6;
               ctx.fillStyle = color;
               ctx.beginPath();
               ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
