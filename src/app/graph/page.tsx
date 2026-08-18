@@ -11,13 +11,8 @@ import {
   Network, 
   ZoomIn, 
   ZoomOut, 
-  Focus, 
-  Filter,
-  Check,
-  Eye,
-  EyeOff
+  Focus
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 // Dynamiczny import wyłączający SSR dla silnika Canvas 2D
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), { ssr: false });
@@ -59,6 +54,9 @@ export default function GraphPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const fgRef = useRef<any>(null);
   const hasInitiallyFittedRef = useRef(false);
+  
+  // Zapamiętywanie pozycji współrzędnych węzłów (zapobiega resetowaniu / eksplozji od środka przy przełączaniu filtrów)
+  const nodeCoordsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
   
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
     width: 1200,
@@ -123,22 +121,29 @@ export default function GraphPage() {
     };
   }, [projects, taskLists, tasks, notes, places]);
 
-  // Generowanie grafu
+  // Generowanie grafu z zachowaniem istniejących pozycji węzłów
   const graphData = useMemo(() => {
     const nodes: any[] = [];
     const links: any[] = [];
 
+    const getInitialCoords = (id: string) => {
+      return nodeCoordsRef.current.get(id);
+    };
+
     // 1. Główne Projekty (ACTIVE / PAUSED)
     if (filters.projects) {
       projects.filter(p => p.status === "ACTIVE" || p.status === "PAUSED").forEach(project => {
+        const id = `project_${project.id}`;
+        const coords = getInitialCoords(id);
         nodes.push({
-          id: `project_${project.id}`,
+          id,
           name: project.title,
-          radius: 13,
+          radius: 12,
           color: "#a855f7",
           glowColor: "rgba(168, 85, 247, 0.4)",
           category: "projects",
-          type: "Projekt"
+          type: "Projekt",
+          ...(coords ? { x: coords.x, y: coords.y } : {})
         });
       });
     }
@@ -146,14 +151,17 @@ export default function GraphPage() {
     // 2. Inkubator (INBOX)
     if (filters.incubator) {
       projects.filter(p => p.status === "INBOX").forEach(idea => {
+        const id = `project_${idea.id}`;
+        const coords = getInitialCoords(id);
         nodes.push({
-          id: `project_${idea.id}`,
+          id,
           name: idea.title,
-          radius: 9,
+          radius: 8.5,
           color: "#f59e0b",
           glowColor: "rgba(245, 158, 11, 0.35)",
           category: "incubator",
-          type: "Inkubator"
+          type: "Inkubator",
+          ...(coords ? { x: coords.x, y: coords.y } : {})
         });
       });
     }
@@ -161,19 +169,22 @@ export default function GraphPage() {
     // 3. Listy Zadań
     if (filters.lists) {
       taskLists.forEach(list => {
+        const id = `list_${list.id}`;
+        const coords = getInitialCoords(id);
         nodes.push({
-          id: `list_${list.id}`,
+          id,
           name: list.name,
-          radius: 8,
+          radius: 7.5,
           color: "#6366f1",
           glowColor: "rgba(99, 102, 241, 0.35)",
           category: "lists",
-          type: "Lista"
+          type: "Lista",
+          ...(coords ? { x: coords.x, y: coords.y } : {})
         });
 
         if (list.projectId) {
           links.push({
-            source: `list_${list.id}`,
+            source: id,
             target: `project_${list.projectId}`
           });
         }
@@ -184,32 +195,35 @@ export default function GraphPage() {
     const activeTasks = tasks.filter(t => !t.isCompleted);
     if (filters.tasks) {
       activeTasks.forEach(task => {
+        const id = `task_${task.id}`;
+        const coords = getInitialCoords(id);
         nodes.push({
-          id: `task_${task.id}`,
+          id,
           name: task.title,
-          radius: 4.5,
+          radius: 4,
           color: isDark ? "#e2e8f0" : "#475569",
           glowColor: "transparent",
           category: "tasks",
-          type: "Zadanie"
+          type: "Zadanie",
+          ...(coords ? { x: coords.x, y: coords.y } : {})
         });
 
         // Relacje zadania
         if (task.taskListId) {
           links.push({
-            source: `task_${task.id}`,
+            source: id,
             target: `list_${task.taskListId}`
           });
         } else if (task.projectId) {
           links.push({
-            source: `task_${task.id}`,
+            source: id,
             target: `project_${task.projectId}`
           });
         }
         
         if (task.placeId) {
           links.push({
-            source: `task_${task.id}`,
+            source: id,
             target: `place_${task.placeId}`
           });
         }
@@ -223,14 +237,16 @@ export default function GraphPage() {
           task.tagNames.forEach(tag => {
             const tagId = `tag_${tag.toLowerCase()}`;
             if (!nodes.find(n => n.id === tagId)) {
+              const coords = getInitialCoords(tagId);
               nodes.push({
                 id: tagId,
                 name: `#${tag}`,
-                radius: 5.5,
+                radius: 5,
                 color: "#ec4899",
                 glowColor: "rgba(236, 72, 153, 0.3)",
                 category: "tags",
-                type: "Tag"
+                type: "Tag",
+                ...(coords ? { x: coords.x, y: coords.y } : {})
               });
             }
             if (filters.tasks) {
@@ -247,19 +263,22 @@ export default function GraphPage() {
     // 6. Notatki
     if (filters.notes) {
       notes.forEach(note => {
+        const id = `note_${note.id}`;
+        const coords = getInitialCoords(id);
         nodes.push({
-          id: `note_${note.id}`,
+          id,
           name: note.title,
-          radius: 5.5,
+          radius: 5,
           color: "#3b82f6",
           glowColor: "rgba(59, 130, 246, 0.3)",
           category: "notes",
-          type: "Notatka"
+          type: "Notatka",
+          ...(coords ? { x: coords.x, y: coords.y } : {})
         });
 
         if (note.projectId) {
           links.push({
-            source: `note_${note.id}`,
+            source: id,
             target: `project_${note.projectId}`
           });
         }
@@ -269,14 +288,17 @@ export default function GraphPage() {
     // 7. Miejsca GPS
     if (filters.places) {
       places.forEach(place => {
+        const id = `place_${place.id}`;
+        const coords = getInitialCoords(id);
         nodes.push({
-          id: `place_${place.id}`,
+          id,
           name: place.name,
-          radius: 7,
+          radius: 6.5,
           color: "#06b6d4",
           glowColor: "rgba(6, 182, 212, 0.35)",
           category: "places",
-          type: "Miejsce"
+          type: "Miejsce",
+          ...(coords ? { x: coords.x, y: coords.y } : {})
         });
       });
     }
@@ -290,6 +312,15 @@ export default function GraphPage() {
 
     return { nodes, links: safeLinks };
   }, [projects, taskLists, tasks, notes, places, isDark, filters]);
+
+  // Ustawienie sił D3 w celu zbliżenia kulek (gęstsze klastry)
+  useEffect(() => {
+    if (fgRef.current) {
+      // Zmniejszamy siłę odpychania (charge) oraz skracamy dystans połączeń (link distance)
+      fgRef.current.d3Force("charge")?.strength(-30);
+      fgRef.current.d3Force("link")?.distance(22);
+    }
+  }, [graphData]);
 
   const isLoading = projectsLoading || taskListsLoading || tasksLoading || notesLoading || placesLoading;
 
@@ -372,12 +403,12 @@ export default function GraphPage() {
             height={dimensions.height}
             nodeLabel="name"
             nodeColor="color"
-            nodeRelSize={6}
+            nodeRelSize={5}
             linkColor={() => "rgba(113, 113, 122, 0.22)"}
             linkWidth={1.2}
             backgroundColor="#0d0f14"
-            cooldownTicks={120}
-            d3VelocityDecay={0.3}
+            cooldownTicks={40}
+            d3VelocityDecay={0.45}
             onEngineStop={() => {
               if (fgRef.current && !hasInitiallyFittedRef.current) {
                 hasInitiallyFittedRef.current = true;
@@ -398,12 +429,15 @@ export default function GraphPage() {
             nodeCanvasObject={(node: any, ctx, globalScale) => {
               if (node.x === undefined || node.y === undefined || isNaN(node.x) || isNaN(node.y)) return;
               
-              const radius = node.radius || 6;
+              // Zapisujemy pozycję na żywo w pamięci podręcznej (dla stabilności filtrów)
+              nodeCoordsRef.current.set(node.id, { x: node.x, y: node.y });
+
+              const radius = node.radius || 5;
 
               // 1. Rysowanie subtelnej poświaty (Aura / Glow) dla większych węzłów
               if (node.glowColor && node.glowColor !== "transparent") {
                 ctx.beginPath();
-                ctx.arc(node.x, node.y, radius + 2.5, 0, 2 * Math.PI, false);
+                ctx.arc(node.x, node.y, radius + 2.2, 0, 2 * Math.PI, false);
                 ctx.fillStyle = node.glowColor;
                 ctx.fill();
               }
@@ -421,8 +455,8 @@ export default function GraphPage() {
 
               // 3. Rysowanie etykiety monospace pod kulą
               const label = node.name || "";
-              const truncated = label.length > 22 ? label.substring(0, 20) + "..." : label;
-              const fontSize = Math.max(11 / globalScale, 3.5);
+              const truncated = label.length > 20 ? label.substring(0, 18) + "..." : label;
+              const fontSize = Math.max(10 / globalScale, 3.2);
               
               ctx.font = `600 ${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
               ctx.textAlign = 'center';
@@ -432,7 +466,7 @@ export default function GraphPage() {
               ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
               ctx.shadowBlur = 4;
               ctx.fillStyle = node.category === "projects" || node.category === "incubator" ? "#f4f4f5" : "#a1a1aa";
-              ctx.fillText(truncated, node.x, node.y + radius + (3 / globalScale));
+              ctx.fillText(truncated, node.x, node.y + radius + (2.5 / globalScale));
               
               // Reset cienia dla reszty rysowania
               ctx.shadowColor = 'transparent';
@@ -440,7 +474,7 @@ export default function GraphPage() {
             }}
             nodePointerAreaPaint={(node: any, color, ctx) => {
               if (node.x === undefined || node.y === undefined || isNaN(node.x) || isNaN(node.y)) return;
-              const radius = (node.radius || 6) + 4;
+              const radius = (node.radius || 5) + 4;
               ctx.fillStyle = color;
               ctx.beginPath();
               ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
