@@ -53,7 +53,7 @@ export default function GraphPage() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const fgRef = useRef<any>(null);
-  const hasInitiallyFittedRef = useRef(false);
+  const isInitialMountedRef = useRef(false);
   
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
     width: 1200,
@@ -118,7 +118,7 @@ export default function GraphPage() {
     };
   }, [projects, taskLists, tasks, notes, places]);
 
-  // Generowanie grafu z zachowaniem naturalnego rozstawu sił D3
+  // Generowanie danych grafu
   const graphData = useMemo(() => {
     const nodes: any[] = [];
     const links: any[] = [];
@@ -129,7 +129,8 @@ export default function GraphPage() {
         nodes.push({
           id: `project_${project.id}`,
           name: project.title,
-          radius: 15,
+          radius: 14,
+          fontSize: 5.5,
           color: "#a855f7",
           glowColor: "rgba(168, 85, 247, 0.45)",
           category: "projects",
@@ -145,6 +146,7 @@ export default function GraphPage() {
           id: `project_${idea.id}`,
           name: idea.title,
           radius: 10,
+          fontSize: 4.8,
           color: "#f59e0b",
           glowColor: "rgba(245, 158, 11, 0.4)",
           category: "incubator",
@@ -160,7 +162,8 @@ export default function GraphPage() {
         nodes.push({
           id,
           name: list.name,
-          radius: 9,
+          radius: 8.5,
+          fontSize: 4.2,
           color: "#6366f1",
           glowColor: "rgba(99, 102, 241, 0.4)",
           category: "lists",
@@ -184,7 +187,8 @@ export default function GraphPage() {
         nodes.push({
           id,
           name: task.title,
-          radius: 6,
+          radius: 5,
+          fontSize: 3.6,
           color: isDark ? "#e2e8f0" : "#475569",
           glowColor: "transparent",
           category: "tasks",
@@ -223,7 +227,8 @@ export default function GraphPage() {
               nodes.push({
                 id: tagId,
                 name: `#${tag}`,
-                radius: 6,
+                radius: 5.5,
+                fontSize: 3.8,
                 color: "#ec4899",
                 glowColor: "rgba(236, 72, 153, 0.35)",
                 category: "tags",
@@ -248,7 +253,8 @@ export default function GraphPage() {
         nodes.push({
           id,
           name: note.title,
-          radius: 7,
+          radius: 6,
+          fontSize: 3.8,
           color: "#3b82f6",
           glowColor: "rgba(59, 130, 246, 0.35)",
           category: "notes",
@@ -271,7 +277,8 @@ export default function GraphPage() {
         nodes.push({
           id,
           name: place.name,
-          radius: 8.5,
+          radius: 7.5,
+          fontSize: 4.2,
           color: "#06b6d4",
           glowColor: "rgba(6, 182, 212, 0.4)",
           category: "places",
@@ -290,25 +297,18 @@ export default function GraphPage() {
     return { nodes, links: safeLinks };
   }, [projects, taskLists, tasks, notes, places, isDark, filters]);
 
-  // Dynamiczne ustawienie sił D3:
-  // Duży link distance (110px) zapobiega nachodzeniu na siebie węzłów, a silniejsze odpychanie rozsuwa etykiety
+  // Ustawienie sił D3 raz po załadowaniu:
   useEffect(() => {
-    if (fgRef.current) {
-      fgRef.current.d3Force("charge")?.strength(-220);
-      fgRef.current.d3Force("link")?.distance(110);
+    if (fgRef.current && !isInitialMountedRef.current && graphData.nodes.length > 0) {
+      isInitialMountedRef.current = true;
+      fgRef.current.d3Force("charge")?.strength(-240);
+      fgRef.current.d3Force("link")?.distance(95);
+      
+      setTimeout(() => {
+        fgRef.current?.zoomToFit(400, 80);
+      }, 500);
     }
-  }, [graphData]);
-
-  // Jednorazowe wycentrowanie na starcie
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (fgRef.current && !hasInitiallyFittedRef.current) {
-        hasInitiallyFittedRef.current = true;
-        fgRef.current.zoomToFit(500, 80);
-      }
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
+  }, [graphData.nodes.length]);
 
   const isLoading = projectsLoading || taskListsLoading || tasksLoading || notesLoading || placesLoading;
 
@@ -320,13 +320,13 @@ export default function GraphPage() {
 
   const handleZoomIn = () => {
     if (fgRef.current) {
-      fgRef.current.zoom(fgRef.current.zoom() * 1.3, 250);
+      fgRef.current.zoom(fgRef.current.zoom() * 1.3, 200);
     }
   };
 
   const handleZoomOut = () => {
     if (fgRef.current) {
-      fgRef.current.zoom(fgRef.current.zoom() * 0.7, 250);
+      fgRef.current.zoom(fgRef.current.zoom() * 0.7, 200);
     }
   };
 
@@ -351,21 +351,21 @@ export default function GraphPage() {
         <div className="flex items-center gap-1.5 bg-zinc-900/90 border border-zinc-800 p-1 rounded-2xl shadow-xs">
           <button
             onClick={handleZoomIn}
-            className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"
+            className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
             title="Przybliż"
           >
             <ZoomIn className="w-4 h-4" />
           </button>
           <button
             onClick={handleZoomOut}
-            className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"
+            className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
             title="Oddal"
           >
             <ZoomOut className="w-4 h-4" />
           </button>
           <button
             onClick={handleCenter}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
             title="Wyśrodkuj cały graf"
           >
             <Focus className="w-3.5 h-3.5" /> Wyśrodkuj
@@ -392,32 +392,25 @@ export default function GraphPage() {
             nodeLabel="name"
             nodeColor="color"
             nodeRelSize={6}
-            // Pogrubione, jasne i wyraźne linie połączeń
-            linkColor={() => "rgba(212, 212, 216, 0.45)"}
-            linkWidth={2.4}
+            linkColor={() => "rgba(212, 212, 216, 0.4)"}
+            linkWidth={2}
             linkDirectionalParticles={2}
             linkDirectionalParticleSpeed={0.006}
-            linkDirectionalParticleWidth={2.5}
+            linkDirectionalParticleWidth={2.2}
             linkDirectionalParticleColor={() => "#c084fc"}
             backgroundColor="#0d0f14"
-            cooldownTicks={80}
+            cooldownTicks={60}
             d3VelocityDecay={0.35}
-            // BRAK automatycznego zoomowania przy przeciąganiu, klikaniu czy zatrzymaniu silnika
-            onNodeClick={(node: any) => {
-              // Kliknięcie nie wymusza zoomu - zachowuje obecną skalę użytkownika
-            }}
-            nodeCanvasObject={(node: any, ctx, globalScale) => {
+            enableNodeDrag={true}
+            nodeCanvasObject={(node: any, ctx) => {
               if (node.x === undefined || node.y === undefined || isNaN(node.x) || isNaN(node.y)) return;
 
-              // Skalowanie adaptacyjne: zapobiega kurczeniu się kulek w mikroskopijne kropki przy oddalaniu
-              const baseRadius = node.radius || 6;
-              const minScreenRadius = 5.5;
-              const radius = Math.max(baseRadius, minScreenRadius / globalScale);
+              const radius = node.radius || 6;
 
-              // 1. Rysowanie subtelnej poświaty (Aura / Glow) dla większych węzłów
+              // 1. Rysowanie subtelnej poświaty (Aura / Glow)
               if (node.glowColor && node.glowColor !== "transparent") {
                 ctx.beginPath();
-                ctx.arc(node.x, node.y, radius + (3 / globalScale), 0, 2 * Math.PI, false);
+                ctx.arc(node.x, node.y, radius + 3, 0, 2 * Math.PI, false);
                 ctx.fillStyle = node.glowColor;
                 ctx.fill();
               }
@@ -428,35 +421,32 @@ export default function GraphPage() {
               ctx.fillStyle = node.color || "#a855f7";
               ctx.fill();
               
-              // Cienki, elegancki obrys
-              ctx.lineWidth = 1.4 / globalScale;
+              // Cienki obrys
+              ctx.lineWidth = 1.2;
               ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
               ctx.stroke();
 
-              // 3. Rysowanie etykiety monospace pod kulą z minimalnym rozmiarem czytelności
+              // 3. Rysowanie etykiety monospace pod kulą w naturalnych współrzędnych świata
               const label = node.name || "";
-              const truncated = label.length > 22 ? label.substring(0, 20) + "..." : label;
-              const minFontSize = 3.8;
-              const fontSize = Math.max(11.5 / globalScale, minFontSize);
+              const truncated = label.length > 20 ? label.substring(0, 18) + "..." : label;
+              const fontSize = node.fontSize || 4;
               
               ctx.font = `600 ${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
               ctx.textAlign = 'center';
               ctx.textBaseline = 'top';
 
-              // Cień tekstu dla czytelności na ciemnym tle
+              // Cień tekstu dla czytelności
               ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-              ctx.shadowBlur = 4;
+              ctx.shadowBlur = 3;
               ctx.fillStyle = node.category === "projects" || node.category === "incubator" ? "#f4f4f5" : "#cbd5e1";
-              ctx.fillText(truncated, node.x, node.y + radius + (3.5 / globalScale));
+              ctx.fillText(truncated, node.x, node.y + radius + 2.5);
               
-              // Reset cienia dla reszty rysowania
               ctx.shadowColor = 'transparent';
               ctx.shadowBlur = 0;
             }}
-            nodePointerAreaPaint={(node: any, color, ctx, globalScale) => {
+            nodePointerAreaPaint={(node: any, color, ctx) => {
               if (node.x === undefined || node.y === undefined || isNaN(node.x) || isNaN(node.y)) return;
-              const baseRadius = node.radius || 6;
-              const radius = Math.max(baseRadius, 6 / (globalScale || 1)) + 6;
+              const radius = (node.radius || 6) + 5;
               ctx.fillStyle = color;
               ctx.beginPath();
               ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
@@ -477,7 +467,7 @@ export default function GraphPage() {
                 key={key}
                 type="button"
                 onClick={() => toggleFilter(key)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all shrink-0 border select-none ${
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all shrink-0 border select-none cursor-pointer ${
                   isVisible 
                     ? `${cfg.bgActive} ${cfg.border} shadow-xs scale-100` 
                     : "bg-zinc-950/60 border-zinc-800/60 text-zinc-600 opacity-50 hover:opacity-80"
