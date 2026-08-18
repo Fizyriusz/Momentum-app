@@ -104,14 +104,14 @@ export function TaskItem({ task }: { task: Task }) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <div
         className={`
-          group flex items-center justify-between p-3.5 rounded-2xl transition-all duration-200 cursor-pointer border
+          group flex items-start justify-between p-3.5 rounded-2xl transition-all duration-200 cursor-pointer border gap-3
           ${task.isCompleted 
             ? "bg-zinc-100/50 dark:bg-zinc-900/20 border-zinc-200/50 dark:border-zinc-800/30 opacity-60" 
             : "bg-white dark:bg-zinc-900/60 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 border-zinc-200/80 dark:border-zinc-800/60 shadow-xs dark:shadow-none"
           }
         `}
       >
-        <div className="flex items-center gap-3 overflow-hidden flex-1">
+        <div className="flex items-start gap-3 min-w-0 flex-1">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -119,7 +119,7 @@ export function TaskItem({ task }: { task: Task }) {
             }}
             disabled={isPending}
             className={`
-              shrink-0 w-5 h-5 rounded-lg flex items-center justify-center border transition-all
+              shrink-0 w-5 h-5 rounded-lg flex items-center justify-center border transition-all mt-0.5
               ${task.isCompleted 
                 ? "bg-purple-600 border-purple-600 text-white shadow-xs" 
                 : "border-zinc-300 dark:border-zinc-600 text-transparent hover:border-purple-500 group-hover:border-purple-500 bg-white/50 dark:bg-zinc-800/50"
@@ -129,8 +129,8 @@ export function TaskItem({ task }: { task: Task }) {
             <Check className="w-3.5 h-3.5" strokeWidth={3} />
           </button>
           
-          <DialogTrigger className="flex flex-col flex-1 text-left bg-transparent border-none p-0 cursor-pointer focus:outline-none">
-            <span className={`text-sm font-semibold truncate ${task.isCompleted ? "line-through text-zinc-400 dark:text-zinc-500" : "text-zinc-900 dark:text-zinc-200"}`}>
+          <DialogTrigger className="flex flex-col flex-1 text-left bg-transparent border-none p-0 cursor-pointer focus:outline-none min-w-0">
+            <span className={`text-sm font-semibold break-words leading-snug ${task.isCompleted ? "line-through text-zinc-400 dark:text-zinc-500" : "text-zinc-900 dark:text-zinc-200"}`}>
               {task.title}
             </span>
             {(task.dueDate || task.description || task.placeId || task.taskListId) && !task.isCompleted && (

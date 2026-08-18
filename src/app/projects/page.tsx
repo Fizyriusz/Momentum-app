@@ -104,65 +104,120 @@ function ProjectDetailsView({ id }: { id: string }) {
           </div>
         </div>
         
-        {viewMode === "kanban" ? (
-          <div className="space-y-8">
-            {taskLists.length > 0 ? (
-              taskLists.map(list => {
-                const listTasks = tasks.filter(t => t.taskListId === list.id);
-                return (
-                  <div key={list.id} className="space-y-4 bg-zinc-100/60 dark:bg-zinc-900/10 border border-zinc-200 dark:border-zinc-800/30 p-4 rounded-3xl shadow-xs dark:shadow-none">
-                    <div className="flex items-center justify-between px-1">
-                      <Link href={`/lists?id=${list.id}`} className="flex items-center gap-2 group">
-                        <span className="w-2.5 h-2.5 rounded-full bg-purple-600 dark:bg-purple-500 group-hover:scale-125 transition-transform" />
-                        <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-200 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">{list.name}</h3>
-                        <span className="text-xs text-zinc-500 font-medium">({listTasks.filter(t => !t.isCompleted).length})</span>
-                      </Link>
-                      <EditTaskListDialog taskList={list} />
-                    </div>
-                    <TaskKanban taskList={list} tasks={listTasks} projectId={project.id} />
+        {(() => {
+          const unassignedTasks = tasks.filter(t => !t.taskListId || !taskLists.some(l => l.id === t.taskListId));
+
+          if (viewMode === "kanban") {
+            return (
+              <div className="space-y-8">
+                {taskLists.length > 0 ? (
+                  <>
+                    {taskLists.map(list => {
+                      const listTasks = tasks.filter(t => t.taskListId === list.id);
+                      return (
+                        <div key={list.id} className="space-y-4 bg-zinc-100/60 dark:bg-zinc-900/10 border border-zinc-200 dark:border-zinc-800/30 p-4 rounded-3xl shadow-xs dark:shadow-none">
+                          <div className="flex items-center justify-between px-1">
+                            <Link href={`/lists?id=${list.id}`} className="flex items-center gap-2 group">
+                              <span className="w-2.5 h-2.5 rounded-full bg-purple-600 dark:bg-purple-500 group-hover:scale-125 transition-transform" />
+                              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-200 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">{list.name}</h3>
+                              <span className="text-xs text-zinc-500 font-medium">({listTasks.filter(t => !t.isCompleted).length})</span>
+                            </Link>
+                            <EditTaskListDialog taskList={list} />
+                          </div>
+                          <TaskKanban taskList={list} tasks={listTasks} projectId={project.id} />
+                        </div>
+                      );
+                    })}
+
+                    {unassignedTasks.length > 0 && (
+                      <div className="space-y-4 bg-zinc-100/60 dark:bg-zinc-900/10 border border-zinc-200 dark:border-zinc-800/30 p-4 rounded-3xl shadow-xs dark:shadow-none">
+                        <div className="flex items-center justify-between px-1">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+                            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-200">Ogólne Zadania Projektu</h3>
+                            <span className="text-xs text-zinc-500 font-medium">({unassignedTasks.filter(t => !t.isCompleted).length})</span>
+                          </div>
+                        </div>
+                        <TaskKanban tasks={unassignedTasks} projectId={project.id} />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="bg-zinc-100/60 dark:bg-zinc-900/10 border border-zinc-200 dark:border-zinc-800/30 p-4 rounded-3xl shadow-xs dark:shadow-none">
+                    <TaskKanban tasks={tasks} projectId={project.id} />
                   </div>
-                );
-              })
-            ) : (
-              <div className="bg-zinc-100/60 dark:bg-zinc-900/10 border border-zinc-200 dark:border-zinc-800/30 p-4 rounded-3xl shadow-xs dark:shadow-none">
-                <TaskKanban tasks={tasks} projectId={project.id} />
+                )}
               </div>
-            )}
-          </div>
-        ) : (
-          taskLists.length > 0 ? (
+            );
+          }
+
+          // Widok Listy
+          return (
             <div className="space-y-8">
-              {taskLists.map(list => {
-                const listTasks = tasks.filter(t => t.taskListId === list.id);
-                return (
-                  <div key={list.id} className="space-y-4 bg-white dark:bg-zinc-900/20 border border-zinc-200/80 dark:border-zinc-800/40 p-4 rounded-3xl shadow-xs dark:shadow-none">
-                    <div className="flex items-center justify-between px-1">
-                      <Link href={`/lists?id=${list.id}`} className="flex items-center gap-2 group">
-                        <span className="w-2.5 h-2.5 rounded-full bg-purple-600 dark:bg-purple-500 group-hover:scale-125 transition-transform" />
-                        <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-200 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">{list.name}</h3>
-                        <span className="text-xs text-zinc-500 font-medium">({listTasks.filter(t => !t.isCompleted).length})</span>
-                      </Link>
-                      <EditTaskListDialog taskList={list} />
+              {taskLists.length > 0 ? (
+                <>
+                  {taskLists.map(list => {
+                    const listTasks = tasks.filter(t => t.taskListId === list.id);
+                    return (
+                      <div key={list.id} className="space-y-4 bg-white dark:bg-zinc-900/20 border border-zinc-200/80 dark:border-zinc-800/40 p-4 rounded-3xl shadow-xs dark:shadow-none">
+                        <div className="flex items-center justify-between px-1">
+                          <Link href={`/lists?id=${list.id}`} className="flex items-center gap-2 group">
+                            <span className="w-2.5 h-2.5 rounded-full bg-purple-600 dark:bg-purple-500 group-hover:scale-125 transition-transform" />
+                            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-200 group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">{list.name}</h3>
+                            <span className="text-xs text-zinc-500 font-medium">({listTasks.filter(t => !t.isCompleted).length})</span>
+                          </Link>
+                          <EditTaskListDialog taskList={list} />
+                        </div>
+                        <QuickAddTask taskListId={list.id} projectId={project.id} />
+                        <TaskList tasks={listTasks} />
+                      </div>
+                    );
+                  })}
+
+                  {unassignedTasks.length > 0 && (
+                    <div className="space-y-4 bg-white dark:bg-zinc-900/20 border border-zinc-200/80 dark:border-zinc-800/40 p-4 rounded-3xl shadow-xs dark:shadow-none">
+                      <div className="flex items-center justify-between px-1">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-zinc-400 dark:bg-zinc-600" />
+                          <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-200">Ogólne Zadania Projektu</h3>
+                          <span className="text-xs text-zinc-500 font-medium">({unassignedTasks.filter(t => !t.isCompleted).length})</span>
+                        </div>
+                      </div>
+                      <QuickAddTask projectId={project.id} />
+                      <TaskList tasks={unassignedTasks} />
                     </div>
-                    <QuickAddTask taskListId={list.id} projectId={project.id} />
-                    <TaskList tasks={listTasks} />
+                  )}
+                </>
+              ) : tasks.length > 0 ? (
+                <div className="space-y-4 bg-white dark:bg-zinc-900/20 border border-zinc-200/80 dark:border-zinc-800/40 p-4 rounded-3xl shadow-xs dark:shadow-none">
+                  <div className="flex items-center justify-between px-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-purple-600 dark:bg-purple-500" />
+                      <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-200">Zadania Projektu</h3>
+                      <span className="text-xs text-zinc-500 font-medium">({tasks.filter(t => !t.isCompleted).length})</span>
+                    </div>
                   </div>
-                );
-              })}
+                  <QuickAddTask projectId={project.id} />
+                  <TaskList tasks={tasks} />
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <QuickAddTask projectId={project.id} />
+                  <div className="text-center p-8 text-zinc-500 flex flex-col items-center gap-4 bg-white dark:bg-zinc-900/30 rounded-3xl border border-dashed border-zinc-200 dark:border-zinc-800 shadow-xs">
+                    <div className="p-3 bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl">
+                      <ListTodo className="w-6 h-6 text-zinc-400 dark:text-zinc-600" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-zinc-800 dark:text-zinc-300">Brak zadań w tym projekcie.</p>
+                      <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">Dodaj zadanie powyżej lub utwórz dedykowaną listę zadań.</p>
+                    </div>
+                    <CreateTaskListDialog defaultProjectId={project.id} />
+                  </div>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-center p-8 text-zinc-500 flex flex-col items-center gap-4 bg-white dark:bg-zinc-900/30 rounded-3xl border border-dashed border-zinc-200 dark:border-zinc-800 shadow-xs">
-              <div className="p-3 bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl">
-                <ListTodo className="w-6 h-6 text-zinc-400 dark:text-zinc-600" />
-              </div>
-              <div>
-                <p className="font-bold text-zinc-800 dark:text-zinc-300">Projekt nie posiada jeszcze listy zadań.</p>
-                <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">Aby zacząć dodawać zadania, utwórz nową listę dla tego projektu.</p>
-              </div>
-              <CreateTaskListDialog defaultProjectId={project.id} />
-            </div>
-          )
-        )}
+          );
+        })()}
       </section>
     </main>
   );

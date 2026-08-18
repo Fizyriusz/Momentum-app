@@ -10,18 +10,18 @@ export default function ChangelogPage() {
 
       <section className="space-y-8">
         
-        {/* v0.7.5 - AKTUALNA WERSJA */}
+        {/* v0.7.6 - AKTUALNA WERSJA */}
         <div className="bg-white dark:bg-zinc-900/40 border border-purple-500/40 dark:border-purple-500/30 rounded-3xl p-6 backdrop-blur-md relative overflow-hidden shadow-md dark:shadow-none">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                <Sun className="w-6 h-6" />
+                <Sparkles className="w-6 h-6" />
               </div>
               <div>
                 <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                  <span className="text-purple-600 dark:text-purple-400">v0.7.5</span> - Tryb Jasny i Ciemny (Light & Dark Mode)
+                  <span className="text-purple-600 dark:text-purple-400">v0.7.6</span> - Inteligentny FAB, Pełne Zawijanie Zadań & Mobilny Przegląd
                 </h2>
-                <p className="text-xs text-zinc-500 font-medium">Etap 1.2 Roadmapy Momentum</p>
+                <p className="text-xs text-zinc-500 font-medium">Usprawnienia UX i Mobile</p>
               </div>
             </div>
             <span className="text-xs font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-xl border border-purple-500/30">
@@ -31,15 +31,26 @@ export default function ChangelogPage() {
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Nowości & Usprawnienia Stylistyczne</h3>
+              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Usprawnienia & Poprawki</h3>
               <ul className="space-y-2 text-zinc-700 dark:text-zinc-300 text-sm list-disc list-inside">
-                <li><strong>Trójpozycyjny Przełącznik Motywów:</strong> Jasny (Light), Ciemny (Dark) oraz Automatyczny (System) w dolnym panelu nawigacji bocznej oraz mobilnej.</li>
-                <li><strong>Kompleksowa Adaptacja Wszystkich Widoków:</strong> Kokpit (Dashboard), Listy Zadań, Tablice Kanban, Projekty, Inkubator, Miejsca, Nawyki, Notatki, Modale dialogowe oraz Graf Powiązań.</li>
-                <li><strong>Dynamiczny Canvas Grafu:</strong> Graf 2D automatycznie wykrywa aktywny motyw i przełącza tło płótna, barwy powiązań i etykiety dla maksymalnej czytelności.</li>
-                <li><strong>Anti-FOUC & Zapamiętywanie:</strong> Motyw jest odczytywany przed renderowaniem HTML, zapobiegając białemu/ciemnemu błyskowi przy przeładowaniu, z automatyczną synchronizacją do <code>localStorage</code> i <code>prefers-color-scheme</code>.</li>
+                <li><strong>Pełne Wyświetlanie Tytułów Zadań:</strong> Usunięto obcinanie tekstu (<code>truncate</code>) na rzecz naturalnego zawijania wierszy (<code>break-words</code>), zapewniając pełną czytelność długich nazw zadań na smartfonach.</li>
+                <li><strong>Inteligentny Przycisk FAB:</strong> Przycisk szybkiego dodawania (+) automatycznie wykrywa aktualny widok — ustawia termin na <em>„Dzisiaj”</em> w widoku Dzisiaj, <em>„Jutro”</em> w widoku Jutro, a w otwartych Listach/Projektach wstępnie przypisuje nowe zadanie.</li>
+                <li><strong>Przegląd w Menu Mobilnym:</strong> Dodano brakującą pozycję <em>„Przegląd”</em> (Dashboard) na samym szczycie menu nawigacyjnego na telefonie.</li>
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* v0.7.5 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-600 dark:text-purple-400">v0.7.5</span> - Tryb Jasny i Ciemny (Light & Dark Mode)
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-600 dark:text-zinc-400 space-y-2 ml-2">
+            <li>Trójpozycyjny przełącznik motywów: Jasny (Light), Ciemny (Dark) oraz Automatyczny (System).</li>
+            <li>Kompleksowa adaptacja wszystkich widoków, kart, modali, Kanbanu i nawyków.</li>
+            <li>Dynamiczny Canvas grafu 2D reagujący na aktywny motyw.</li>
+          </ul>
         </div>
 
         {/* v0.7.2 */}

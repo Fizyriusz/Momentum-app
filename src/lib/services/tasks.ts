@@ -200,7 +200,7 @@ export function useProjectTasks(projectId: string) {
         return {
           id: doc.id,
           ...d,
-          taskListId: d.taskListId || d.projectId || null
+          taskListId: d.taskListId || null
         } as Task;
       });
 

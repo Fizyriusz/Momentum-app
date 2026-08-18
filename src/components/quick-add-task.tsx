@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { createTask, useTaskLists } from "@/lib/services/tasks";
 import { createNote } from "@/lib/services/notes";
 import { createPlace } from "@/lib/services/places";
@@ -13,15 +13,19 @@ import { Plus, Sun, Sunset, CalendarX, FileText, CheckSquare, MapPin, Loader2, L
 export function QuickAddTask({ 
   projectId, 
   taskListId, 
+  defaultDueDate = null,
+  defaultMode = "TASK",
   onSuccess 
 }: { 
   projectId?: string, 
   taskListId?: string, 
+  defaultDueDate?: Date | null,
+  defaultMode?: "TASK" | "NOTE" | "IDEA",
   onSuccess?: () => void 
 }) {
   const [title, setTitle] = useState("");
-  const [dueDate, setDueDate] = useState<Date | null>(null);
-  const [mode, setMode] = useState<"TASK" | "NOTE" | "IDEA">("TASK");
+  const [dueDate, setDueDate] = useState<Date | null>(defaultDueDate);
+  const [mode, setMode] = useState<"TASK" | "NOTE" | "IDEA">(defaultMode);
   const [isPending, startTransition] = useTransition();
   
   const [locating, setLocating] = useState(false);
@@ -33,6 +37,22 @@ export function QuickAddTask({
   
   const [selectedProjectId, setSelectedProjectId] = useState<string>(projectId || "");
   const [selectedTaskListId, setSelectedTaskListId] = useState<string>(taskListId || "");
+
+  useEffect(() => {
+    if (defaultDueDate !== undefined) setDueDate(defaultDueDate);
+  }, [defaultDueDate]);
+
+  useEffect(() => {
+    if (defaultMode !== undefined) setMode(defaultMode);
+  }, [defaultMode]);
+
+  useEffect(() => {
+    if (projectId !== undefined) setSelectedProjectId(projectId);
+  }, [projectId]);
+
+  useEffect(() => {
+    if (taskListId !== undefined) setSelectedTaskListId(taskListId);
+  }, [taskListId]);
 
   async function handleLocateHere() {
     setLocating(true);
@@ -76,7 +96,7 @@ export function QuickAddTask({
       }
 
       setTitle("");
-      setDueDate(null);
+      setDueDate(defaultDueDate || null);
       setSelectedPlaceId(null);
       if (!projectId) setSelectedProjectId("");
       if (!taskListId) setSelectedTaskListId("");
@@ -92,14 +112,18 @@ export function QuickAddTask({
   };
   const clearDate = () => setDueDate(null);
 
-  const isToday = dueDate && new Date().toDateString() === new Date().toDateString();
-  const isTomorrow = dueDate && (() => {
+  const isToday = !!dueDate && new Date().toDateString() === new Date(dueDate).toDateString();
+  const isTomorrow = !!dueDate && (() => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    return dueDate.toDateString() === tomorrow.toDateString();
+    return new Date(dueDate).toDateString() === tomorrow.toDateString();
   })();
 
   const activeTaskLists = taskLists.filter(l => !l.isArchived);
+  const currentProjectId = projectId || selectedProjectId;
+  const filteredTaskLists = currentProjectId
+    ? activeTaskLists.filter(l => l.projectId === currentProjectId)
+    : activeTaskLists;
 
   return (
     <div className="flex flex-col gap-2 w-full mb-4">
@@ -164,7 +188,7 @@ export function QuickAddTask({
         {mode !== "IDEA" && (
           <div className="flex flex-wrap items-center gap-2 px-1">
             {/* Wybór Listy Zadań */}
-            {mode === "TASK" && !taskListId && activeTaskLists.length > 0 && (
+            {mode === "TASK" && !taskListId && filteredTaskLists.length > 0 && (
               <div className="flex items-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-xs dark:shadow-none">
                 <div className="pl-2.5">
                   <ListTodo className="w-3 h-3 text-zinc-400" />
@@ -175,7 +199,7 @@ export function QuickAddTask({
                   className="bg-transparent text-[11px] font-bold text-zinc-700 dark:text-zinc-300 py-1.5 px-2 focus:outline-none max-w-[130px]"
                 >
                   <option value="" className="bg-white dark:bg-zinc-900">Lista: Domyślna</option>
-                  {activeTaskLists.map(list => (
+                  {filteredTaskLists.map(list => (
                     <option key={list.id} value={list.id} className="bg-white dark:bg-zinc-900">{list.name}</option>
                   ))}
                 </select>
