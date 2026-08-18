@@ -37,6 +37,7 @@ export default function GraphPage() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const fgRef = useRef<any>(null);
+  const hasInitiallyFittedRef = useRef(false);
   
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
     width: 1200,
@@ -59,18 +60,11 @@ export default function GraphPage() {
     
     const t1 = setTimeout(updateSize, 100);
     const t2 = setTimeout(updateSize, 500);
-    const t3 = setTimeout(() => {
-      updateSize();
-      if (fgRef.current) {
-        fgRef.current.zoomToFit(400, 50);
-      }
-    }, 1000);
 
     return () => {
       window.removeEventListener("resize", updateSize);
       clearTimeout(t1);
       clearTimeout(t2);
-      clearTimeout(t3);
     };
   }, []);
 
@@ -188,14 +182,21 @@ export default function GraphPage() {
       });
     });
 
-    return { nodes, links };
+    // ZABEZPIECZENIE PRZED AWARIĄ D3: filtrujemy linki tak, aby oba węzły (source i target) na pewno istniały w grafie
+    const nodeIdsSet = new Set(nodes.map(n => n.id));
+    const safeLinks = links.filter(l => 
+      nodeIdsSet.has(typeof l.source === "object" ? l.source.id : l.source) && 
+      nodeIdsSet.has(typeof l.target === "object" ? l.target.id : l.target)
+    );
+
+    return { nodes, links: safeLinks };
   }, [projects, taskLists, tasks, notes, places, isDark]);
 
   const isLoading = projectsLoading || taskListsLoading || tasksLoading || notesLoading || placesLoading;
 
   const handleCenter = () => {
     if (fgRef.current) {
-      fgRef.current.zoomToFit(400, 50);
+      fgRef.current.zoomToFit(500, 60);
     }
   };
 
@@ -270,15 +271,29 @@ export default function GraphPage() {
             nodeLabel="name"
             nodeColor="color"
             nodeRelSize={6}
-            linkColor={() => isDark ? "rgba(161, 161, 170, 0.2)" : "rgba(100, 116, 139, 0.25)"}
+            linkColor={() => isDark ? "rgba(161, 161, 170, 0.25)" : "rgba(100, 116, 139, 0.3)"}
             backgroundColor={isDark ? "#09090b" : "#fafafa"}
-            cooldownTicks={100}
+            cooldownTicks={120}
             onEngineStop={() => {
+              if (fgRef.current && !hasInitiallyFittedRef.current) {
+                hasInitiallyFittedRef.current = true;
+                fgRef.current.zoomToFit(500, 60);
+              }
+            }}
+            onNodeClick={(node: any) => {
+              if (fgRef.current && node.x !== undefined && node.y !== undefined && !isNaN(node.x) && !isNaN(node.y)) {
+                fgRef.current.centerAt(node.x, node.y, 600);
+                fgRef.current.zoom(2.5, 600);
+              }
+            }}
+            onBackgroundClick={() => {
               if (fgRef.current) {
-                fgRef.current.zoomToFit(400, 50);
+                fgRef.current.zoomToFit(600, 60);
               }
             }}
             nodeCanvasObject={(node: any, ctx, globalScale) => {
+              if (node.x === undefined || node.y === undefined || isNaN(node.x) || isNaN(node.y)) return;
+              
               const label = node.name || "";
               const fontSize = Math.max(12 / globalScale, 4);
               ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
@@ -296,9 +311,12 @@ export default function GraphPage() {
               node.__bckgDimensions = bckgDimensions;
             }}
             nodePointerAreaPaint={(node: any, color, ctx) => {
+              if (node.x === undefined || node.y === undefined || isNaN(node.x) || isNaN(node.y)) return;
               ctx.fillStyle = color;
               const bckgDimensions = node.__bckgDimensions;
-              bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
+              if (bckgDimensions) {
+                ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
+              }
             }}
           />
         )}

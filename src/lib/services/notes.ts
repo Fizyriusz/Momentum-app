@@ -36,7 +36,7 @@ export function useNotes(projectId?: string | null) {
     let q = query(getUserNotesCol(), orderBy("updatedAt", "desc"));
     
     if (projectId) {
-      q = query(getUserNotesCol(), where("projectId", "==", projectId), orderBy("updatedAt", "desc"));
+      q = query(getUserNotesCol(), where("projectId", "==", projectId));
     }
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -48,10 +48,14 @@ export function useNotes(projectId?: string | null) {
           content: d.content,
           // Kompatybilność z migracją (projectId || skillId)
           projectId: d.projectId || d.skillId || null,
-          createdAt: d.createdAt?.toMillis() || Date.now(),
-          updatedAt: d.updatedAt?.toMillis() || Date.now(),
+          createdAt: d.createdAt?.toMillis ? d.createdAt.toMillis() : (typeof d.createdAt === 'number' ? d.createdAt : Date.now()),
+          updatedAt: d.updatedAt?.toMillis ? d.updatedAt.toMillis() : (typeof d.updatedAt === 'number' ? d.updatedAt : Date.now()),
         } as Note;
       });
+
+      // Sortowanie po stronie klienta
+      data.sort((a, b) => b.updatedAt - a.updatedAt);
+
       setNotes(data);
       setLoading(false);
     }, (error) => {

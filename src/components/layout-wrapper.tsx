@@ -310,7 +310,7 @@ function MobileSidebarNav({ onClose }: { onClose: () => void }) {
           onClick={onClose}
           className="flex items-center justify-between text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors group"
         >
-          <span>v0.8.0</span>
+          <span>v0.8.1</span>
           <span className="flex items-center gap-1">
             Changelog
             <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
