@@ -55,7 +55,7 @@ export default function GraphPage() {
   const fgRef = useRef<any>(null);
   const hasInitiallyFittedRef = useRef(false);
   
-  // Zapamiętywanie pozycji współrzędnych węzłów (zapobiega resetowaniu / eksplozji od środka przy przełączaniu filtrów)
+  // Zapamiętywanie pozycji współrzędnych węzłów
   const nodeCoordsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
   
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
@@ -121,7 +121,7 @@ export default function GraphPage() {
     };
   }, [projects, taskLists, tasks, notes, places]);
 
-  // Generowanie grafu z zachowaniem istniejących pozycji węzłów
+  // Generowanie grafu
   const graphData = useMemo(() => {
     const nodes: any[] = [];
     const links: any[] = [];
@@ -138,9 +138,9 @@ export default function GraphPage() {
         nodes.push({
           id,
           name: project.title,
-          radius: 12,
+          radius: 14,
           color: "#a855f7",
-          glowColor: "rgba(168, 85, 247, 0.4)",
+          glowColor: "rgba(168, 85, 247, 0.45)",
           category: "projects",
           type: "Projekt",
           ...(coords ? { x: coords.x, y: coords.y } : {})
@@ -156,9 +156,9 @@ export default function GraphPage() {
         nodes.push({
           id,
           name: idea.title,
-          radius: 8.5,
+          radius: 9,
           color: "#f59e0b",
-          glowColor: "rgba(245, 158, 11, 0.35)",
+          glowColor: "rgba(245, 158, 11, 0.4)",
           category: "incubator",
           type: "Inkubator",
           ...(coords ? { x: coords.x, y: coords.y } : {})
@@ -174,9 +174,9 @@ export default function GraphPage() {
         nodes.push({
           id,
           name: list.name,
-          radius: 7.5,
+          radius: 8.5,
           color: "#6366f1",
-          glowColor: "rgba(99, 102, 241, 0.35)",
+          glowColor: "rgba(99, 102, 241, 0.4)",
           category: "lists",
           type: "Lista",
           ...(coords ? { x: coords.x, y: coords.y } : {})
@@ -200,7 +200,7 @@ export default function GraphPage() {
         nodes.push({
           id,
           name: task.title,
-          radius: 4,
+          radius: 5,
           color: isDark ? "#e2e8f0" : "#475569",
           glowColor: "transparent",
           category: "tasks",
@@ -241,9 +241,9 @@ export default function GraphPage() {
               nodes.push({
                 id: tagId,
                 name: `#${tag}`,
-                radius: 5,
+                radius: 5.5,
                 color: "#ec4899",
-                glowColor: "rgba(236, 72, 153, 0.3)",
+                glowColor: "rgba(236, 72, 153, 0.35)",
                 category: "tags",
                 type: "Tag",
                 ...(coords ? { x: coords.x, y: coords.y } : {})
@@ -268,9 +268,9 @@ export default function GraphPage() {
         nodes.push({
           id,
           name: note.title,
-          radius: 5,
+          radius: 6,
           color: "#3b82f6",
-          glowColor: "rgba(59, 130, 246, 0.3)",
+          glowColor: "rgba(59, 130, 246, 0.35)",
           category: "notes",
           type: "Notatka",
           ...(coords ? { x: coords.x, y: coords.y } : {})
@@ -293,9 +293,9 @@ export default function GraphPage() {
         nodes.push({
           id,
           name: place.name,
-          radius: 6.5,
+          radius: 7.5,
           color: "#06b6d4",
-          glowColor: "rgba(6, 182, 212, 0.35)",
+          glowColor: "rgba(6, 182, 212, 0.4)",
           category: "places",
           type: "Miejsce",
           ...(coords ? { x: coords.x, y: coords.y } : {})
@@ -313,12 +313,16 @@ export default function GraphPage() {
     return { nodes, links: safeLinks };
   }, [projects, taskLists, tasks, notes, places, isDark, filters]);
 
-  // Ustawienie sił D3 w celu zbliżenia kulek (gęstsze klastry)
+  // Konfiguracja zaawansowanej fizyki D3:
+  // 1. Zwiększony dystans połączeń (link distance) o ponad 60% (75px) - koniec nakładania się powiązanych kulek!
+  // 2. Siła odpychania i centrowania
   useEffect(() => {
     if (fgRef.current) {
-      // Zmniejszamy siłę odpychania (charge) oraz skracamy dystans połączeń (link distance)
-      fgRef.current.d3Force("charge")?.strength(-30);
-      fgRef.current.d3Force("link")?.distance(22);
+      // Siła odpychania (pozwala na swobodną przestrzeń wokół etykiet)
+      fgRef.current.d3Force("charge")?.strength(-140);
+      
+      // Zwiększony dystans nitki (75px) -> brak nakładania się podłączonych obiektów (wzrost o ponad 60%)
+      fgRef.current.d3Force("link")?.distance(75);
     }
   }, [graphData]);
 
@@ -326,7 +330,7 @@ export default function GraphPage() {
 
   const handleCenter = () => {
     if (fgRef.current) {
-      fgRef.current.zoomToFit(500, 60);
+      fgRef.current.zoomToFit(500, 70);
     }
   };
 
@@ -404,26 +408,28 @@ export default function GraphPage() {
             nodeLabel="name"
             nodeColor="color"
             nodeRelSize={5}
-            linkColor={() => "rgba(113, 113, 122, 0.22)"}
-            linkWidth={1.2}
+            // Pogrubione, wyraźne nitki połączeń
+            linkColor={() => "rgba(161, 161, 170, 0.45)"}
+            linkWidth={2.2}
             backgroundColor="#0d0f14"
-            cooldownTicks={40}
-            d3VelocityDecay={0.45}
+            cooldownTicks={50}
+            d3VelocityDecay={0.4}
             onEngineStop={() => {
+              // ZoomToFit odpalamy WYŁĄCZNIE raz na starcie strony, nigdy przy filtrach!
               if (fgRef.current && !hasInitiallyFittedRef.current) {
                 hasInitiallyFittedRef.current = true;
-                fgRef.current.zoomToFit(500, 60);
+                fgRef.current.zoomToFit(400, 70);
               }
             }}
             onNodeClick={(node: any) => {
               if (fgRef.current && node.x !== undefined && node.y !== undefined && !isNaN(node.x) && !isNaN(node.y)) {
                 fgRef.current.centerAt(node.x, node.y, 600);
-                fgRef.current.zoom(2.8, 600);
+                fgRef.current.zoom(2.5, 600);
               }
             }}
             onBackgroundClick={() => {
               if (fgRef.current) {
-                fgRef.current.zoomToFit(600, 60);
+                fgRef.current.zoomToFit(600, 70);
               }
             }}
             nodeCanvasObject={(node: any, ctx, globalScale) => {
@@ -437,7 +443,7 @@ export default function GraphPage() {
               // 1. Rysowanie subtelnej poświaty (Aura / Glow) dla większych węzłów
               if (node.glowColor && node.glowColor !== "transparent") {
                 ctx.beginPath();
-                ctx.arc(node.x, node.y, radius + 2.2, 0, 2 * Math.PI, false);
+                ctx.arc(node.x, node.y, radius + 2.8, 0, 2 * Math.PI, false);
                 ctx.fillStyle = node.glowColor;
                 ctx.fill();
               }
@@ -449,24 +455,24 @@ export default function GraphPage() {
               ctx.fill();
               
               // Cienki obrys dla kontrastu
-              ctx.lineWidth = 1.2 / globalScale;
-              ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+              ctx.lineWidth = 1.4 / globalScale;
+              ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
               ctx.stroke();
 
               // 3. Rysowanie etykiety monospace pod kulą
               const label = node.name || "";
               const truncated = label.length > 20 ? label.substring(0, 18) + "..." : label;
-              const fontSize = Math.max(10 / globalScale, 3.2);
+              const fontSize = Math.max(10.5 / globalScale, 3.2);
               
               ctx.font = `600 ${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
               ctx.textAlign = 'center';
               ctx.textBaseline = 'top';
 
               // Cień tekstu dla maksymalnej czytelności na ciemnym tle
-              ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+              ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
               ctx.shadowBlur = 4;
               ctx.fillStyle = node.category === "projects" || node.category === "incubator" ? "#f4f4f5" : "#a1a1aa";
-              ctx.fillText(truncated, node.x, node.y + radius + (2.5 / globalScale));
+              ctx.fillText(truncated, node.x, node.y + radius + (3 / globalScale));
               
               // Reset cienia dla reszty rysowania
               ctx.shadowColor = 'transparent';
@@ -474,7 +480,7 @@ export default function GraphPage() {
             }}
             nodePointerAreaPaint={(node: any, color, ctx) => {
               if (node.x === undefined || node.y === undefined || isNaN(node.x) || isNaN(node.y)) return;
-              const radius = (node.radius || 5) + 4;
+              const radius = (node.radius || 5) + 5;
               ctx.fillStyle = color;
               ctx.beginPath();
               ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
