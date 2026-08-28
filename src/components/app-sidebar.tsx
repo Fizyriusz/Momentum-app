@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { DuveoLogo } from "@/components/duveo-logo";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Project } from "@/lib/services/projects";
+import { useProjects, Project } from "@/lib/services/projects";
 import { useTaskLists, useTasks } from "@/lib/services/tasks";
 import { CreateTaskListDialog, LIST_ICONS, LIST_COLORS } from "./create-task-list-dialog";
 import { UserProfileButton } from "./user-profile-button";
@@ -36,7 +36,7 @@ type Tag = {
   color: string;
 };
 
-export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], projects?: Project[] }) {
+export function AppSidebar({ tags: initialTags, projects: initialProjects }: { tags?: Tag[], projects?: Project[] } = {}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentListId = searchParams.get("id");
@@ -47,8 +47,15 @@ export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], project
   const [isListsOpen, setIsListsOpen] = useState(true);
   const [isArchivedListsOpen, setIsArchivedListsOpen] = useState(false);
 
+  const { projects: activeProjects } = useProjects("ACTIVE");
+  const projects = initialProjects && initialProjects.length > 0 ? initialProjects : activeProjects;
+
   const { taskLists } = useTaskLists();
   const { tasks } = useTasks();
+
+  const tags = initialTags && initialTags.length > 0
+    ? initialTags
+    : Array.from(new Set(tasks.flatMap(t => t.tagNames || []))).map(name => ({ id: name, name, color: "#8b5cf6" }));
 
   const d = new Date();
   const offset = d.getTimezoneOffset() * 60000;
