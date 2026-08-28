@@ -1,8 +1,9 @@
-import { Sun, Moon, Sparkles, Monitor, Layers, CheckCircle2, ShieldCheck, MapPin, ListTodo, Calendar, Network, Trash2, Droplet, Tag, LayoutGrid } from "lucide-react";
+import { Sun, Moon, Sparkles, Monitor, Layers, CheckCircle2, ShieldCheck, MapPin, ListTodo, Calendar, Network, Trash2, Droplet, Tag, LayoutGrid, Timer, Flame, Cloud, Rocket } from "lucide-react";
+import { DuveoLogo } from "@/components/duveo-logo";
 
 export default function ChangelogPage() {
   return (
-    <main className="min-h-full px-4 py-8 max-w-4xl mx-auto flex flex-col gap-6">
+    <main className="min-h-full px-4 py-8 pb-32 max-w-4xl mx-auto flex flex-col gap-6">
       <header className="mb-4">
         <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-900 dark:text-zinc-100">Changelog</h1>
         <p className="text-zinc-500 text-sm font-medium mt-0.5">Historia rozwoju i aktualizacji systemu Duveo.</p>
@@ -10,18 +11,18 @@ export default function ChangelogPage() {
 
       <section className="space-y-8">
         
-        {/* v0.8.5 - AKTUALNA WERSJA */}
+        {/* v0.9.0 - AKTUALNA WERSJA */}
         <div className="bg-white dark:bg-zinc-900/40 border border-purple-500/40 dark:border-purple-500/30 rounded-3xl p-6 backdrop-blur-md relative overflow-hidden shadow-md dark:shadow-none">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                <Network className="w-6 h-6" />
+                <DuveoLogo className="w-6 h-6" />
               </div>
               <div>
                 <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                  <span className="text-purple-600 dark:text-purple-400">v0.8.5</span> - Nowy Silnik Wizualny Grafu 2D (Obsidian Dark-Tech) & System Filtrów
+                  <span className="text-purple-600 dark:text-purple-400">v0.9.0</span> - Rebranding Duveo (duveo.app), Nowy Sygnet & Natywny Geofencing
                 </h2>
-                <p className="text-xs text-zinc-500 font-medium">Zaawansowana wizualizacja sieci powiązań i eksploracja wiedzy</p>
+                <p className="text-xs text-zinc-500 font-medium">Oficjalna zmiana marki, nowy identyfikator aplikacji i pancerny silnik powiadomień GPS</p>
               </div>
             </div>
             <span className="text-xs font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-xl border border-purple-500/30">
@@ -31,25 +32,29 @@ export default function ChangelogPage() {
 
           <div className="space-y-6">
             <div>
-              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Główne Zmiany Grafu</h3>
+              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Główne Zmiany w v0.9.0</h3>
               <ul className="space-y-2 text-zinc-700 dark:text-zinc-300 text-sm list-disc list-inside">
-                <li><strong>Estetyka Obsidian Dark-Tech:</strong> Przejście z prostokątnych ramek na soczyste, neonowe kule ze świecącą poświatą (Aura Glow) i minimalistyczną typografią monospace (<code>Geist Mono</code> / <code>Consolas</code>) umieszczoną pod węzłami.</li>
-                <li><strong>Hierarchia Kolorów i Rozmiarów:</strong>
-                  <ul className="list-circle list-inside ml-6 mt-1 space-y-1 text-xs text-zinc-600 dark:text-zinc-400">
-                    <li>🟣 <strong>Główne Projekty:</strong> Duże fioletowe kule (<code>#a855f7</code>) jako centra grawitacji.</li>
-                    <li>🟡 <strong>Inkubator:</strong> Bursztynowo-złote kule (<code>#f59e0b</code>) dla pomysłów w poczekalni.</li>
-                    <li>🗂️ <strong>Listy Zadań:</strong> Średnie indygo kule (<code>#6366f1</code>) spajające zadania.</li>
-                    <li>⚪ <strong>Zadania Otwarte:</strong> Drobne chłodno-szare kule (<code>#94a3b8</code>) — zadania wykonane są ukrywane.</li>
-                    <li>🔵 <strong>Notatki:</strong> Lazurowo-błękitne kule (<code>#3b82f6</code>).</li>
-                    <li>📍 <strong>Miejsca GPS:</strong> Turkusowo-morskie kule (<code>#06b6d4</code>).</li>
-                    <li>💖 <strong>Tagi:</strong> Neonowo-różowe kule (<code>#ec4899</code>).</li>
-                  </ul>
-                </li>
-                <li><strong>Interaktywny Pasek Filtrów (Pills):</strong> Dolny pływający pasek umożliwiający włączanie i wyłączanie widoczności dowolnej kategorii elementów w czasie rzeczywistym z licznikami obiektów.</li>
-                <li><strong>Dynamiczna Interakcja:</strong> Płynne przybliżenie (<code>zoom 2.8</code>) po kliknięciu w węzeł oraz wyśrodkowanie całości po kliknięciu w tło.</li>
+                <li><strong>Oficjalny Rebranding na Duveo:</strong> Zmiana nazwy aplikacji w całym ekosystemie, domena docelowa <code>duveo.app</code> oraz identyfikator paczki mobilnej <code>app.duveo.mobile</code>.</li>
+                <li><strong>Nowy Sygnet Wektorowy Duveo:</strong> Autorski komponent SVG (litera D w <code>currentColor</code> ze stałą neonowo-fioletową strzałką <code>#C084FC</code>) zastępujący dotychczasowe generyczne ikony.</li>
+                <li><strong>Komplet Nowych Zasobów Graficznych:</strong> Nowe ikony aplikacji na Androida i iOS, ikona adaptacyjna z ciemnym tłem <code>#09090B</code>, splash screen 2732px, favikony oraz PWA z obsługą trybu maskable.</li>
+                <li><strong>Natywny Silnik Geofencingu w Androidzie:</strong> Wdrożenie natywnej klasy <code>DuveoApp</code> i odbiornika <code>NativeGeofenceReceiver</code> w Java/Kotlin wyzwalających powiadomienia o wejściu w strefę GPS bezpośrednio na zablokowanym ekranie bez zależności od uśpionego JavaScriptu.</li>
+                <li><strong>Wsteczna Kompatybilność:</strong> Bezpieczna migracja motywów i stanów stoperów z zachowaniem danych użytkowników (fallbacki <code>localStorage</code>).</li>
               </ul>
             </div>
           </div>
+        </div>
+
+        {/* v0.8.5 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-600 dark:text-purple-400">v0.8.5</span> - Nowy Silnik Wizualny Grafu 2D (Obsidian Dark-Tech) & System Filtrów
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-600 dark:text-zinc-400 space-y-2 ml-2">
+            <li><strong>Estetyka Obsidian Dark-Tech:</strong> Neonowe kule z poświatą (Aura Glow) i minimalistyczną typografią monospace (<code>Geist Mono</code>) pod węzłami.</li>
+            <li><strong>Hierarchia Kolorów:</strong> Fiolet dla projektów, złoto dla inkubatora, indygo dla list, szarość dla zadań otwartych, błękit dla notatek, turkus dla miejsc i róż dla tagów.</li>
+            <li><strong>Pływający Pasek Filtrów:</strong> Włączanie i wyłączanie widoczności dowolnej kategorii elementów w czasie rzeczywistym z licznikami obiektów.</li>
+            <li><strong>Dynamiczna Interakcja:</strong> Płynne przybliżenie (zoom 2.8) po kliknięciu w węzeł oraz centrowanie całości po kliknięciu w tło.</li>
+          </ul>
         </div>
 
         {/* v0.8.1 */}
@@ -191,6 +196,66 @@ export default function ChangelogPage() {
           <ul className="list-disc list-inside text-sm text-zinc-600 dark:text-zinc-400 space-y-2 ml-2">
             <li>Autonomiczne Listy Zadań: Własne ikony i kolory, z opcją przypisania do projektu lub jako lista wolnostojąca.</li>
             <li>Twardy Limit 2 Aktywnych Projektów: Zabezpieczenie przed rozproszeniem uwagi (wymusza skupienie).</li>
+          </ul>
+        </div>
+
+        {/* v0.5.0 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-600 dark:text-purple-400">v0.5.0</span> - Inkubator Pomysłów & Przygotowanie Projektów
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-600 dark:text-zinc-400 space-y-2 ml-2">
+            <li>Inkubator Pomysłów (/incubator): Dedykowane miejsce na luźne koncepcje i plany bez zaśmiecania aktywnych celów.</li>
+            <li>Karty Przygotowania: Określanie celu nadrzędnego, budżetu czasowego i kryteriów sukcesu przed aktywacją.</li>
+            <li>Jednoklikowy transfer pomysłu do aktywnych projektów głównych.</li>
+          </ul>
+        </div>
+
+        {/* v0.4.0 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-600 dark:text-purple-400">v0.4.0</span> - System Nawyków & Notatki Globalne Markdown
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-600 dark:text-zinc-400 space-y-2 ml-2">
+            <li>Śledzenie Nawyków (/habits): Codzienna lista powtarzalnych czynności z automatycznym resetem o północy.</li>
+            <li>Globalny Notatnik (/notes): Szybki edytor notatek ze wsparciem Markdown do zapisywania przemyśleń i linków.</li>
+            <li>System tagowania notatek i powiązań z zadaniami.</li>
+          </ul>
+        </div>
+
+        {/* v0.3.0 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-600 dark:text-purple-400">v0.3.0</span> - Stoper Pomodoro & Wbudowany Focus Timer (TimeLogs)
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-600 dark:text-zinc-400 space-y-2 ml-2">
+            <li>Wbudowany stoper skupienia w projektach z deklaracją planowanego czasu pracy.</li>
+            <li>Automatyczne rejestrowanie logów czasowych (TimeLogs) i pełna historia sesji pod przyciskiem Historia.</li>
+            <li>Pływający mini-timer (Mini-Timer) zachowujący stan odliczania w tle podczas nawigacji po aplikacji.</li>
+          </ul>
+        </div>
+
+        {/* v0.2.0 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-600 dark:text-purple-400">v0.2.0</span> - Migracja na Cloud Firestore & Autoryzacja Google
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-600 dark:text-zinc-400 space-y-2 ml-2">
+            <li>Przejście z lokalnej bazy SQLite na bezpieczną chmurę Google Cloud Firestore z synchronizacją offline.</li>
+            <li>Integracja Firebase Authentication: Logowanie za pomocą konta Google na Web i natywnym Androidzie.</li>
+            <li>Izolacja danych użytkowników w strukturze <code>/users/{'{uid}'}/...</code>.</li>
+          </ul>
+        </div>
+
+        {/* v0.1.0 */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-300 flex items-center gap-2">
+            <span className="text-purple-600 dark:text-purple-400">v0.1.0</span> - Prototyp MVP & Architektura Flat UI Mobile-First
+          </h2>
+          <ul className="list-disc list-inside text-sm text-zinc-600 dark:text-zinc-400 space-y-2 ml-2">
+            <li>Płaski interfejs użytkownika (Flat UI) zoptymalizowany pod urządzenia mobilne i responsywność PWA.</li>
+            <li>Karty zadań (Dzisiaj, Jutro, Nadchodzące, Inbox) z szybkimi akcjami.</li>
+            <li>Podstawowa struktura projektów i zarządzania czasem.</li>
           </ul>
         </div>
 
