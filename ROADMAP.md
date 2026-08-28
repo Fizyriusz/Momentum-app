@@ -1,6 +1,6 @@
-# 🗺️ Momentum (Quest Log) — Oficjalny Roadmap Projektu
+# 🗺️ Duveo (duveo.app) — Oficjalny Roadmap Projektu
 
-Niniejszy dokument jest nadrzędnym planem rozwoju systemu **Momentum**, podzielonym na **Fazy** oraz zawarte w nich **Etapy**. Każdy etap realizowany jest w formule: **Plan ➔ Wdrożenie ➔ Weryfikacja (testy użytkownika) ➔ Commit / Release**.
+Niniejszy dokument jest nadrzędnym planem rozwoju systemu **Duveo**, podzielonym na **Fazy** oraz zawarte w nich **Etapy**. Każdy etap realizowany jest w formule: **Plan ➔ Wdrożenie ➔ Weryfikacja (testy użytkownika) ➔ Commit / Release**.
 
 ---
 

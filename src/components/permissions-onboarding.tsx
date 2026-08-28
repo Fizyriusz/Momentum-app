@@ -21,7 +21,7 @@ export function PermissionsOnboarding() {
         const bgStatus = await BackgroundGeolocation.checkPermissions();
         // Jeśli nie mamy uprawnień do tła (zawsze zezwalaj), pokaż onboarding
         if (bgStatus.location !== "granted") {
-          const hasSeen = localStorage.getItem("momentum_permissions_seen");
+          const hasSeen = localStorage.getItem("duveo_permissions_seen") || localStorage.getItem("momentum_permissions_seen");
           if (!hasSeen) {
             setShow(true);
           }
@@ -53,7 +53,7 @@ export function PermissionsOnboarding() {
   };
 
   const finishOnboarding = () => {
-    localStorage.setItem("momentum_permissions_seen", "true");
+    localStorage.setItem("duveo_permissions_seen", "true");
     setShow(false);
   };
 
@@ -71,7 +71,7 @@ export function PermissionsOnboarding() {
               Konfiguracja Uprawnień
             </h2>
             <p className="text-sm text-zinc-400 mb-8">
-              Aby przypomnienia w tle działały, gdy jesteś w terenie, Momentum potrzebuje kilku uprawnień.
+              Aby przypomnienia w tle działały, gdy jesteś w terenie, Duveo potrzebuje kilku uprawnień.
             </p>
             <Button 
               onClick={() => setStep(1)}
@@ -97,7 +97,7 @@ export function PermissionsOnboarding() {
               Śledzenie w Tle
             </h2>
             <p className="text-sm text-zinc-400 mb-2">
-              Momentum wybudzi się i powiadomi Cię o zadaniach, gdy wejdziesz w przypisaną strefę.
+              Duveo wybudzi się i powiadomi Cię o zadaniach, gdy wejdziesz w przypisaną strefę.
             </p>
             <div className="bg-zinc-950 p-4 rounded-xl text-xs text-left mb-6 border border-zinc-800">
               <span className="text-yellow-500 font-bold">Ważne:</span> Gdy system zapyta o lokalizację, koniecznie wybierz <strong className="text-white">"Zawsze zezwalaj"</strong>. Inaczej funkcja nie zadziała gdy telefon będzie w kieszeni!
@@ -140,7 +140,7 @@ export function PermissionsOnboarding() {
               Ostatni Krok
             </h2>
             <p className="text-sm text-zinc-400 mb-6">
-              Android agresywnie usypia aplikacje. Aby Geofencing działał poprawnie, przejdź do ustawień telefonu, znajdź Momentum i <strong>wyłącz "Optymalizację baterii"</strong>.
+              Android agresywnie usypia aplikacje. Aby Geofencing działał poprawnie, przejdź do ustawień telefonu, znajdź Duveo i <strong>wyłącz "Optymalizację baterii"</strong>.
             </p>
             <Button 
               onClick={finishOnboarding}

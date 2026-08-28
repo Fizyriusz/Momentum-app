@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 272 64" height="64">
+  <g transform="translate(-8.537 -0.116) scale(2.02625)"
+     fill="none" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7 27 V5 H15 C23.5 5 27 10 27 16 C27 22 23.5 27 15 27 Z" stroke="#FAFAFA"/>
+    <path d="M26.8 12.8 L36.9 5.4" stroke="#C084FC"/>
+    <polygon points="39.5,3.5 36.63,8.77 33.61,4.65" fill="#C084FC" stroke="#C084FC" stroke-width="1.1"/>
+  </g>
+  <text x="84.7" y="45.0" fill="#FAFAFA"
+        font-family="Archivo, Arial Black, sans-serif" font-size="38"
+        font-weight="900" letter-spacing="3.4">DUVEO</text>
+</svg>

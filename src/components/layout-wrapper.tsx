@@ -28,6 +28,7 @@ import {
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { DuveoLogo } from "@/components/duveo-logo";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { FabAddTask } from "./fab-add-task";
 import { useAuth } from "./auth-provider";
@@ -74,9 +75,9 @@ function MobileSidebarNav({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col h-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
       <Link href="/" onClick={onClose} className="p-6 flex items-center gap-3 border-b border-zinc-200/80 dark:border-zinc-800/50 shrink-0 hover:opacity-80 transition-opacity">
-        <Layers className="w-6 h-6 text-purple-600 dark:text-purple-500" />
+        <DuveoLogo className="w-6 h-6 text-zinc-900 dark:text-zinc-100" />
         <h1 className="text-xl font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-100">
-          Momentum
+          Duveo
         </h1>
       </Link>
 
@@ -349,10 +350,10 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <div className="h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4">
         <div className="max-w-md w-full space-y-8 text-center animate-in fade-in zoom-in duration-500 bg-white dark:bg-zinc-900/60 p-8 rounded-3xl border border-zinc-200 dark:border-zinc-800/80 shadow-lg dark:shadow-none">
           <div className="w-20 h-20 bg-purple-500/15 rounded-3xl mx-auto flex items-center justify-center">
-            <Layers className="w-10 h-10 text-purple-600 dark:text-purple-400" />
+            <DuveoLogo className="w-10 h-10 text-purple-600 dark:text-purple-400" />
           </div>
           <div>
-            <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">Momentum</h1>
+            <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">Duveo</h1>
             <p className="text-zinc-600 dark:text-zinc-400 mt-2 text-sm">Zaloguj się, aby uzyskać dostęp do swoich projektów i zadań.</p>
           </div>
           <Button 
@@ -398,9 +399,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
             </Sheet>
 
             <Link href="/" className="flex items-center gap-2">
-              <Layers className="w-5 h-5 text-purple-600 dark:text-purple-500" />
+              <DuveoLogo className="w-5 h-5 text-purple-600 dark:text-purple-500" />
               <span className="font-bold text-sm tracking-widest uppercase text-zinc-900 dark:text-zinc-100">
-                Momentum
+                Duveo
               </span>
             </Link>
           </div>

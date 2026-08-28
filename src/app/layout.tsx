@@ -16,13 +16,43 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Momentum",
+  title: "Duveo",
   description: "System egzekucji projektów, zadań i zarządzania czasem.",
+  applicationName: "Duveo",
   manifest: "/manifest.json",
+  metadataBase: new URL("https://duveo.app"),
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "Duveo",
+    description: "System egzekucji projektów, zadań i zarządzania czasem.",
+    url: "https://duveo.app",
+    siteName: "Duveo",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Duveo",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Duveo",
+    description: "System egzekucji projektów, zadań i zarządzania czasem.",
+    images: ["/og-image.png"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Momentum",
+    title: "Duveo",
   },
 };
 
@@ -37,7 +67,7 @@ export const viewport: Viewport = {
 const themeInitScript = `
   (function() {
     try {
-      var saved = localStorage.getItem('momentum-theme');
+      var saved = localStorage.getItem('duveo-theme') || localStorage.getItem('momentum-theme');
       var isDark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches) || (saved === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
       if (isDark || !saved) {
         document.documentElement.classList.add('dark');

@@ -5,7 +5,7 @@ export default function ChangelogPage() {
     <main className="min-h-full px-4 py-8 max-w-4xl mx-auto flex flex-col gap-6">
       <header className="mb-4">
         <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-900 dark:text-zinc-100">Changelog</h1>
-        <p className="text-zinc-500 text-sm font-medium mt-0.5">Historia rozwoju i aktualizacji systemu Momentum.</p>
+        <p className="text-zinc-500 text-sm font-medium mt-0.5">Historia rozwoju i aktualizacji systemu Duveo.</p>
       </header>
 
       <section className="space-y-8">

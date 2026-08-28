@@ -4,7 +4,8 @@ import { useHabits } from "@/lib/services/habits";
 import { useProjects } from "@/lib/services/projects";
 import { useTasks } from "@/lib/services/tasks";
 import { usePlaces, getDistance } from "@/lib/services/places";
-import { Layers, Target, Flame, ArrowRight, MapPin } from "lucide-react";
+import { Target, Flame, ArrowRight, MapPin } from "lucide-react";
+import { DuveoLogo } from "@/components/duveo-logo";
 import { MiniTimer } from "@/components/mini-timer";
 import { TaskList } from "@/components/task-list";
 import { QuickAddTask } from "@/components/quick-add-task";
@@ -67,7 +68,7 @@ export default function Home() {
   if (isLoading) {
     return (
       <main className="min-h-dvh bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
-        <Layers className="h-8 w-8 text-purple-600 dark:text-purple-500 animate-pulse" />
+        <DuveoLogo className="h-8 w-8 text-purple-600 dark:text-purple-500 animate-pulse" />
       </main>
     );
   }
@@ -78,8 +79,8 @@ export default function Home() {
         
         <header className="flex flex-col gap-1 items-center justify-center pt-4 pb-2">
           <div className="flex items-center gap-2">
-            <Layers className="h-6 w-6 text-purple-600 dark:text-purple-500" />
-            <h1 className="text-2xl font-black tracking-tight uppercase text-zinc-900 dark:text-zinc-100">Momentum</h1>
+            <DuveoLogo className="h-6 w-6 text-purple-600 dark:text-purple-500" />
+            <h1 className="text-2xl font-black tracking-tight uppercase text-zinc-900 dark:text-zinc-100">Duveo</h1>
           </div>
           <time className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mt-1">{today}</time>
         </header>

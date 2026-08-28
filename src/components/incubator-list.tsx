@@ -439,7 +439,7 @@ export function IncubatorList({
 
           <div className="space-y-4 my-2 text-sm text-zinc-700 dark:text-zinc-300">
             <p>
-              Momentum to system egzekucji oparty na <strong>bezwzględnym skupieniu</strong>. Możesz prowadzić maksymalnie <strong>2 aktywne projekty</strong> jednocześnie.
+              Duveo to system egzekucji oparty na <strong>bezwzględnym skupieniu</strong>. Możesz prowadzić maksymalnie <strong>2 aktywne projekty</strong> jednocześnie.
             </p>
             
             <div className="bg-zinc-100 dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 space-y-2 text-xs">

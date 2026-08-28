@@ -64,8 +64,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         await signInWithPopup(auth, googleProvider);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Błąd podczas logowania:", error);
+      alert("Błąd logowania Google: " + (error?.message || error?.code || JSON.stringify(error)));
     }
   };
 

@@ -13,10 +13,10 @@ export function MiniTimer({ projects }: { projects: Project[] }) {
     projects.length > 0 ? projects[0].id : null
   );
 
-  const storageKey = `momentum-mini-timer`;
+  const storageKey = `duveo-mini-timer`;
 
   useEffect(() => {
-    const stored = localStorage.getItem(storageKey);
+    const stored = localStorage.getItem(storageKey) || localStorage.getItem(`momentum-mini-timer`);
     if (stored) {
       const { startTime, accumulated, projectId } = JSON.parse(stored);
       setIsTracking(true);

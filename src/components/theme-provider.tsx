@@ -20,7 +20,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Odczytaj początkowy motyw z localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("momentum-theme") as Theme | null;
+      const saved = (localStorage.getItem("duveo-theme") || localStorage.getItem("momentum-theme")) as Theme | null;
       if (saved && (saved === "dark" || saved === "light" || saved === "system")) {
         setThemeState(saved);
       } else {
@@ -81,7 +81,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     try {
-      localStorage.setItem("momentum-theme", newTheme);
+      localStorage.setItem("duveo-theme", newTheme);
     } catch {}
   };
 

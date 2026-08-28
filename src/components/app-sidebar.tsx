@@ -23,6 +23,7 @@ import {
   ListTodo,
   Archive
 } from "lucide-react";
+import { DuveoLogo } from "@/components/duveo-logo";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Project } from "@/lib/services/projects";
 import { useTaskLists, useTasks } from "@/lib/services/tasks";
@@ -66,9 +67,9 @@ export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], project
   return (
     <div className="w-64 h-full bg-white/90 dark:bg-zinc-950/80 border-r border-zinc-200/80 dark:border-zinc-800/50 backdrop-blur-xl flex flex-col hidden md:flex text-zinc-900 dark:text-zinc-100 transition-colors duration-200">
       <Link href="/" className="p-6 flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity">
-        <Layers className="w-6 h-6 text-purple-600 dark:text-purple-500" />
+        <DuveoLogo className="w-6 h-6 text-zinc-900 dark:text-zinc-100" />
         <h1 className="text-xl font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-100">
-          Momentum
+          Duveo
         </h1>
       </Link>
 

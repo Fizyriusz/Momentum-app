@@ -1,6 +1,6 @@
-# Momentum
+# Duveo
 
-Momentum to nowoczesny system egzekucji i zarządzania czasem (Personal Dashboard) zbudowany w architekturze PWA (Mobile-First). Został zaprojektowany jako narzędzie dla "hustlerów, twórców i przyszłych milionerów", którzy potrzebują płaskiego, błyskawicznego i w pełni skupionego na celu interfejsu (Flat UI).
+Duveo to nowoczesny system egzekucji i zarządzania czasem (Personal Dashboard) zbudowany w architekturze PWA (Mobile-First). Został zaprojektowany jako narzędzie dla "hustlerów, twórców i przyszłych milionerów", którzy potrzebują płaskiego, błyskawicznego i w pełni skupionego na celu interfejsu (Flat UI). Domena: `duveo.app`.
 
 ## Tech Stack
 * **Framework:** Next.js 16 (App Router)
