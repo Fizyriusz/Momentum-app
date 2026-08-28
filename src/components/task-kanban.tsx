@@ -288,7 +288,7 @@ export function TaskKanban({
                           {task.description && (
                             <span className="flex items-center gap-0.5 text-zinc-500">
                               <FileText className="w-2.5 h-2.5" />
-                              Notatka
+                              Opis
                             </span>
                           )}
 

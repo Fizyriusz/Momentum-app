@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Play, Square, Briefcase, BookOpen, Code, Layers, History, Edit2, Save, Target, Pause, Archive, AlertCircle, RefreshCcw } from "lucide-react";
+import { Play, Square, Briefcase, BookOpen, Code, Layers, History, Edit2, Save, Target, Pause, Archive, AlertCircle, RefreshCcw, Calendar, Clock, Sparkles, CheckCircle2, Rocket } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,38 @@ import {
 } from "@/components/ui/dialog";
 import ReactMarkdown from "react-markdown";
 import { useRouter } from "next/navigation";
+
+function formatProjectDate(ts: any): string {
+  if (!ts) return "Niedawno";
+  try {
+    const millis = ts?.toMillis ? ts.toMillis() : (ts?.seconds ? ts.seconds * 1000 : (typeof ts === 'number' ? ts : new Date(ts).getTime()));
+    if (!millis || isNaN(millis)) return "Niedawno";
+    return new Date(millis).toLocaleDateString("pl-PL", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+  } catch {
+    return "Niedawno";
+  }
+}
+
+function formatProjectDateTime(ts: any): string {
+  if (!ts) return "Niedawno";
+  try {
+    const millis = ts?.toMillis ? ts.toMillis() : (ts?.seconds ? ts.seconds * 1000 : (typeof ts === 'number' ? ts : new Date(ts).getTime()));
+    if (!millis || isNaN(millis)) return "Niedawno";
+    return new Date(millis).toLocaleDateString("pl-PL", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  } catch {
+    return "Niedawno";
+  }
+}
 
 type TimeLog = {
   id: string;
@@ -214,9 +246,16 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
                 </Badge>
               )}
             </div>
-            <p className="text-[10px] text-zinc-500 uppercase tracking-widest mt-0.5">
-              Budżet na {PeriodLabels[project.period]?.toLowerCase() || project.period.toLowerCase()}
-            </p>
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              <p className="text-[10px] text-zinc-500 uppercase tracking-widest">
+                Budżet na {PeriodLabels[project.period]?.toLowerCase() || project.period.toLowerCase()}
+              </p>
+              <span className="text-[10px] text-zinc-400 dark:text-zinc-600">•</span>
+              <span className="text-[10px] text-zinc-500 flex items-center gap-1 font-medium">
+                <Calendar className="w-2.5 h-2.5" />
+                Od: {formatProjectDate(project.createdAt)}
+              </span>
+            </div>
           </div>
         </div>
         
@@ -443,51 +482,118 @@ export function ProjectCard({ project, timeLogs = [] }: { project: Project, time
             + 25m
           </Button>
           
-          {/* Modal Historii Sesji */}
+          {/* Modal Historii & Osi Czasu (Timeline) */}
           <Dialog>
             <DialogTrigger 
               render={
                 <Button 
                   variant="outline" 
                   className="h-12 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-800 dark:text-white shrink-0 font-bold rounded-2xl shadow-xs"
-                  title="Historia Sesji"
+                  title="Historia i Oś Czasu"
                 >
                   <History className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
                   Historia
                 </Button>
               }
             />
-            <DialogContent className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 sm:max-w-md w-[90vw] rounded-3xl p-6 shadow-2xl">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
-                  <History className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                  Historia Sesji: {project.title}
+            <DialogContent className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 sm:max-w-lg w-[92vw] rounded-3xl p-6 shadow-2xl max-h-[80vh] flex flex-col">
+              <DialogHeader className="shrink-0">
+                <DialogTitle className="flex items-center gap-2.5 text-zinc-900 dark:text-zinc-100 text-lg font-black tracking-tight">
+                  <div className="p-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                    <History className="w-5 h-5" />
+                  </div>
+                  Oś Czasu & Historia: {project.title}
                 </DialogTitle>
               </DialogHeader>
               
-              <div className="max-h-[60vh] overflow-y-auto pr-2 mt-4 space-y-3">
+              {/* Statystyki podsumowujące */}
+              <div className="grid grid-cols-3 gap-2.5 my-3 shrink-0">
+                <div className="p-3 rounded-2xl bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800/80 text-center">
+                  <span className="text-[10px] uppercase font-bold text-zinc-500 block">Przepracowano</span>
+                  <span className="text-sm font-black text-purple-600 dark:text-purple-400 font-mono mt-0.5 block">{formatTime(currentTotalMinutes)}</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800/80 text-center">
+                  <span className="text-[10px] uppercase font-bold text-zinc-500 block">Liczba Sesji</span>
+                  <span className="text-sm font-black text-zinc-900 dark:text-zinc-100 font-mono mt-0.5 block">{timeLogs.length}</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800/80 text-center">
+                  <span className="text-[10px] uppercase font-bold text-zinc-500 block">Data Startu</span>
+                  <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 truncate mt-0.5 block">{formatProjectDate(project.createdAt)}</span>
+                </div>
+              </div>
+
+              {/* Oś Czasu (Timeline) z połączoną linią */}
+              <div className="flex-1 overflow-y-auto pr-2 mt-2 space-y-4 relative before:absolute before:left-[19px] before:top-3 before:bottom-3 before:w-0.5 before:bg-zinc-200 dark:before:bg-zinc-800">
+                
+                {/* 1. Ostatnie sesje skupienia (TimeLogs) */}
                 {timeLogs && timeLogs.length > 0 ? (
-                  timeLogs.map(log => (
-                    <div key={log.id} className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800/50">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-200">
-                          +{log.minutes} min
-                        </span>
-                        <span className="text-xs text-zinc-500">
-                          {new Date(log.createdAt).toLocaleString('pl-PL', {
-                            day: '2-digit', month: '2-digit', year: 'numeric',
-                            hour: '2-digit', minute: '2-digit'
-                          })}
-                        </span>
+                  timeLogs.map((log) => (
+                    <div key={log.id} className="relative flex items-start gap-4 pl-2 group">
+                      <div className="w-9 h-9 rounded-2xl bg-purple-500/15 border-2 border-white dark:border-zinc-950 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0 z-10 shadow-xs">
+                        <Play className="w-3.5 h-3.5 fill-current" />
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center">
-                        <Play className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+                      <div className="flex-1 p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/60 hover:border-purple-500/30 transition-colors">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="text-xs font-bold text-purple-600 dark:text-purple-400 font-mono">
+                            +{log.minutes} min skupienia
+                          </span>
+                          <span className="text-[10px] text-zinc-500 font-medium">
+                            {new Date(log.createdAt).toLocaleString('pl-PL', {
+                              day: '2-digit', month: 'short', year: 'numeric',
+                              hour: '2-digit', minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
+                          Zarejestrowano sesję pracy nad projektem.
+                        </p>
                       </div>
                     </div>
                   ))
-                ) : (
-                  <p className="text-sm text-zinc-500 text-center py-4">Brak zarejestrowanych sesji.</p>
+                ) : null}
+
+                {/* 2. Zdarzenie Ostatniej Modyfikacji (jeśli istnieje) */}
+                {project.updatedAt && (
+                  <div className="relative flex items-start gap-4 pl-2">
+                    <div className="w-9 h-9 rounded-2xl bg-blue-500/15 border-2 border-white dark:border-zinc-950 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 z-10 shadow-xs">
+                      <Clock className="w-3.5 h-3.5" />
+                    </div>
+                    <div className="flex-1 p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/60">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                          Ostatnia modyfikacja
+                        </span>
+                        <span className="text-[10px] text-zinc-500 font-medium">
+                          {formatProjectDateTime(project.updatedAt)}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
+                        Zaktualizowano cele, budżet lub status projektu.
+                      </p>
+                    </div>
+                  </div>
                 )}
+
+                {/* 3. Zdarzenie Utworzenia Projektu (Start Timeline) */}
+                <div className="relative flex items-start gap-4 pl-2">
+                  <div className="w-9 h-9 rounded-2xl bg-emerald-500/15 border-2 border-white dark:border-zinc-950 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 z-10 shadow-xs">
+                    <Rocket className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="flex-1 p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/60">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                        Utworzenie projektu
+                      </span>
+                      <span className="text-[10px] text-zinc-500 font-medium">
+                        {formatProjectDateTime(project.createdAt)}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
+                      Projekt zainicjalizowany w Duveo z budżetem {formatTime(project.targetMinutes)} na {PeriodLabels[project.period]?.toLowerCase() || project.period.toLowerCase()}.
+                    </p>
+                  </div>
+                </div>
+
               </div>
             </DialogContent>
           </Dialog>

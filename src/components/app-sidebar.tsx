@@ -28,7 +28,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Project } from "@/lib/services/projects";
 import { useTaskLists, useTasks } from "@/lib/services/tasks";
 import { CreateTaskListDialog, LIST_ICONS, LIST_COLORS } from "./create-task-list-dialog";
-import { ThemeToggle } from "./theme-toggle";
+import { UserProfileButton } from "./user-profile-button";
 
 type Tag = {
   id: string;
@@ -457,11 +457,11 @@ export function AppSidebar({ tags = [], projects = [] }: { tags?: Tag[], project
         </div>
       </nav>
 
-      <div className="p-4 border-t border-zinc-200/80 dark:border-zinc-800/50 shrink-0 space-y-3">
-        <ThemeToggle />
+      <div className="p-3 border-t border-zinc-200/80 dark:border-zinc-800/50 shrink-0 space-y-2.5">
+        <UserProfileButton />
 
-        <Link href="/changelog" className="flex items-center justify-between text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors group">
-          <span>v0.8.5</span>
+        <Link href="/changelog" className="flex items-center justify-between text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors group px-1">
+          <span>v0.9.0</span>
           <span className="flex items-center gap-1">
             Changelog
             <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />

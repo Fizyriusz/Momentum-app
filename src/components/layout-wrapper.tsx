@@ -38,6 +38,8 @@ import { usePlaces } from "@/lib/services/places";
 import { useProjects, Project } from "@/lib/services/projects";
 import { useTaskLists, useTasks } from "@/lib/services/tasks";
 import { CreateTaskListDialog, LIST_ICONS, LIST_COLORS } from "./create-task-list-dialog";
+import { UserProfileButton } from "./user-profile-button";
+import { SettingsDialog } from "./settings-dialog";
 import { PermissionsOnboarding } from "./permissions-onboarding";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -303,15 +305,15 @@ function MobileSidebarNav({ onClose }: { onClose: () => void }) {
         </div>
       </nav>
 
-      <div className="p-4 border-t border-zinc-200/80 dark:border-zinc-800/50 shrink-0 space-y-3">
-        <ThemeToggle />
+      <div className="p-3 border-t border-zinc-200/80 dark:border-zinc-800/50 shrink-0 space-y-2.5">
+        <UserProfileButton onItemClick={onClose} />
         
         <Link 
           href="/changelog" 
           onClick={onClose}
-          className="flex items-center justify-between text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors group"
+          className="flex items-center justify-between text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors group px-1"
         >
-          <span>v0.8.5</span>
+          <span>v0.9.0</span>
           <span className="flex items-center gap-1">
             Changelog
             <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
@@ -324,6 +326,7 @@ function MobileSidebarNav({ onClose }: { onClose: () => void }) {
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
   const { user, loading, signInWithGoogle, signOut } = useAuth();
   const { projects } = useProjects("ACTIVE");
   const { places } = usePlaces();
@@ -347,15 +350,15 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     return (
-      <div className="h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4">
-        <div className="max-w-md w-full space-y-8 text-center animate-in fade-in zoom-in duration-500 bg-white dark:bg-zinc-900/60 p-8 rounded-3xl border border-zinc-200 dark:border-zinc-800/80 shadow-lg dark:shadow-none">
-          <div className="w-20 h-20 bg-purple-500/15 rounded-3xl mx-auto flex items-center justify-center">
-            <DuveoLogo className="w-10 h-10 text-purple-600 dark:text-purple-400" />
+      <div className="min-h-screen bg-zinc-950 flex flex-col justify-center items-center p-4">
+        <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-8 shadow-2xl flex flex-col items-center text-center">
+          <div className="w-16 h-16 bg-purple-500/10 rounded-2xl flex items-center justify-center mb-6">
+            <DuveoLogo className="w-10 h-10 text-purple-600 dark:text-purple-500" />
           </div>
-          <div>
-            <h1 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">Duveo</h1>
-            <p className="text-zinc-600 dark:text-zinc-400 mt-2 text-sm">Zaloguj się, aby uzyskać dostęp do swoich projektów i zadań.</p>
-          </div>
+          <h1 className="text-2xl font-black text-white tracking-tight uppercase mb-2">Duveo</h1>
+          <p className="text-sm text-zinc-400 mb-8">
+            Nowoczesny system egzekucji i zarządzania czasem. Zaloguj się, aby zsynchronizować swoje projekty i zadania.
+          </p>
           <Button 
             onClick={signInWithGoogle} 
             className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold h-12 text-base rounded-xl shadow-md transition-all"
@@ -368,14 +371,13 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950 overflow-hidden text-zinc-900 dark:text-zinc-100 selection:bg-purple-500/30 transition-colors duration-200">
+    <div className="flex h-dvh overflow-hidden">
+      {/* Onboarding uprawnień powiadomień i GPS */}
       <PermissionsOnboarding />
 
-      {/* Desktop Sidebar z Suspense */}
-      <aside className="w-64 border-r border-zinc-200/80 dark:border-zinc-800/60 shrink-0 hidden md:block">
-        <Suspense fallback={<div className="w-64 h-full bg-zinc-50 dark:bg-zinc-950" />}>
-          <AppSidebar tags={tags} projects={projects} />
-        </Suspense>
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex flex-col w-64 border-r border-zinc-200/80 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl shrink-0 z-20">
+        <AppSidebar />
       </aside>
 
       {/* Main Content Area */}
@@ -408,11 +410,22 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={signOut}
-              title="Wyloguj"
-              className="p-2 text-zinc-500 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg"
+              onClick={() => setMobileSettingsOpen(true)}
+              title="Ustawienia & Profil"
+              className="p-1.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors rounded-xl flex items-center gap-1.5"
             >
-              <LogOut className="w-4 h-4" />
+              {user?.photoURL ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.photoURL}
+                  alt="Profil"
+                  className="w-7 h-7 rounded-lg object-cover ring-1 ring-purple-500/40"
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-lg bg-purple-600 text-white font-bold text-xs flex items-center justify-center">
+                  {user?.displayName?.charAt(0).toUpperCase() || "U"}
+                </div>
+              )}
             </button>
           </div>
         </header>
@@ -424,6 +437,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       </div>
 
       <FabAddTask />
+      <SettingsDialog open={mobileSettingsOpen} onOpenChange={setMobileSettingsOpen} />
     </div>
   );
 }

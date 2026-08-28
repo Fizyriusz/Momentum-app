@@ -36,6 +36,7 @@ export type Project = {
   description?: string | null;
   goal?: string | null;
   createdAt: any;
+  updatedAt?: any;
 };
 
 export const MAX_ACTIVE_PROJECTS = 2;
@@ -122,13 +123,17 @@ export async function createProject(title: string, status: ProjectStatus = "INBO
     loggedMinutesToday: 0,
     lastLoggedDate: "",
     icon: "Briefcase",
-    createdAt: serverTimestamp()
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
   });
 }
 
 export async function updateProject(id: string, data: Partial<Project>) {
   if (!auth.currentUser) return;
-  return updateDoc(getUserProjectDoc(id), data);
+  return updateDoc(getUserProjectDoc(id), {
+    ...data,
+    updatedAt: serverTimestamp()
+  });
 }
 
 export async function deleteProject(id: string) {
@@ -150,7 +155,8 @@ export async function setProjectStatus(id: string, status: ProjectStatus) {
   }
 
   return updateDoc(getUserProjectDoc(id), {
-    status
+    status,
+    updatedAt: serverTimestamp()
   });
 }
 

@@ -158,7 +158,7 @@ export function TaskItem({
                 {task.description && (
                   <div className="flex items-center gap-1">
                     <FileText className="w-3 h-3 text-zinc-500" />
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Notatka</span>
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Opis</span>
                   </div>
                 )}
                 {task.placeId && (
@@ -237,7 +237,7 @@ export function TaskItem({
                 {task.description && (
                   <div className="flex items-center gap-1">
                     <FileText className="w-3 h-3 text-zinc-500" />
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Notatka</span>
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-500">Opis</span>
                   </div>
                 )}
                 {task.placeId && (
@@ -373,13 +373,13 @@ export function TaskItem({
           {/* Opis Markdown */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5" /> Notatka (Markdown)
+              <FileText className="w-3.5 h-3.5" /> Opis (Markdown)
             </label>
             <textarea 
               value={description} 
               onChange={e => setDescription(e.target.value)} 
               rows={3}
-              placeholder="Zanotuj szczegóły, linki, przemyślenia..."
+              placeholder="Dodaj opis zadania, linki, szczegóły..."
               className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-purple-500 font-mono resize-y"
             />
             {description && (
